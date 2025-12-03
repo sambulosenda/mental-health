@@ -1,0 +1,1 @@
+export { detectPatterns } from './patternDetection';

@@ -1,15 +1,74 @@
-import { View, StyleSheet, ScrollView } from 'react-native';
+import { useEffect, useState, useCallback } from 'react';
+import { View, StyleSheet, ScrollView, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Text, Card } from '@/src/components/ui';
+import { MoodTrendChart, MoodCalendar, InsightList } from '@/src/components/insights';
+import type { Insight } from '@/src/components/insights';
+import { useMoodStore } from '@/src/stores';
+import { detectPatterns } from '@/src/lib/insights';
 import { colors, spacing } from '@/src/constants/theme';
+import type { DailyMoodSummary } from '@/src/types/mood';
 
 export default function InsightsScreen() {
+  const { entries, loadEntries, getDailySummaries } = useMoodStore();
+  const [summaries, setSummaries] = useState<DailyMoodSummary[]>([]);
+  const [insights, setInsights] = useState<Insight[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const loadData = useCallback(async () => {
+    try {
+      await loadEntries();
+      const dailySummaries = await getDailySummaries(30);
+      setSummaries(dailySummaries);
+
+      // Detect patterns
+      const detectedInsights = detectPatterns({
+        entries,
+        summaries: dailySummaries,
+      });
+      setInsights(detectedInsights);
+    } catch (error) {
+      console.error('Failed to load insights:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [loadEntries, getDailySummaries, entries]);
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  // Re-run pattern detection when entries change
+  useEffect(() => {
+    if (summaries.length > 0) {
+      const detectedInsights = detectPatterns({
+        entries,
+        summaries,
+      });
+      setInsights(detectedInsights);
+    }
+  }, [entries, summaries]);
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await loadData();
+    setRefreshing(false);
+  }, [loadData]);
+
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <ScrollView
         style={styles.scroll}
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={colors.primary}
+          />
+        }
       >
         <View style={styles.header}>
           <Text variant="h1" color="textPrimary">
@@ -21,48 +80,33 @@ export default function InsightsScreen() {
         </View>
 
         <View style={styles.section}>
-          <Text variant="h3" color="textPrimary" style={styles.sectionTitle}>
-            Mood Trends
-          </Text>
-          <Card style={styles.chartCard}>
-            <Text variant="body" color="textMuted" center>
-              Charts will appear here once you have mood entries.
-            </Text>
-          </Card>
+          <MoodTrendChart summaries={summaries} isLoading={isLoading} />
         </View>
 
         <View style={styles.section}>
           <Text variant="h3" color="textPrimary" style={styles.sectionTitle}>
-            Monthly Calendar
+            Monthly Overview
           </Text>
-          <Card variant="flat" style={styles.calendarCard}>
-            <Text variant="body" color="textMuted" center>
-              Mood calendar coming soon
-            </Text>
-          </Card>
+          <MoodCalendar summaries={summaries} isLoading={isLoading} />
         </View>
 
         <View style={styles.section}>
           <Text variant="h3" color="textPrimary" style={styles.sectionTitle}>
-            Patterns Detected
+            Patterns & Insights
           </Text>
-          <Card variant="flat" style={styles.emptyCard}>
-            <Text variant="body" color="textMuted" center>
-              Track your mood for at least a week to see patterns.
-            </Text>
-          </Card>
+          <InsightList
+            insights={insights}
+            emptyMessage="Track your mood for at least a week to discover patterns and insights."
+          />
         </View>
 
         <View style={styles.section}>
-          <Text variant="h3" color="textPrimary" style={styles.sectionTitle}>
-            AI Insights
-          </Text>
-          <Card variant="outlined" style={styles.insightCard}>
+          <Card variant="outlined" style={styles.aiCard}>
             <Text variant="captionMedium" color="primary">
-              Coming in v1.1
+              Coming Soon
             </Text>
-            <Text variant="body" color="textSecondary" style={styles.insightText}>
-              Personalized insights powered by on-device AI will be available in a future update.
+            <Text variant="body" color="textSecondary" style={styles.aiText}>
+              AI-powered insights will analyze your patterns to provide personalized recommendations.
             </Text>
           </Card>
         </View>
@@ -95,21 +139,10 @@ const styles = StyleSheet.create({
   sectionTitle: {
     marginBottom: spacing.md,
   },
-  chartCard: {
-    height: 200,
-    justifyContent: 'center',
-  },
-  calendarCard: {
-    height: 280,
-    justifyContent: 'center',
-  },
-  emptyCard: {
-    padding: spacing.xl,
-  },
-  insightCard: {
+  aiCard: {
     padding: spacing.md,
   },
-  insightText: {
+  aiText: {
     marginTop: spacing.xs,
   },
 });
