@@ -3,6 +3,7 @@ import { formatDistanceToNow, format } from 'date-fns';
 import { Ionicons } from '@expo/vector-icons';
 import { Card, Text, NativeContextMenu, showContextMenuFallback } from '@/src/components/ui';
 import type { ContextMenuAction } from '@/src/components/ui';
+import { MoodAnimation } from '@/src/components/mood/MoodAnimation';
 import { colors, spacing, borderRadius } from '@/src/constants/theme';
 import type { JournalEntry } from '@/src/types/journal';
 
@@ -13,14 +14,6 @@ interface JournalCardProps {
   onDelete?: () => void;
   onShare?: () => void;
 }
-
-const MOOD_EMOJIS: Record<number, string> = {
-  1: '😔',
-  2: '😕',
-  3: '😐',
-  4: '🙂',
-  5: '😊',
-};
 
 export function JournalCard({ entry, onPress, onEdit, onDelete, onShare }: JournalCardProps) {
   const timeAgo = formatDistanceToNow(entry.createdAt, { addSuffix: true });
@@ -82,7 +75,7 @@ export function JournalCard({ entry, onPress, onEdit, onDelete, onShare }: Journ
                 { backgroundColor: colors.mood[entry.mood] },
               ]}
             >
-              <Text style={styles.moodEmoji}>{MOOD_EMOJIS[entry.mood]}</Text>
+              <MoodAnimation mood={entry.mood as 1 | 2 | 3 | 4 | 5} size={16} loop={false} />
             </View>
           )}
         </View>

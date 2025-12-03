@@ -2,6 +2,7 @@ import { View, StyleSheet, Pressable, Platform } from 'react-native';
 import { formatDistanceToNow } from 'date-fns';
 import { Card, Text, NativeContextMenu, showContextMenuFallback } from '@/src/components/ui';
 import type { ContextMenuAction } from '@/src/components/ui';
+import { MoodAnimation } from './MoodAnimation';
 import { colors, spacing, borderRadius, moodLabels, activityTags } from '@/src/constants/theme';
 import type { MoodEntry } from '@/src/types/mood';
 
@@ -13,14 +14,6 @@ interface MoodCardProps {
   onDelete?: () => void;
   onShare?: () => void;
 }
-
-const MOOD_EMOJIS: Record<number, string> = {
-  1: '😔',
-  2: '😕',
-  3: '😐',
-  4: '🙂',
-  5: '😊',
-};
 
 export function MoodCard({ entry, compact = false, onPress, onEdit, onDelete, onShare }: MoodCardProps) {
   const timeAgo = formatDistanceToNow(entry.timestamp, { addSuffix: true });
@@ -61,7 +54,7 @@ export function MoodCard({ entry, compact = false, onPress, onEdit, onDelete, on
           <View
             style={[styles.moodDot, { backgroundColor: colors.mood[entry.mood] }]}
           >
-            <Text style={styles.compactEmoji}>{MOOD_EMOJIS[entry.mood]}</Text>
+            <MoodAnimation mood={entry.mood} size={20} loop={false} />
           </View>
           <View style={styles.compactContent}>
             <Text variant="captionMedium" color="textPrimary">
@@ -83,7 +76,7 @@ export function MoodCard({ entry, compact = false, onPress, onEdit, onDelete, on
           <View
             style={[styles.moodBadge, { backgroundColor: colors.mood[entry.mood] }]}
           >
-            <Text style={styles.emoji}>{MOOD_EMOJIS[entry.mood]}</Text>
+            <MoodAnimation mood={entry.mood} size={28} loop={false} />
           </View>
           <View style={styles.headerText}>
             <Text variant="bodyMedium" color="textPrimary">
@@ -141,9 +134,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  emoji: {
-    fontSize: 24,
-  },
   headerText: {
     marginLeft: spacing.md,
   },
@@ -175,9 +165,6 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.full,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  compactEmoji: {
-    fontSize: 16,
   },
   compactContent: {
     marginLeft: spacing.sm,

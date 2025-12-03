@@ -1,4 +1,4 @@
-import { View, StyleSheet, Text as RNText } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import Animated, {
   useSharedValue,
@@ -8,6 +8,7 @@ import Animated, {
   useDerivedValue,
 } from 'react-native-reanimated';
 import { Text, NativeSlider } from '@/src/components/ui';
+import { MoodAnimation } from './MoodAnimation';
 import { colors, spacing, borderRadius, moodLabels } from '@/src/constants/theme';
 import { useRef } from 'react';
 
@@ -15,14 +16,6 @@ interface MoodSliderSelectorProps {
   selectedMood: (1 | 2 | 3 | 4 | 5) | null;
   onSelectMood: (mood: 1 | 2 | 3 | 4 | 5) => void;
 }
-
-const MOOD_EMOJIS: Record<number, string> = {
-  1: '😔',
-  2: '😕',
-  3: '😐',
-  4: '🙂',
-  5: '😊',
-};
 
 const MOOD_COLORS = [
   colors.mood[1],
@@ -79,14 +72,14 @@ export function MoodSliderSelector({ selectedMood, onSelectMood }: MoodSliderSel
     <View style={styles.container}>
       <Animated.View style={[styles.emojiContainer, animatedBackgroundStyle]}>
         <Animated.View style={animatedEmojiStyle}>
-          <RNText style={styles.emoji}>{MOOD_EMOJIS[displayMood]}</RNText>
+          <MoodAnimation mood={displayMood as 1 | 2 | 3 | 4 | 5} size={64} />
         </Animated.View>
       </Animated.View>
 
       <View style={styles.sliderContainer}>
         <View style={styles.sliderLabels}>
-          <Text variant="caption" color="textMuted">😔</Text>
-          <Text variant="caption" color="textMuted">😊</Text>
+          <MoodAnimation mood={1} size={20} loop={false} />
+          <MoodAnimation mood={5} size={20} loop={false} />
         </View>
         <NativeSlider
           value={selectedMood ? (selectedMood - 1) / 4 : 0.5}
@@ -123,10 +116,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: spacing.lg,
-  },
-  emoji: {
-    fontSize: 56,
-    textAlign: 'center',
   },
   sliderContainer: {
     width: '100%',

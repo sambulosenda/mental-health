@@ -1,4 +1,4 @@
-import { View, Pressable, StyleSheet, Text as RNText } from 'react-native';
+import { View, Pressable, StyleSheet } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import Animated, {
   useSharedValue,
@@ -7,6 +7,7 @@ import Animated, {
   withSequence,
 } from 'react-native-reanimated';
 import { Text } from '@/src/components/ui';
+import { MoodAnimation } from './MoodAnimation';
 import { colors, spacing, borderRadius, moodLabels } from '@/src/constants/theme';
 
 interface MoodSelectorProps {
@@ -14,12 +15,12 @@ interface MoodSelectorProps {
   onSelectMood: (mood: 1 | 2 | 3 | 4 | 5) => void;
 }
 
-const MOODS: Array<{ value: 1 | 2 | 3 | 4 | 5; emoji: string }> = [
-  { value: 1, emoji: '😔' },
-  { value: 2, emoji: '😕' },
-  { value: 3, emoji: '😐' },
-  { value: 4, emoji: '🙂' },
-  { value: 5, emoji: '😊' },
+const MOODS: Array<{ value: 1 | 2 | 3 | 4 | 5 }> = [
+  { value: 1 },
+  { value: 2 },
+  { value: 3 },
+  { value: 4 },
+  { value: 5 },
 ];
 
 export function MoodSelector({ selectedMood, onSelectMood }: MoodSelectorProps) {
@@ -30,7 +31,6 @@ export function MoodSelector({ selectedMood, onSelectMood }: MoodSelectorProps) 
           <MoodButton
             key={mood.value}
             mood={mood.value}
-            emoji={mood.emoji}
             isSelected={selectedMood === mood.value}
             onPress={() => onSelectMood(mood.value)}
           />
@@ -52,12 +52,11 @@ export function MoodSelector({ selectedMood, onSelectMood }: MoodSelectorProps) 
 
 interface MoodButtonProps {
   mood: 1 | 2 | 3 | 4 | 5;
-  emoji: string;
   isSelected: boolean;
   onPress: () => void;
 }
 
-function MoodButton({ mood, emoji, isSelected, onPress }: MoodButtonProps) {
+function MoodButton({ mood, isSelected, onPress }: MoodButtonProps) {
   const scale = useSharedValue(1);
   const backgroundColor = colors.mood[mood];
 
@@ -94,7 +93,7 @@ function MoodButton({ mood, emoji, isSelected, onPress }: MoodButtonProps) {
           animatedStyle,
         ]}
       >
-        <RNText style={styles.emoji}>{emoji}</RNText>
+        <MoodAnimation mood={mood} size={32} loop={false} />
       </Animated.View>
     </Pressable>
   );
@@ -123,10 +122,6 @@ const styles = StyleSheet.create({
   moodButtonSelected: {
     borderColor: colors.primary,
     borderWidth: 3,
-  },
-  emoji: {
-    fontSize: 28,
-    textAlign: 'center',
   },
   labelContainer: {
     marginTop: spacing.lg,

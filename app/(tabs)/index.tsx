@@ -6,7 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import Animated, { useSharedValue, useAnimatedScrollHandler } from 'react-native-reanimated';
 import { format } from 'date-fns';
 import { Text, Card, Button, AnimatedHeader, AnimatedListItem, NativeGauge, NativeBottomSheet } from '@/src/components/ui';
-import { MoodCard } from '@/src/components/mood';
+import { MoodCard, MoodAnimation } from '@/src/components/mood';
 import { useMoodStore } from '@/src/stores';
 import { colors, spacing, moodLabels, activityTags } from '@/src/constants/theme';
 import type { MoodEntry } from '@/src/types/mood';
@@ -196,9 +196,7 @@ export default function HomeScreen() {
           <View style={styles.detailsContent}>
             <View style={styles.detailsHeader}>
               <View style={[styles.moodBadge, { backgroundColor: colors.mood[selectedEntry.mood] }]}>
-                <Text style={styles.moodEmoji}>
-                  {['', '😔', '😕', '😐', '🙂', '😊'][selectedEntry.mood]}
-                </Text>
+                <MoodAnimation mood={selectedEntry.mood} size={32} />
               </View>
               <View style={styles.detailsHeaderText}>
                 <Text variant="h3" color="textPrimary">
