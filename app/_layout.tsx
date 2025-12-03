@@ -57,15 +57,22 @@ export default function RootLayout() {
             screenOptions={{
               headerShown: false,
               contentStyle: { backgroundColor: colors.background },
+              animation: 'slide_from_right',
+              animationDuration: 250,
+              gestureEnabled: true,
+              gestureDirection: 'horizontal',
             }}
           >
             <Stack.Screen name="onboarding" options={{ headerShown: false }} />
-            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen name="(tabs)" options={{ headerShown: false, animation: 'fade' }} />
             <Stack.Screen
               name="(modals)"
               options={{
                 presentation: 'modal',
                 headerShown: false,
+                animation: 'slide_from_bottom',
+                gestureEnabled: true,
+                gestureDirection: 'vertical',
               }}
             />
           </Stack>

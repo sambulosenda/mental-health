@@ -39,6 +39,12 @@ export function Button({
 
   const isDisabled = disabled || loading;
 
+  const getRippleColor = () => {
+    if (variant === 'primary') return 'rgba(255, 255, 255, 0.2)';
+    if (variant === 'danger') return 'rgba(255, 255, 255, 0.2)';
+    return colors.primaryLight;
+  };
+
   return (
     <Pressable
       style={({ pressed }) => [
@@ -54,6 +60,11 @@ export function Button({
       onPress={handlePress}
       accessibilityRole="button"
       accessibilityState={{ disabled: isDisabled }}
+      android_ripple={{
+        color: getRippleColor(),
+        borderless: false,
+        foreground: true,
+      }}
       {...props}
     >
       {loading ? (

@@ -1,15 +1,19 @@
 import { useEffect } from 'react';
-import { View, StyleSheet, ScrollView, Pressable } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { View, StyleSheet, Pressable } from 'react-native';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { Text, Card, Button } from '@/src/components/ui';
+import Animated, { useSharedValue, useAnimatedScrollHandler } from 'react-native-reanimated';
+import { Text, Card, Button, AnimatedHeader, AnimatedListItem } from '@/src/components/ui';
 import { MoodCard } from '@/src/components/mood';
 import { useMoodStore } from '@/src/stores';
 import { colors, spacing } from '@/src/constants/theme';
 
+const HEADER_EXPANDED_HEIGHT = 120;
+
 export default function HomeScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { todayEntries, entries, loadTodayEntries, loadEntries } = useMoodStore();
 
   useEffect(() => {
@@ -28,6 +32,14 @@ export default function HomeScreen() {
   const latestMood = todayEntries[0];
   const recentEntries = entries.slice(0, 5);
 
+  // Scroll animation
+  const scrollY = useSharedValue(0);
+  const scrollHandler = useAnimatedScrollHandler({
+    onScroll: (event) => {
+      scrollY.value = event.contentOffset.y;
+    },
+  });
+
   // Calculate weekly average
   const weekEntries = entries.filter((e) => {
     const weekAgo = new Date();
@@ -41,20 +53,17 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <ScrollView
+      <AnimatedHeader scrollY={scrollY} title={greeting} subtitle={formattedDate} />
+      <Animated.ScrollView
         style={styles.scroll}
-        contentContainerStyle={styles.content}
+        contentContainerStyle={[
+          styles.content,
+          { paddingTop: HEADER_EXPANDED_HEIGHT + insets.top },
+        ]}
         showsVerticalScrollIndicator={false}
+        onScroll={scrollHandler}
+        scrollEventThrottle={16}
       >
-        <View style={styles.header}>
-          <Text variant="h1" color="textPrimary">
-            {greeting}
-          </Text>
-          <Text variant="body" color="textSecondary" style={styles.date}>
-            {formattedDate}
-          </Text>
-        </View>
-
         {latestMood ? (
           <Card style={styles.statusCard}>
             <Text variant="captionMedium" color="primary" style={styles.statusLabel}>
@@ -71,25 +80,23 @@ export default function HomeScreen() {
             </Button>
           </Card>
         ) : (
-          <Pressable onPress={() => router.navigate('/(tabs)/track')}>
-            <Card style={styles.promptCard}>
-              <Text variant="captionMedium" color="primary" style={styles.promptLabel}>
-                Today's Check-in
-              </Text>
-              <Text variant="h3" color="textPrimary">
-                How are you feeling?
-              </Text>
-              <Text variant="body" color="textSecondary" style={styles.promptHint}>
-                Tap to log your first mood of the day
-              </Text>
-              <Ionicons
-                name="add-circle"
-                size={32}
-                color={colors.primary}
-                style={styles.addIcon}
-              />
-            </Card>
-          </Pressable>
+          <Card style={styles.promptCard} onPress={() => router.navigate('/(tabs)/track')}>
+            <Text variant="captionMedium" color="primary" style={styles.promptLabel}>
+              Today's Check-in
+            </Text>
+            <Text variant="h3" color="textPrimary">
+              How are you feeling?
+            </Text>
+            <Text variant="body" color="textSecondary" style={styles.promptHint}>
+              Tap to log your first mood of the day
+            </Text>
+            <Ionicons
+              name="add-circle"
+              size={32}
+              color={colors.primary}
+              style={styles.addIcon}
+            />
+          </Card>
         )}
 
         {weeklyAverage !== null && (
@@ -145,8 +152,10 @@ export default function HomeScreen() {
           </View>
           {recentEntries.length > 0 ? (
             <View style={styles.recentList}>
-              {recentEntries.map((entry) => (
-                <MoodCard key={entry.id} entry={entry} />
+              {recentEntries.map((entry, index) => (
+                <AnimatedListItem key={entry.id} index={index}>
+                  <MoodCard entry={entry} />
+                </AnimatedListItem>
               ))}
             </View>
           ) : (
@@ -163,7 +172,7 @@ export default function HomeScreen() {
             </Card>
           )}
         </View>
-      </ScrollView>
+      </Animated.ScrollView>
     </SafeAreaView>
   );
 }
@@ -184,14 +193,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   content: {
-    padding: spacing.lg,
+    paddingHorizontal: spacing.lg,
     paddingBottom: spacing.xxl,
-  },
-  header: {
-    marginBottom: spacing.xl,
-  },
-  date: {
-    marginTop: spacing.xs,
   },
   promptCard: {
     marginBottom: spacing.xl,
@@ -243,7 +246,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.divider,
   },
   recentList: {
-    gap: spacing.sm,
+    gap: spacing.md,
   },
   emptyCard: {
     padding: spacing.xl,

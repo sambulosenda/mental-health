@@ -1,12 +1,13 @@
 import { useEffect, useState, useCallback } from 'react';
-import { View, StyleSheet, ScrollView, FlatList, RefreshControl } from 'react-native';
+import { View, StyleSheet, ScrollView, FlatList, RefreshControl, Share, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { Text, Card, Button } from '@/src/components/ui';
+import { Text, Card, Button, AnimatedListItem, SwipeableRow } from '@/src/components/ui';
 import { JournalCard, PromptCard, SearchBar } from '@/src/components/journal';
 import { useJournalStore } from '@/src/stores';
 import { colors, spacing } from '@/src/constants/theme';
+import type { JournalEntry } from '@/src/types/journal';
 
 type ViewMode = 'entries' | 'prompts';
 
@@ -24,6 +25,7 @@ export default function JournalScreen() {
     performSearch,
     clearSearch,
     setDraftPrompt,
+    removeEntry,
   } = useJournalStore();
 
   const [viewMode, setViewMode] = useState<ViewMode>('entries');
@@ -65,6 +67,31 @@ export default function JournalScreen() {
       pathname: '/(modals)/journal-entry',
       params: { editId: entryId },
     });
+  };
+
+  const handleDeleteEntry = (entryId: string) => {
+    Alert.alert(
+      'Delete Entry',
+      'Are you sure you want to delete this entry? This cannot be undone.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: () => removeEntry(entryId),
+        },
+      ]
+    );
+  };
+
+  const handleShareEntry = async (entry: typeof entries[0]) => {
+    try {
+      await Share.share({
+        message: `${entry.title ? entry.title + '\n\n' : ''}${entry.content}`,
+      });
+    } catch (error) {
+      console.error('Error sharing:', error);
+    }
   };
 
   const displayedEntries = searchQuery ? searchResults : entries;
@@ -128,11 +155,18 @@ export default function JournalScreen() {
             <FlatList
               data={displayedEntries}
               keyExtractor={(item) => item.id}
-              renderItem={({ item }) => (
-                <JournalCard
-                  entry={item}
-                  onPress={() => handleEntryPress(item.id)}
-                />
+              renderItem={({ item, index }) => (
+                <AnimatedListItem index={index}>
+                  <SwipeableRow onDelete={() => handleDeleteEntry(item.id)}>
+                    <JournalCard
+                      entry={item}
+                      onPress={() => handleEntryPress(item.id)}
+                      onEdit={() => handleEntryPress(item.id)}
+                      onDelete={() => handleDeleteEntry(item.id)}
+                      onShare={() => handleShareEntry(item)}
+                    />
+                  </SwipeableRow>
+                </AnimatedListItem>
               )}
               contentContainerStyle={styles.listContent}
               showsVerticalScrollIndicator={false}
@@ -141,6 +175,8 @@ export default function JournalScreen() {
                   refreshing={refreshing}
                   onRefresh={onRefresh}
                   tintColor={colors.primary}
+                  colors={[colors.primary]}
+                  progressBackgroundColor={colors.surface}
                 />
               }
             />
@@ -169,7 +205,7 @@ export default function JournalScreen() {
             Choose a prompt to inspire your writing
           </Text>
 
-          {Object.entries(promptsByCategory).map(([category, categoryPrompts]) => (
+          {Object.entries(promptsByCategory).map(([ category, categoryPrompts]) => (
             <View key={category} style={styles.categorySection}>
               <Text variant="h3" color="textPrimary" style={styles.categoryTitle}>
                 {category.charAt(0).toUpperCase() + category.slice(1)}

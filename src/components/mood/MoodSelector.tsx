@@ -1,4 +1,4 @@
-import { View, Pressable, StyleSheet } from 'react-native';
+import { View, Pressable, StyleSheet, Text as RNText } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import Animated, {
   useSharedValue,
@@ -94,7 +94,7 @@ function MoodButton({ mood, emoji, isSelected, onPress }: MoodButtonProps) {
           animatedStyle,
         ]}
       >
-        <Text style={styles.emoji}>{emoji}</Text>
+        <RNText style={styles.emoji}>{emoji}</RNText>
       </Animated.View>
     </Pressable>
   );
@@ -103,15 +103,17 @@ function MoodButton({ mood, emoji, isSelected, onPress }: MoodButtonProps) {
 const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
+    width: '100%',
   },
   moodRow: {
     flexDirection: 'row',
-    justifyContent: 'center',
-    gap: spacing.md,
+    justifyContent: 'space-between',
+    width: '100%',
+    paddingHorizontal: spacing.xs,
   },
   moodButton: {
-    width: 56,
-    height: 56,
+    width: 54,
+    height: 54,
     borderRadius: borderRadius.full,
     alignItems: 'center',
     justifyContent: 'center',
@@ -124,6 +126,7 @@ const styles = StyleSheet.create({
   },
   emoji: {
     fontSize: 28,
+    textAlign: 'center',
   },
   labelContainer: {
     marginTop: spacing.lg,

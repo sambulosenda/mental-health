@@ -1,14 +1,17 @@
-import { View, StyleSheet, Pressable } from 'react-native';
+import { View, StyleSheet, Pressable, ActionSheetIOS, Platform, Alert } from 'react-native';
 import { formatDistanceToNow, format } from 'date-fns';
 import { Ionicons } from '@expo/vector-icons';
 import { Card, Text } from '@/src/components/ui';
+import { haptics } from '@/src/utils/haptics';
 import { colors, spacing, borderRadius } from '@/src/constants/theme';
 import type { JournalEntry } from '@/src/types/journal';
 
 interface JournalCardProps {
   entry: JournalEntry;
   onPress?: () => void;
-  onLongPress?: () => void;
+  onEdit?: () => void;
+  onDelete?: () => void;
+  onShare?: () => void;
 }
 
 const MOOD_EMOJIS: Record<number, string> = {
@@ -19,7 +22,7 @@ const MOOD_EMOJIS: Record<number, string> = {
   5: '😊',
 };
 
-export function JournalCard({ entry, onPress, onLongPress }: JournalCardProps) {
+export function JournalCard({ entry, onPress, onEdit, onDelete, onShare }: JournalCardProps) {
   const timeAgo = formatDistanceToNow(entry.createdAt, { addSuffix: true });
   const fullDate = format(entry.createdAt, 'MMM d, yyyy • h:mm a');
 
@@ -28,8 +31,40 @@ export function JournalCard({ entry, onPress, onLongPress }: JournalCardProps) {
     ? entry.content.substring(0, 150).trim() + '...'
     : entry.content;
 
+  const handleLongPress = () => {
+    haptics.medium();
+
+    if (Platform.OS === 'ios') {
+      ActionSheetIOS.showActionSheetWithOptions(
+        {
+          options: ['Cancel', 'Edit', 'Share', 'Delete'],
+          destructiveButtonIndex: 3,
+          cancelButtonIndex: 0,
+          title: entry.title || 'Journal Entry',
+        },
+        (buttonIndex) => {
+          if (buttonIndex === 1) onEdit?.();
+          if (buttonIndex === 2) onShare?.();
+          if (buttonIndex === 3) onDelete?.();
+        }
+      );
+    } else {
+      // Android fallback
+      Alert.alert(
+        entry.title || 'Journal Entry',
+        undefined,
+        [
+          { text: 'Edit', onPress: onEdit },
+          { text: 'Share', onPress: onShare },
+          { text: 'Delete', onPress: onDelete, style: 'destructive' },
+          { text: 'Cancel', style: 'cancel' },
+        ]
+      );
+    }
+  };
+
   return (
-    <Pressable onPress={onPress} onLongPress={onLongPress}>
+    <Pressable onPress={onPress} onLongPress={handleLongPress} delayLongPress={400}>
       <Card style={styles.card}>
         <View style={styles.header}>
           <View style={styles.headerLeft}>

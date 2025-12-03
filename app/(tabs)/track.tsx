@@ -1,13 +1,17 @@
-import { View, StyleSheet, ScrollView, TextInput, KeyboardAvoidingView, Platform, Alert } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { View, StyleSheet, TextInput, KeyboardAvoidingView, Platform, Alert } from 'react-native';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { Text, Card, Button } from '@/src/components/ui';
+import Animated, { useSharedValue, useAnimatedScrollHandler } from 'react-native-reanimated';
+import { Text, Card, Button, AnimatedHeader } from '@/src/components/ui';
 import { MoodSelector, ActivityTags } from '@/src/components/mood';
 import { useMoodStore } from '@/src/stores';
 import { colors, spacing, borderRadius, typography } from '@/src/constants/theme';
 
+const HEADER_EXPANDED_HEIGHT = 120;
+
 export default function TrackScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const {
     draftMood,
     draftActivities,
@@ -49,27 +53,36 @@ export default function TrackScreen() {
 
   const canSave = draftMood !== null;
 
+  // Scroll animation
+  const scrollY = useSharedValue(0);
+  const scrollHandler = useAnimatedScrollHandler({
+    onScroll: (event) => {
+      scrollY.value = event.contentOffset.y;
+    },
+  });
+
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
+      <AnimatedHeader
+        scrollY={scrollY}
+        title="Track Mood"
+        subtitle="How are you feeling right now?"
+      />
       <KeyboardAvoidingView
         style={styles.keyboardView}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
-        <ScrollView
+        <Animated.ScrollView
           style={styles.scroll}
-          contentContainerStyle={styles.content}
+          contentContainerStyle={[
+            styles.content,
+            { paddingTop: HEADER_EXPANDED_HEIGHT + insets.top },
+          ]}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
+          onScroll={scrollHandler}
+          scrollEventThrottle={16}
         >
-          <View style={styles.header}>
-            <Text variant="h1" color="textPrimary">
-              Track Mood
-            </Text>
-            <Text variant="body" color="textSecondary" style={styles.subtitle}>
-              How are you feeling right now?
-            </Text>
-          </View>
-
           <Card style={styles.moodCard}>
             <MoodSelector
               selectedMood={draftMood}
@@ -127,7 +140,7 @@ export default function TrackScreen() {
               </Button>
             )}
           </View>
-        </ScrollView>
+        </Animated.ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -145,16 +158,11 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   content: {
-    padding: spacing.lg,
+    paddingHorizontal: spacing.lg,
     paddingBottom: spacing.xxl * 2,
   },
-  header: {
-    marginBottom: spacing.xl,
-  },
-  subtitle: {
-    marginTop: spacing.xs,
-  },
   moodCard: {
+    padding: spacing.lg,
     paddingVertical: spacing.xl,
     marginBottom: spacing.xl,
   },

@@ -1,6 +1,13 @@
-import { View, ViewProps, StyleSheet, Pressable } from 'react-native';
+import { View, ViewProps, StyleSheet, Pressable, Platform } from 'react-native';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+} from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 import { colors, spacing, borderRadius, shadows } from '@/src/constants/theme';
+
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 interface CardProps extends ViewProps {
   variant?: 'elevated' | 'outlined' | 'flat';
@@ -16,6 +23,20 @@ export function Card({
   children,
   ...props
 }: CardProps) {
+  const scale = useSharedValue(1);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
+
+  const handlePressIn = () => {
+    scale.value = withSpring(0.97, { damping: 15, stiffness: 300 });
+  };
+
+  const handlePressOut = () => {
+    scale.value = withSpring(1, { damping: 15, stiffness: 300 });
+  };
+
   const handlePress = async () => {
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     onPress?.();
@@ -37,13 +58,20 @@ export function Card({
 
   if (onPress) {
     return (
-      <Pressable
+      <AnimatedPressable
         onPress={handlePress}
-        style={({ pressed }) => pressed && styles.pressed}
+        onPressIn={handlePressIn}
+        onPressOut={handlePressOut}
+        style={animatedStyle}
         accessibilityRole="button"
+        android_ripple={{
+          color: colors.primaryLight,
+          borderless: false,
+          foreground: true,
+        }}
       >
         {content}
-      </Pressable>
+      </AnimatedPressable>
     );
   }
 
@@ -64,9 +92,5 @@ const styles = StyleSheet.create({
   },
   flat: {
     backgroundColor: colors.surfaceElevated,
-  },
-  pressed: {
-    opacity: 0.9,
-    transform: [{ scale: 0.99 }],
   },
 });
