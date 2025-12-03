@@ -1,12 +1,17 @@
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, Pressable, Platform } from 'react-native';
 import { formatDistanceToNow } from 'date-fns';
-import { Card, Text } from '@/src/components/ui';
+import { Card, Text, NativeContextMenu, showContextMenuFallback } from '@/src/components/ui';
+import type { ContextMenuAction } from '@/src/components/ui';
 import { colors, spacing, borderRadius, moodLabels, activityTags } from '@/src/constants/theme';
 import type { MoodEntry } from '@/src/types/mood';
 
 interface MoodCardProps {
   entry: MoodEntry;
   compact?: boolean;
+  onPress?: () => void;
+  onEdit?: () => void;
+  onDelete?: () => void;
+  onShare?: () => void;
 }
 
 const MOOD_EMOJIS: Record<number, string> = {
@@ -17,68 +22,107 @@ const MOOD_EMOJIS: Record<number, string> = {
   5: '😊',
 };
 
-export function MoodCard({ entry, compact = false }: MoodCardProps) {
+export function MoodCard({ entry, compact = false, onPress, onEdit, onDelete, onShare }: MoodCardProps) {
   const timeAgo = formatDistanceToNow(entry.timestamp, { addSuffix: true });
   const activityLabels = entry.activities
     .map((id) => activityTags.find((t) => t.id === id)?.label)
     .filter(Boolean);
 
+  const contextMenuActions: ContextMenuAction[] = [
+    {
+      title: 'Edit',
+      systemIcon: 'pencil',
+      onPress: () => onEdit?.(),
+    },
+    {
+      title: 'Share',
+      systemIcon: 'square.and.arrow.up',
+      onPress: () => onShare?.(),
+    },
+    {
+      title: 'Delete',
+      systemIcon: 'trash',
+      destructive: true,
+      onPress: () => onDelete?.(),
+    },
+  ];
+
+  const handleLongPress = () => {
+    // Only use fallback on Android - iOS uses native ContextMenu
+    if (Platform.OS !== 'ios') {
+      showContextMenuFallback(moodLabels[entry.mood].label, contextMenuActions);
+    }
+  };
+
   if (compact) {
     return (
-      <View style={styles.compactContainer}>
-        <View
-          style={[styles.moodDot, { backgroundColor: colors.mood[entry.mood] }]}
-        >
-          <Text style={styles.compactEmoji}>{MOOD_EMOJIS[entry.mood]}</Text>
+      <Pressable onPress={onPress} onLongPress={handleLongPress} delayLongPress={400}>
+        <View style={styles.compactContainer}>
+          <View
+            style={[styles.moodDot, { backgroundColor: colors.mood[entry.mood] }]}
+          >
+            <Text style={styles.compactEmoji}>{MOOD_EMOJIS[entry.mood]}</Text>
+          </View>
+          <View style={styles.compactContent}>
+            <Text variant="captionMedium" color="textPrimary">
+              {moodLabels[entry.mood].label}
+            </Text>
+            <Text variant="caption" color="textMuted">
+              {timeAgo}
+            </Text>
+          </View>
         </View>
-        <View style={styles.compactContent}>
-          <Text variant="captionMedium" color="textPrimary">
-            {moodLabels[entry.mood].label}
-          </Text>
-          <Text variant="caption" color="textMuted">
-            {timeAgo}
-          </Text>
-        </View>
-      </View>
+      </Pressable>
     );
   }
 
+  const cardContent = (
+    <Pressable onPress={onPress} onLongPress={handleLongPress} delayLongPress={400}>
+      <Card style={styles.card}>
+        <View style={styles.header}>
+          <View
+            style={[styles.moodBadge, { backgroundColor: colors.mood[entry.mood] }]}
+          >
+            <Text style={styles.emoji}>{MOOD_EMOJIS[entry.mood]}</Text>
+          </View>
+          <View style={styles.headerText}>
+            <Text variant="bodyMedium" color="textPrimary">
+              {moodLabels[entry.mood].label}
+            </Text>
+            <Text variant="caption" color="textSecondary">
+              {timeAgo}
+            </Text>
+          </View>
+        </View>
+
+        {activityLabels.length > 0 && (
+          <View style={styles.activities}>
+            {activityLabels.map((label, index) => (
+              <View key={index} style={styles.activityChip}>
+                <Text variant="label" color="textSecondary">
+                  {label}
+                </Text>
+              </View>
+            ))}
+          </View>
+        )}
+
+        {entry.note && (
+          <Text variant="body" color="textSecondary" style={styles.note}>
+            {entry.note}
+          </Text>
+        )}
+      </Card>
+    </Pressable>
+  );
+
   return (
-    <Card style={styles.card}>
-      <View style={styles.header}>
-        <View
-          style={[styles.moodBadge, { backgroundColor: colors.mood[entry.mood] }]}
-        >
-          <Text style={styles.emoji}>{MOOD_EMOJIS[entry.mood]}</Text>
-        </View>
-        <View style={styles.headerText}>
-          <Text variant="bodyMedium" color="textPrimary">
-            {moodLabels[entry.mood].label}
-          </Text>
-          <Text variant="caption" color="textSecondary">
-            {timeAgo}
-          </Text>
-        </View>
-      </View>
-
-      {activityLabels.length > 0 && (
-        <View style={styles.activities}>
-          {activityLabels.map((label, index) => (
-            <View key={index} style={styles.activityChip}>
-              <Text variant="label" color="textSecondary">
-                {label}
-              </Text>
-            </View>
-          ))}
-        </View>
-      )}
-
-      {entry.note && (
-        <Text variant="body" color="textSecondary" style={styles.note}>
-          {entry.note}
-        </Text>
-      )}
-    </Card>
+    <NativeContextMenu
+      title={moodLabels[entry.mood].label}
+      actions={contextMenuActions}
+    >
+      {cardContent}
+    </NativeContextMenu>
   );
 }
 

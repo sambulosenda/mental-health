@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { View, StyleSheet, ScrollView, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Text, Card } from '@/src/components/ui';
+import { Text, Card, NativePicker } from '@/src/components/ui';
 import { MoodTrendChart, MoodCalendar, InsightList } from '@/src/components/insights';
 import type { Insight } from '@/src/components/insights';
 import { useMoodStore } from '@/src/stores';
@@ -9,17 +9,24 @@ import { detectPatterns } from '@/src/lib/insights';
 import { colors, spacing } from '@/src/constants/theme';
 import type { DailyMoodSummary } from '@/src/types/mood';
 
+const TIME_RANGES = ['Week', 'Month', 'Year'] as const;
+const DAYS_MAP = { Week: 7, Month: 30, Year: 365 } as const;
+
 export default function InsightsScreen() {
   const { entries, loadEntries, getDailySummaries } = useMoodStore();
   const [summaries, setSummaries] = useState<DailyMoodSummary[]>([]);
   const [insights, setInsights] = useState<Insight[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [timeRangeIndex, setTimeRangeIndex] = useState(1); // Default to Month
+
+  const selectedRange = TIME_RANGES[timeRangeIndex];
+  const daysToFetch = DAYS_MAP[selectedRange];
 
   const loadData = useCallback(async () => {
     try {
       await loadEntries();
-      const dailySummaries = await getDailySummaries(30);
+      const dailySummaries = await getDailySummaries(daysToFetch);
       setSummaries(dailySummaries);
 
       // Detect patterns
@@ -33,11 +40,11 @@ export default function InsightsScreen() {
     } finally {
       setIsLoading(false);
     }
-  }, [loadEntries, getDailySummaries, entries]);
+  }, [loadEntries, getDailySummaries, entries, daysToFetch]);
 
   useEffect(() => {
     loadData();
-  }, []);
+  }, [daysToFetch]);
 
   // Re-run pattern detection when entries change
   useEffect(() => {
@@ -79,13 +86,21 @@ export default function InsightsScreen() {
           </Text>
         </View>
 
+        <View style={styles.pickerContainer}>
+          <NativePicker
+            options={[...TIME_RANGES]}
+            selectedIndex={timeRangeIndex}
+            onSelect={setTimeRangeIndex}
+          />
+        </View>
+
         <View style={styles.section}>
           <MoodTrendChart summaries={summaries} isLoading={isLoading} />
         </View>
 
         <View style={styles.section}>
           <Text variant="h3" color="textPrimary" style={styles.sectionTitle}>
-            Monthly Overview
+            {selectedRange} Overview
           </Text>
           <MoodCalendar summaries={summaries} isLoading={isLoading} />
         </View>
@@ -132,6 +147,9 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     marginTop: spacing.xs,
+  },
+  pickerContainer: {
+    marginBottom: spacing.lg,
   },
   section: {
     marginBottom: spacing.lg,

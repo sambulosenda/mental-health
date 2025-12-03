@@ -3,7 +3,7 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useRouter } from 'expo-router';
 import Animated, { useSharedValue, useAnimatedScrollHandler } from 'react-native-reanimated';
 import { Text, Card, Button, AnimatedHeader } from '@/src/components/ui';
-import { MoodSelector, ActivityTags } from '@/src/components/mood';
+import { MoodSliderSelector, ActivityTags } from '@/src/components/mood';
 import { useMoodStore } from '@/src/stores';
 import { colors, spacing, borderRadius, typography } from '@/src/constants/theme';
 
@@ -84,7 +84,7 @@ export default function TrackScreen() {
           scrollEventThrottle={16}
         >
           <Card style={styles.moodCard}>
-            <MoodSelector
+            <MoodSliderSelector
               selectedMood={draftMood}
               onSelectMood={setDraftMood}
             />

@@ -1,13 +1,15 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { View, StyleSheet, Pressable } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import Animated, { useSharedValue, useAnimatedScrollHandler } from 'react-native-reanimated';
-import { Text, Card, Button, AnimatedHeader, AnimatedListItem } from '@/src/components/ui';
+import { format } from 'date-fns';
+import { Text, Card, Button, AnimatedHeader, AnimatedListItem, NativeGauge, NativeBottomSheet } from '@/src/components/ui';
 import { MoodCard } from '@/src/components/mood';
 import { useMoodStore } from '@/src/stores';
-import { colors, spacing } from '@/src/constants/theme';
+import { colors, spacing, moodLabels, activityTags } from '@/src/constants/theme';
+import type { MoodEntry } from '@/src/types/mood';
 
 const HEADER_EXPANDED_HEIGHT = 120;
 
@@ -15,11 +17,18 @@ export default function HomeScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { todayEntries, entries, loadTodayEntries, loadEntries } = useMoodStore();
+  const [selectedEntry, setSelectedEntry] = useState<MoodEntry | null>(null);
+  const [showDetails, setShowDetails] = useState(false);
 
   useEffect(() => {
     loadTodayEntries();
     loadEntries();
   }, []);
+
+  const handleMoodPress = (entry: MoodEntry) => {
+    setSelectedEntry(entry);
+    setShowDetails(true);
+  };
 
   const today = new Date();
   const greeting = getGreeting();
@@ -40,16 +49,20 @@ export default function HomeScreen() {
     },
   });
 
-  // Calculate weekly average
-  const weekEntries = entries.filter((e) => {
-    const weekAgo = new Date();
-    weekAgo.setDate(weekAgo.getDate() - 7);
-    return e.timestamp >= weekAgo;
-  });
+  // Calculate weekly stats
+  const weekAgo = new Date();
+  weekAgo.setDate(weekAgo.getDate() - 7);
+
+  const weekEntries = entries.filter((e) => e.timestamp >= weekAgo);
   const weeklyAverage =
     weekEntries.length > 0
       ? weekEntries.reduce((sum, e) => sum + e.mood, 0) / weekEntries.length
       : null;
+
+  // Count unique days tracked this week
+  const uniqueDaysTracked = new Set(
+    weekEntries.map((e) => new Date(e.timestamp).toDateString())
+  ).size;
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -99,38 +112,38 @@ export default function HomeScreen() {
           </Card>
         )}
 
-        {weeklyAverage !== null && (
+        {(weeklyAverage !== null || uniqueDaysTracked > 0) && (
           <View style={styles.section}>
             <Text variant="h3" color="textPrimary" style={styles.sectionTitle}>
               This Week
             </Text>
             <Card variant="flat">
-              <View style={styles.weeklyStats}>
-                <View style={styles.statItem}>
-                  <Text variant="h2" color="primary">
-                    {weeklyAverage.toFixed(1)}
-                  </Text>
-                  <Text variant="caption" color="textSecondary">
-                    Avg. Mood
-                  </Text>
-                </View>
-                <View style={styles.statDivider} />
-                <View style={styles.statItem}>
-                  <Text variant="h2" color="primary">
-                    {weekEntries.length}
-                  </Text>
-                  <Text variant="caption" color="textSecondary">
-                    Check-ins
-                  </Text>
-                </View>
-                <View style={styles.statDivider} />
-                <View style={styles.statItem}>
-                  <Text variant="h2" color="primary">
-                    {todayEntries.length}
-                  </Text>
-                  <Text variant="caption" color="textSecondary">
-                    Today
-                  </Text>
+              <View style={styles.weeklyStatsWithGauge}>
+                <NativeGauge
+                  value={uniqueDaysTracked}
+                  maxValue={7}
+                  label="Days Tracked"
+                  size={90}
+                />
+                <View style={styles.weeklyStatsText}>
+                  <View style={styles.statRow}>
+                    <Text variant="caption" color="textSecondary">Avg. Mood</Text>
+                    <Text variant="bodyMedium" color="primary">
+                      {weeklyAverage?.toFixed(1) ?? '-'}
+                    </Text>
+                  </View>
+                  <View style={styles.statRow}>
+                    <Text variant="caption" color="textSecondary">Check-ins</Text>
+                    <Text variant="bodyMedium" color="primary">
+                      {weekEntries.length}
+                    </Text>
+                  </View>
+                  <View style={styles.statRow}>
+                    <Text variant="caption" color="textSecondary">Today</Text>
+                    <Text variant="bodyMedium" color="primary">
+                      {todayEntries.length}
+                    </Text>
+                  </View>
                 </View>
               </View>
             </Card>
@@ -154,7 +167,7 @@ export default function HomeScreen() {
             <View style={styles.recentList}>
               {recentEntries.map((entry, index) => (
                 <AnimatedListItem key={entry.id} index={index}>
-                  <MoodCard entry={entry} />
+                  <MoodCard entry={entry} onPress={() => handleMoodPress(entry)} />
                 </AnimatedListItem>
               ))}
             </View>
@@ -173,6 +186,63 @@ export default function HomeScreen() {
           )}
         </View>
       </Animated.ScrollView>
+
+      <NativeBottomSheet
+        isOpen={showDetails}
+        onClose={() => setShowDetails(false)}
+        title="Mood Details"
+      >
+        {selectedEntry && (
+          <View style={styles.detailsContent}>
+            <View style={styles.detailsHeader}>
+              <View style={[styles.moodBadge, { backgroundColor: colors.mood[selectedEntry.mood] }]}>
+                <Text style={styles.moodEmoji}>
+                  {['', '😔', '😕', '😐', '🙂', '😊'][selectedEntry.mood]}
+                </Text>
+              </View>
+              <View style={styles.detailsHeaderText}>
+                <Text variant="h3" color="textPrimary">
+                  {moodLabels[selectedEntry.mood].label}
+                </Text>
+                <Text variant="caption" color="textSecondary">
+                  {format(selectedEntry.timestamp, 'EEEE, MMMM d • h:mm a')}
+                </Text>
+              </View>
+            </View>
+
+            {selectedEntry.activities.length > 0 && (
+              <View style={styles.detailsSection}>
+                <Text variant="captionMedium" color="textMuted" style={styles.detailsLabel}>
+                  Activities
+                </Text>
+                <View style={styles.activitiesList}>
+                  {selectedEntry.activities.map((actId) => {
+                    const activity = activityTags.find((t) => t.id === actId);
+                    return activity ? (
+                      <View key={actId} style={styles.activityChip}>
+                        <Text variant="caption" color="textSecondary">
+                          {activity.label}
+                        </Text>
+                      </View>
+                    ) : null;
+                  })}
+                </View>
+              </View>
+            )}
+
+            {selectedEntry.note && (
+              <View style={styles.detailsSection}>
+                <Text variant="captionMedium" color="textMuted" style={styles.detailsLabel}>
+                  Note
+                </Text>
+                <Text variant="body" color="textSecondary">
+                  {selectedEntry.note}
+                </Text>
+              </View>
+            )}
+          </View>
+        )}
+      </NativeBottomSheet>
     </SafeAreaView>
   );
 }
@@ -231,19 +301,20 @@ const styles = StyleSheet.create({
   sectionTitle: {
     marginBottom: spacing.md,
   },
-  weeklyStats: {
+  weeklyStatsWithGauge: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
     alignItems: 'center',
     paddingVertical: spacing.sm,
+    gap: spacing.lg,
   },
-  statItem: {
+  weeklyStatsText: {
+    flex: 1,
+    gap: spacing.sm,
+  },
+  statRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-  },
-  statDivider: {
-    width: 1,
-    height: 40,
-    backgroundColor: colors.divider,
   },
   recentList: {
     gap: spacing.md,
@@ -254,5 +325,44 @@ const styles = StyleSheet.create({
   },
   emptyIcon: {
     marginBottom: spacing.md,
+  },
+  detailsContent: {
+    paddingTop: spacing.sm,
+  },
+  detailsHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: spacing.lg,
+  },
+  moodBadge: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  moodEmoji: {
+    fontSize: 32,
+  },
+  detailsHeaderText: {
+    marginLeft: spacing.md,
+    flex: 1,
+  },
+  detailsSection: {
+    marginBottom: spacing.md,
+  },
+  detailsLabel: {
+    marginBottom: spacing.xs,
+  },
+  activitiesList: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.xs,
+  },
+  activityChip: {
+    backgroundColor: colors.surfaceElevated,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
+    borderRadius: 8,
   },
 });

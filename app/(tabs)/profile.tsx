@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
-import { View, StyleSheet, ScrollView, Switch, Alert, Pressable } from 'react-native';
+import { View, StyleSheet, ScrollView, Alert, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { Text, Card, Button } from '@/src/components/ui';
+import { Host, Switch } from '@expo/ui/swift-ui';
+import { Text, Card, Button, NativeTimePicker } from '@/src/components/ui';
 import { useSettingsStore, useMoodStore, useJournalStore } from '@/src/stores';
 import {
   scheduleDailyReminder,
@@ -34,6 +35,15 @@ export default function ProfileScreen() {
   const [biometricAvailable, setBiometricAvailable] = useState(false);
   const [biometricName, setBiometricName] = useState('Biometric');
   const [isExporting, setIsExporting] = useState(false);
+  const [showTimePicker, setShowTimePicker] = useState(false);
+
+  // Convert reminderTime string to Date object
+  const getTimeAsDate = () => {
+    const [hour, minute] = reminderTime.split(':').map(Number);
+    const date = new Date();
+    date.setHours(hour, minute, 0, 0);
+    return date;
+  };
 
   useEffect(() => {
     checkBiometrics();
@@ -75,23 +85,17 @@ export default function ProfileScreen() {
   };
 
   const handleTimeChange = () => {
-    Alert.alert(
-      'Reminder Time',
-      'Choose when to receive your daily reminder',
-      [
-        { text: 'Morning (9:00)', onPress: () => updateReminderTime('09:00') },
-        { text: 'Afternoon (14:00)', onPress: () => updateReminderTime('14:00') },
-        { text: 'Evening (20:00)', onPress: () => updateReminderTime('20:00') },
-        { text: 'Cancel', style: 'cancel' },
-      ]
-    );
+    setShowTimePicker(true);
   };
 
-  const updateReminderTime = async (time: string) => {
+  const handleTimeSelected = async (date: Date) => {
+    const hour = date.getHours().toString().padStart(2, '0');
+    const minute = date.getMinutes().toString().padStart(2, '0');
+    const time = `${hour}:${minute}`;
+
     setReminderTime(time);
     if (reminderEnabled) {
-      const { hour, minute } = parseTimeString(time);
-      await scheduleDailyReminder(hour, minute);
+      await scheduleDailyReminder(date.getHours(), date.getMinutes());
     }
   };
 
@@ -205,12 +209,14 @@ export default function ProfileScreen() {
                   Get reminded to track your mood
                 </Text>
               </View>
-              <Switch
-                value={reminderEnabled}
-                onValueChange={handleReminderToggle}
-                trackColor={{ false: colors.border, true: colors.primaryLight }}
-                thumbColor={reminderEnabled ? colors.primary : colors.surface}
-              />
+              <Host matchContents>
+                <Switch
+                  checked={reminderEnabled}
+                  onValueChange={handleReminderToggle}
+                  label="Daily Reminders"
+                  variant="switch"
+                />
+              </Host>
             </View>
             {reminderEnabled && (
               <Pressable style={styles.timeRow} onPress={handleTimeChange}>
@@ -244,13 +250,15 @@ export default function ProfileScreen() {
                     : `${biometricName} not available`}
                 </Text>
               </View>
-              <Switch
-                value={biometricEnabled}
-                onValueChange={handleBiometricToggle}
-                trackColor={{ false: colors.border, true: colors.primaryLight }}
-                thumbColor={biometricEnabled ? colors.primary : colors.surface}
-                disabled={!biometricAvailable}
-              />
+              <Host matchContents>
+                <Switch
+                  checked={biometricEnabled}
+                  onValueChange={handleBiometricToggle}
+                  disabled={!biometricAvailable}
+                  label={`${biometricName} Lock`}
+                  variant="switch"
+                />
+              </Host>
             </View>
           </Card>
         </View>
@@ -314,6 +322,13 @@ export default function ProfileScreen() {
           </Card>
         </View>
       </ScrollView>
+
+      <NativeTimePicker
+        value={getTimeAsDate()}
+        onChange={handleTimeSelected}
+        visible={showTimePicker}
+        onClose={() => setShowTimePicker(false)}
+      />
     </SafeAreaView>
   );
 }

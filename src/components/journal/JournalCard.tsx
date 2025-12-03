@@ -1,8 +1,8 @@
-import { View, StyleSheet, Pressable, ActionSheetIOS, Platform, Alert } from 'react-native';
+import { View, StyleSheet, Pressable, Platform } from 'react-native';
 import { formatDistanceToNow, format } from 'date-fns';
 import { Ionicons } from '@expo/vector-icons';
-import { Card, Text } from '@/src/components/ui';
-import { haptics } from '@/src/utils/haptics';
+import { Card, Text, NativeContextMenu, showContextMenuFallback } from '@/src/components/ui';
+import type { ContextMenuAction } from '@/src/components/ui';
 import { colors, spacing, borderRadius } from '@/src/constants/theme';
 import type { JournalEntry } from '@/src/types/journal';
 
@@ -31,39 +31,33 @@ export function JournalCard({ entry, onPress, onEdit, onDelete, onShare }: Journ
     ? entry.content.substring(0, 150).trim() + '...'
     : entry.content;
 
-  const handleLongPress = () => {
-    haptics.medium();
+  const contextMenuActions: ContextMenuAction[] = [
+    {
+      title: 'Edit',
+      systemIcon: 'pencil',
+      onPress: () => onEdit?.(),
+    },
+    {
+      title: 'Share',
+      systemIcon: 'square.and.arrow.up',
+      onPress: () => onShare?.(),
+    },
+    {
+      title: 'Delete',
+      systemIcon: 'trash',
+      destructive: true,
+      onPress: () => onDelete?.(),
+    },
+  ];
 
-    if (Platform.OS === 'ios') {
-      ActionSheetIOS.showActionSheetWithOptions(
-        {
-          options: ['Cancel', 'Edit', 'Share', 'Delete'],
-          destructiveButtonIndex: 3,
-          cancelButtonIndex: 0,
-          title: entry.title || 'Journal Entry',
-        },
-        (buttonIndex) => {
-          if (buttonIndex === 1) onEdit?.();
-          if (buttonIndex === 2) onShare?.();
-          if (buttonIndex === 3) onDelete?.();
-        }
-      );
-    } else {
-      // Android fallback
-      Alert.alert(
-        entry.title || 'Journal Entry',
-        undefined,
-        [
-          { text: 'Edit', onPress: onEdit },
-          { text: 'Share', onPress: onShare },
-          { text: 'Delete', onPress: onDelete, style: 'destructive' },
-          { text: 'Cancel', style: 'cancel' },
-        ]
-      );
+  const handleLongPress = () => {
+    // Only use fallback on Android - iOS uses native ContextMenu
+    if (Platform.OS !== 'ios') {
+      showContextMenuFallback(entry.title || 'Journal Entry', contextMenuActions);
     }
   };
 
-  return (
+  const cardContent = (
     <Pressable onPress={onPress} onLongPress={handleLongPress} delayLongPress={400}>
       <Card style={styles.card}>
         <View style={styles.header}>
@@ -127,6 +121,15 @@ export function JournalCard({ entry, onPress, onEdit, onDelete, onShare }: Journ
         </View>
       </Card>
     </Pressable>
+  );
+
+  return (
+    <NativeContextMenu
+      title={entry.title || 'Journal Entry'}
+      actions={contextMenuActions}
+    >
+      {cardContent}
+    </NativeContextMenu>
   );
 }
 

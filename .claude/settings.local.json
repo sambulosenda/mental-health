@@ -2,7 +2,9 @@
   "permissions": {
     "allow": [
       "Bash(git -C /Users/sambulosenda/Documents/zen-mobile-app log --oneline -10)",
-      "Bash(npx expo install expo-sqlite expo-notifications expo-local-authentication expo-file-system expo-sharing)"
+      "Bash(npx expo install expo-sqlite expo-notifications expo-local-authentication expo-file-system expo-sharing)",
+      "Bash(cat:*)",
+      "Bash(bun install:*)"
     ],
     "deny": [],
     "ask": []
