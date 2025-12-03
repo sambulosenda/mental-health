@@ -13,7 +13,8 @@
       "infoPlist": {
         "NSSpeechRecognitionUsageDescription": "DaySi uses speech recognition to transcribe your voice journal entries.",
         "NSMicrophoneUsageDescription": "DaySi needs microphone access to record your voice for journaling."
-      }
+      },
+      "bundleIdentifier": "com.sambulosendas1.zenmobileapp"
     },
     "android": {
       "adaptiveIcon": {
@@ -24,7 +25,11 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "permissions": ["android.permission.RECORD_AUDIO"]
+      "permissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.RECORD_AUDIO"
+      ],
+      "package": "com.sambulosendas1.zenmobileapp"
     },
     "web": {
       "output": "static",
