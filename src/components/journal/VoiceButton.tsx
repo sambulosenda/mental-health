@@ -1,5 +1,5 @@
-import { useState, useRef } from 'react';
-import { Pressable, StyleSheet, Alert, Platform } from 'react-native';
+import { useEffect } from 'react';
+import { Pressable, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import Animated, {
@@ -11,6 +11,8 @@ import Animated, {
   cancelAnimation,
 } from 'react-native-reanimated';
 import { colors, spacing, borderRadius } from '@/src/constants/theme';
+import { useVoiceRecognition } from '@/src/hooks/useVoiceRecognition';
+import { Text } from '@/src/components/ui';
 
 interface VoiceButtonProps {
   onTranscription: (text: string) => void;
@@ -18,98 +20,126 @@ interface VoiceButtonProps {
 }
 
 export function VoiceButton({ onTranscription, disabled }: VoiceButtonProps) {
-  const [isRecording, setIsRecording] = useState(false);
+  const {
+    state,
+    partialTranscript,
+    error,
+    isAvailable,
+    startListening,
+    stopListening,
+    cancelListening,
+  } = useVoiceRecognition({
+    onTranscription,
+  });
+
+  const isRecording = state === 'listening';
   const scale = useSharedValue(1);
   const opacity = useSharedValue(1);
+
+  useEffect(() => {
+    if (isRecording) {
+      // Pulse animation while recording
+      scale.value = withRepeat(
+        withSequence(
+          withTiming(1.2, { duration: 500 }),
+          withTiming(1, { duration: 500 })
+        ),
+        -1,
+        true
+      );
+      opacity.value = withRepeat(
+        withSequence(
+          withTiming(0.7, { duration: 500 }),
+          withTiming(1, { duration: 500 })
+        ),
+        -1,
+        true
+      );
+    } else {
+      cancelAnimation(scale);
+      cancelAnimation(opacity);
+      scale.value = withTiming(1, { duration: 200 });
+      opacity.value = withTiming(1, { duration: 200 });
+    }
+  }, [isRecording, scale, opacity]);
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
     opacity: opacity.value,
   }));
 
-  const startRecording = async () => {
+  const handlePress = async () => {
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    setIsRecording(true);
 
-    // Pulse animation while recording
-    scale.value = withRepeat(
-      withSequence(
-        withTiming(1.2, { duration: 500 }),
-        withTiming(1, { duration: 500 })
-      ),
-      -1,
-      true
-    );
-    opacity.value = withRepeat(
-      withSequence(
-        withTiming(0.7, { duration: 500 }),
-        withTiming(1, { duration: 500 })
-      ),
-      -1,
-      true
-    );
-
-    // Note: In a production app, integrate with:
-    // - expo-speech-recognition (when available)
-    // - @react-native-voice/voice
-    // - Or a cloud speech API (Google, AWS, etc.)
-
-    // For MVP, show a placeholder alert
-    Alert.alert(
-      'Voice Input',
-      'Voice-to-text requires native speech recognition integration.\n\nThis feature will be available in a future update.',
-      [
-        {
-          text: 'OK',
-          onPress: () => stopRecording(),
-        },
-      ]
-    );
-  };
-
-  const stopRecording = () => {
-    setIsRecording(false);
-    cancelAnimation(scale);
-    cancelAnimation(opacity);
-    scale.value = withTiming(1, { duration: 200 });
-    opacity.value = withTiming(1, { duration: 200 });
-  };
-
-  const handlePress = () => {
     if (isRecording) {
-      stopRecording();
+      await stopListening();
     } else {
-      startRecording();
+      await startListening();
     }
   };
 
+  const handleLongPress = async () => {
+    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+    await cancelListening();
+  };
+
+  if (!isAvailable) {
+    return (
+      <View style={[styles.button, styles.unavailable]}>
+        <Ionicons name="mic-off" size={24} color={colors.textMuted} />
+      </View>
+    );
+  }
+
   return (
-    <Pressable
-      onPress={handlePress}
-      disabled={disabled}
-      accessibilityRole="button"
-      accessibilityLabel={isRecording ? 'Stop recording' : 'Start voice input'}
-      accessibilityState={{ disabled }}
-    >
-      <Animated.View
-        style={[
-          styles.button,
-          isRecording && styles.recording,
-          disabled && styles.disabled,
-          animatedStyle,
-        ]}
+    <View style={styles.container}>
+      {partialTranscript ? (
+        <View style={styles.transcriptBubble}>
+          <Text variant="caption" color="textSecondary" numberOfLines={2}>
+            {partialTranscript}
+          </Text>
+        </View>
+      ) : null}
+
+      <Pressable
+        onPress={handlePress}
+        onLongPress={handleLongPress}
+        disabled={disabled}
+        accessibilityRole="button"
+        accessibilityLabel={isRecording ? 'Stop recording' : 'Start voice input'}
+        accessibilityHint={isRecording ? 'Double tap to stop' : 'Double tap to start recording, long press to cancel'}
+        accessibilityState={{ disabled }}
       >
-        <Ionicons
-          name={isRecording ? 'stop' : 'mic'}
-          size={24}
-          color={isRecording ? colors.error : colors.primary}
-        />
-      </Animated.View>
-    </Pressable>
+        <Animated.View
+          style={[
+            styles.button,
+            isRecording && styles.recording,
+            disabled && styles.disabled,
+            state === 'error' && styles.error,
+            animatedStyle,
+          ]}
+        >
+          <Ionicons
+            name={isRecording ? 'stop' : 'mic'}
+            size={24}
+            color={isRecording ? colors.error : state === 'error' ? colors.error : colors.primary}
+          />
+        </Animated.View>
+      </Pressable>
+
+      {error ? (
+        <Text variant="caption" color="error" style={styles.errorText}>
+          {error}
+        </Text>
+      ) : null}
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  container: {
+    alignItems: 'center',
+  },
   button: {
     width: 48,
     height: 48,
@@ -126,5 +156,30 @@ const styles = StyleSheet.create({
   },
   disabled: {
     opacity: 0.5,
+  },
+  unavailable: {
+    backgroundColor: colors.surface,
+    borderColor: colors.border,
+  },
+  error: {
+    borderColor: colors.error,
+  },
+  transcriptBubble: {
+    position: 'absolute',
+    bottom: 56,
+    backgroundColor: colors.surfaceElevated,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
+    borderRadius: borderRadius.md,
+    maxWidth: 200,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  errorText: {
+    marginTop: spacing.xs,
+    textAlign: 'center',
   },
 });
