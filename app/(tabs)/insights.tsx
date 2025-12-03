@@ -1,11 +1,13 @@
 import { useEffect, useState, useCallback } from 'react';
-import { View, StyleSheet, ScrollView, RefreshControl } from 'react-native';
+import { View, StyleSheet, ScrollView, RefreshControl, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Text, Card, NativePicker } from '@/src/components/ui';
+import { Ionicons } from '@expo/vector-icons';
+import { Text, Card, Button, NativePicker } from '@/src/components/ui';
 import { MoodTrendChart, MoodCalendar, InsightList } from '@/src/components/insights';
 import type { Insight } from '@/src/components/insights';
-import { useMoodStore } from '@/src/stores';
+import { useMoodStore, useJournalStore } from '@/src/stores';
 import { detectPatterns } from '@/src/lib/insights';
+import { useAIInsights } from '@/src/lib/ai';
 import { colors, spacing } from '@/src/constants/theme';
 import type { DailyMoodSummary } from '@/src/types/mood';
 
@@ -14,6 +16,7 @@ const DAYS_MAP = { Week: 7, Month: 30, Year: 365 } as const;
 
 export default function InsightsScreen() {
   const { entries, loadEntries, getDailySummaries } = useMoodStore();
+  const { entries: journalEntries, loadEntries: loadJournalEntries } = useJournalStore();
   const [summaries, setSummaries] = useState<DailyMoodSummary[]>([]);
   const [insights, setInsights] = useState<Insight[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -23,9 +26,22 @@ export default function InsightsScreen() {
   const selectedRange = TIME_RANGES[timeRangeIndex];
   const daysToFetch = DAYS_MAP[selectedRange];
 
+  // AI Insights
+  const {
+    state: aiState,
+    insights: aiInsights,
+    error: aiError,
+    isModelReady,
+    generateInsights,
+  } = useAIInsights({
+    moodEntries: entries,
+    moodSummaries: summaries,
+    journalEntries,
+  });
+
   const loadData = useCallback(async () => {
     try {
-      await loadEntries();
+      await Promise.all([loadEntries(), loadJournalEntries()]);
       const dailySummaries = await getDailySummaries(daysToFetch);
       setSummaries(dailySummaries);
 
@@ -40,7 +56,7 @@ export default function InsightsScreen() {
     } finally {
       setIsLoading(false);
     }
-  }, [loadEntries, getDailySummaries, entries, daysToFetch]);
+  }, [loadEntries, loadJournalEntries, getDailySummaries, entries, daysToFetch]);
 
   useEffect(() => {
     loadData();
@@ -116,14 +132,64 @@ export default function InsightsScreen() {
         </View>
 
         <View style={styles.section}>
-          <Card variant="outlined" style={styles.aiCard}>
-            <Text variant="captionMedium" color="primary">
-              Coming Soon
-            </Text>
-            <Text variant="body" color="textSecondary" style={styles.aiText}>
-              AI-powered insights will analyze your patterns to provide personalized recommendations.
-            </Text>
-          </Card>
+          <Text variant="h3" color="textPrimary" style={styles.sectionTitle}>
+            AI Insights
+          </Text>
+          {!isModelReady ? (
+            <Card variant="outlined" style={styles.aiCard}>
+              <View style={styles.aiLoadingRow}>
+                <ActivityIndicator size="small" color={colors.primary} />
+                <Text variant="body" color="textSecondary" style={styles.aiLoadingText}>
+                  Loading AI model...
+                </Text>
+              </View>
+              <Text variant="caption" color="textMuted" style={styles.aiText}>
+                First-time setup may take a moment while the model downloads.
+              </Text>
+            </Card>
+          ) : aiState === 'generating' ? (
+            <Card variant="outlined" style={styles.aiCard}>
+              <View style={styles.aiLoadingRow}>
+                <ActivityIndicator size="small" color={colors.primary} />
+                <Text variant="body" color="textSecondary" style={styles.aiLoadingText}>
+                  Analyzing your patterns...
+                </Text>
+              </View>
+            </Card>
+          ) : aiInsights.length > 0 ? (
+            <View>
+              <InsightList insights={aiInsights} />
+              <Button
+                variant="ghost"
+                size="small"
+                onPress={generateInsights}
+                style={styles.refreshButton}
+              >
+                Refresh AI Insights
+              </Button>
+            </View>
+          ) : (
+            <Card variant="outlined" style={styles.aiCard}>
+              <Ionicons name="sparkles" size={24} color={colors.primary} />
+              <Text variant="body" color="textSecondary" style={styles.aiText}>
+                {aiError || 'Generate personalized insights based on your mood and journal entries.'}
+              </Text>
+              <Button
+                variant="secondary"
+                size="small"
+                onPress={generateInsights}
+                disabled={entries.length < 3}
+                style={styles.generateButton}
+              >
+                Generate AI Insights
+              </Button>
+              {entries.length < 3 && (
+                <Text variant="caption" color="textMuted" style={styles.aiHint}>
+                  Need at least 3 mood entries
+                </Text>
+              )}
+            </Card>
+          )}
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -159,8 +225,27 @@ const styles = StyleSheet.create({
   },
   aiCard: {
     padding: spacing.md,
+    alignItems: 'center',
   },
   aiText: {
+    marginTop: spacing.sm,
+    textAlign: 'center',
+  },
+  aiLoadingRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  aiLoadingText: {
+    marginLeft: spacing.sm,
+  },
+  generateButton: {
+    marginTop: spacing.md,
+  },
+  refreshButton: {
+    marginTop: spacing.sm,
+    alignSelf: 'center',
+  },
+  aiHint: {
     marginTop: spacing.xs,
   },
 });
