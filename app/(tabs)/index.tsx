@@ -66,8 +66,8 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <AnimatedHeader scrollY={scrollY} title={greeting} subtitle={formattedDate} />
-      <Animated.ScrollView
+        <AnimatedHeader scrollY={scrollY} title={greeting} subtitle={formattedDate} />
+        <Animated.ScrollView
         style={styles.scroll}
         contentContainerStyle={[
           styles.content,

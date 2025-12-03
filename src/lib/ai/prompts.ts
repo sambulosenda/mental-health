@@ -1,6 +1,6 @@
 import type { MoodEntry, DailyMoodSummary } from '@/src/types/mood';
 import type { JournalEntry } from '@/src/types/journal';
-import { ACTIVITY_TAGS } from '@/src/constants/theme';
+import { activityTags } from '@/src/constants/theme';
 
 const MOOD_LABELS = ['Very Low', 'Low', 'Neutral', 'Good', 'Great'];
 
@@ -24,7 +24,7 @@ function formatMoodData(entries: MoodEntry[], summaries: DailyMoodSummary[]): st
     .sort((a, b) => b[1] - a[1])
     .slice(0, 5)
     .map(([id, count]) => {
-      const tag = ACTIVITY_TAGS.find(t => t.id === id);
+      const tag = activityTags.find(t => t.id === id);
       return `${tag?.label || id}: ${count} times`;
     });
 
@@ -37,7 +37,7 @@ Recent mood tracking (last ${entries.length} entries):
 Recent entries:
 ${recentEntries.map(e => {
   const date = new Date(e.timestamp).toLocaleDateString();
-  const activities = e.activities.map(a => ACTIVITY_TAGS.find(t => t.id === a)?.label || a).join(', ');
+  const activities = e.activities.map(a => activityTags.find(t => t.id === a)?.label || a).join(', ');
   return `- ${date}: Mood ${e.mood}/5${activities ? `, Activities: ${activities}` : ''}${e.note ? `, Note: "${e.note.slice(0, 50)}"` : ''}`;
 }).join('\n')}
 `.trim();

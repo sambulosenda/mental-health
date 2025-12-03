@@ -63,7 +63,7 @@ export default function TrackScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <AnimatedHeader
+        <AnimatedHeader
         scrollY={scrollY}
         title="Track Mood"
         subtitle="How are you feeling right now?"

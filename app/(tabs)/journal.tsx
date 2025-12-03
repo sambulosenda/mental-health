@@ -107,7 +107,7 @@ export default function JournalScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <View style={styles.header}>
+        <View style={styles.header}>
         <Text variant="h1" color="textPrimary">
           Journal
         </Text>

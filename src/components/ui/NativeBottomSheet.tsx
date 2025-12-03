@@ -1,7 +1,6 @@
 import { Platform, Modal, View, StyleSheet, Pressable, useWindowDimensions } from 'react-native';
 import { ReactNode } from 'react';
 import { Host, BottomSheet } from '@expo/ui/swift-ui';
-import { BlurView } from 'expo-blur';
 import { colors, spacing, borderRadius } from '@/src/constants/theme';
 import { Text } from './Text';
 
@@ -18,24 +17,30 @@ export function NativeBottomSheet({
   children,
   title,
 }: NativeBottomSheetProps) {
-  const { width } = useWindowDimensions();
+  const { width, height } = useWindowDimensions();
 
   // Use native SwiftUI BottomSheet on iOS
   if (Platform.OS === 'ios') {
+    if (!isOpen) return null;
+
     return (
-      <Host style={{ position: 'absolute', width }}>
+      <Host style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, width, height }}>
         <BottomSheet
           isOpened={isOpen}
           onIsOpenedChange={(opened) => {
             if (!opened) onClose();
           }}
+          presentationDetents={['medium']}
+          presentationDragIndicator="visible"
         >
-          {title && (
-            <Text variant="h3" color="textPrimary" style={{ marginBottom: spacing.md }}>
-              {title}
-            </Text>
-          )}
-          {children}
+          <View style={styles.sheetContent}>
+            {title && (
+              <Text variant="h3" color="textPrimary" style={styles.sheetTitle}>
+                {title}
+              </Text>
+            )}
+            {children}
+          </View>
         </BottomSheet>
       </Host>
     );
@@ -88,5 +93,12 @@ const styles = StyleSheet.create({
   },
   title: {
     marginBottom: spacing.md,
+  },
+  sheetContent: {
+    padding: spacing.lg,
+  },
+  sheetTitle: {
+    marginBottom: spacing.md,
+    textAlign: 'center',
   },
 });
