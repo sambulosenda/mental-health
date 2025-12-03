@@ -29,12 +29,13 @@ export default function ProfileScreen() {
     setBiometricEnabled,
   } = useSettingsStore();
 
-  const { entries: moodEntries, loadEntries: loadMoodEntries } = useMoodStore();
-  const { entries: journalEntries, loadEntries: loadJournalEntries } = useJournalStore();
+  const { entries: moodEntries, loadEntries: loadMoodEntries, clearEntries: clearMoodEntries } = useMoodStore();
+  const { entries: journalEntries, loadEntries: loadJournalEntries, clearEntries: clearJournalEntries } = useJournalStore();
 
   const [biometricAvailable, setBiometricAvailable] = useState(false);
   const [biometricName, setBiometricName] = useState('Biometric');
   const [isExporting, setIsExporting] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
 
   // Convert reminderTime string to Date object
@@ -141,6 +142,11 @@ export default function ProfileScreen() {
   };
 
   const handleDeleteData = () => {
+    if (moodEntries.length === 0 && journalEntries.length === 0) {
+      Alert.alert('No Data', 'You don\'t have any data to delete.');
+      return;
+    }
+
     Alert.alert(
       'Delete All Data',
       'This will permanently delete all your mood entries and journal entries. This action cannot be undone.',
@@ -158,9 +164,17 @@ export default function ProfileScreen() {
                 {
                   text: 'Delete Everything',
                   style: 'destructive',
-                  onPress: () => {
-                    // TODO: Implement full data deletion
-                    Alert.alert('Deleted', 'All data has been deleted.');
+                  onPress: async () => {
+                    setIsDeleting(true);
+                    try {
+                      await clearMoodEntries();
+                      await clearJournalEntries();
+                      Alert.alert('Deleted', 'All data has been deleted.');
+                    } catch (error) {
+                      Alert.alert('Error', 'Failed to delete data. Please try again.');
+                    } finally {
+                      setIsDeleting(false);
+                    }
                   },
                 },
               ]
@@ -299,8 +313,9 @@ export default function ProfileScreen() {
               fullWidth
               style={styles.dangerButton}
               onPress={handleDeleteData}
+              disabled={isDeleting}
             >
-              Delete All Data
+              {isDeleting ? 'Deleting...' : 'Delete All Data'}
             </Button>
           </View>
         </View>

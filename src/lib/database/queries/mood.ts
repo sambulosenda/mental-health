@@ -109,6 +109,11 @@ export async function deleteMoodEntry(id: string): Promise<void> {
   await db.delete(moodEntries).where(eq(moodEntries.id, id));
 }
 
+// Delete all mood entries
+export async function deleteAllMoodEntries(): Promise<void> {
+  await db.delete(moodEntries);
+}
+
 // Get mood entry by ID
 export async function getMoodEntryById(id: string): Promise<MoodEntry | null> {
   const rows = await db

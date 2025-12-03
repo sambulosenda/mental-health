@@ -125,6 +125,11 @@ export async function deleteJournalEntry(id: string): Promise<void> {
   await db.delete(journalEntries).where(eq(journalEntries.id, id));
 }
 
+// Delete all journal entries
+export async function deleteAllJournalEntries(): Promise<void> {
+  await db.delete(journalEntries);
+}
+
 // Get all prompts
 export async function getAllPrompts(): Promise<JournalPrompt[]> {
   const rows = await db.select().from(prompts);

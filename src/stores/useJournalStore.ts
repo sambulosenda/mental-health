@@ -7,6 +7,7 @@ import {
   getJournalEntryById,
   searchJournalEntries,
   deleteJournalEntry,
+  deleteAllJournalEntries,
   getAllPrompts,
   getRandomPrompt,
   markPromptUsed,
@@ -52,6 +53,7 @@ interface JournalState {
 
   // Prompts
   getRandomPrompt: (category?: string) => Promise<JournalPrompt | null>;
+  clearEntries: () => Promise<void>;
 }
 
 export const useJournalStore = create<JournalState>((set, get) => ({
@@ -235,5 +237,19 @@ export const useJournalStore = create<JournalState>((set, get) => ({
   // Get random prompt
   getRandomPrompt: async (category) => {
     return getRandomPrompt(category);
+  },
+
+  // Clear all entries
+  clearEntries: async () => {
+    set({ isLoading: true, error: null });
+    try {
+      await deleteAllJournalEntries();
+      set({ entries: [], searchResults: [], isLoading: false });
+    } catch (error) {
+      set({
+        error: error instanceof Error ? error.message : 'Failed to clear entries',
+        isLoading: false,
+      });
+    }
   },
 }));

@@ -7,6 +7,7 @@ import {
   getMoodEntriesForDate,
   getMoodEntriesForLastDays,
   deleteMoodEntry,
+  deleteAllMoodEntries,
 } from '@/src/lib/database';
 
 interface MoodState {
@@ -36,6 +37,7 @@ interface MoodState {
   // Helpers
   getEntriesForLastDays: (days: number) => Promise<MoodEntry[]>;
   getDailySummaries: (days: number) => Promise<DailyMoodSummary[]>;
+  clearEntries: () => Promise<void>;
 }
 
 export const useMoodStore = create<MoodState>((set, get) => ({
@@ -176,5 +178,19 @@ export const useMoodStore = create<MoodState>((set, get) => ({
 
     // Sort by date descending
     return summaries.sort((a, b) => b.date.localeCompare(a.date));
+  },
+
+  // Clear all entries
+  clearEntries: async () => {
+    set({ isLoading: true, error: null });
+    try {
+      await deleteAllMoodEntries();
+      set({ entries: [], todayEntries: [], isLoading: false });
+    } catch (error) {
+      set({
+        error: error instanceof Error ? error.message : 'Failed to clear entries',
+        isLoading: false,
+      });
+    }
   },
 }));
