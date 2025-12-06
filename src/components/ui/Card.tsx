@@ -1,4 +1,4 @@
-import { View, ViewProps, Pressable } from 'react-native';
+import { View, ViewProps, Pressable, StyleSheet } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -6,6 +6,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 import { useTheme } from '@/src/contexts/ThemeContext';
+import { colors, darkColors, shadows, spacing, borderRadius } from '@/src/constants/theme';
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
@@ -25,6 +26,7 @@ export function Card({
   ...props
 }: CardProps & { className?: string }) {
   const { isDark } = useTheme();
+  const themeColors = isDark ? darkColors : colors;
   const scale = useSharedValue(1);
 
   const animatedStyle = useAnimatedStyle(() => ({
@@ -44,28 +46,49 @@ export function Card({
     onPress?.();
   };
 
-  const paddingClass = {
-    sm: 'p-2',
-    md: 'p-4',
-    lg: 'p-6',
+  const paddingValue = {
+    sm: spacing.sm,
+    md: spacing.md,
+    lg: spacing.lg,
   }[padding];
 
-  const variantClass = {
-    elevated: isDark
-      ? 'bg-surface-dark shadow-md'
-      : 'bg-surface shadow-md',
-    outlined: isDark
-      ? 'bg-surface-dark border border-border-dark'
-      : 'bg-surface border border-border',
-    flat: isDark
-      ? 'bg-surface-dark-elevated'
-      : 'bg-surface-elevated',
-  }[variant];
+  const getVariantStyle = () => {
+    switch (variant) {
+      case 'elevated':
+        return {
+          backgroundColor: themeColors.surface,
+          borderWidth: 1,
+          borderColor: themeColors.border,
+          ...(isDark ? {} : shadows.md),
+        };
+      case 'outlined':
+        return {
+          backgroundColor: themeColors.surface,
+          borderWidth: 1,
+          borderColor: themeColors.border,
+        };
+      case 'flat':
+        return {
+          backgroundColor: themeColors.surfaceElevated,
+        };
+      default:
+        return {
+          backgroundColor: themeColors.surface,
+        };
+    }
+  };
 
   const content = (
     <View
-      className={`rounded-lg ${paddingClass} ${variantClass} ${className || ''}`}
-      style={style}
+      className={className}
+      style={[
+        {
+          borderRadius: borderRadius.md,
+          padding: paddingValue,
+        },
+        getVariantStyle(),
+        style,
+      ]}
       {...props}
     >
       {children}
