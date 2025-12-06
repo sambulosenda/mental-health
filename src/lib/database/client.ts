@@ -79,8 +79,14 @@ export async function initializeDatabase(): Promise<void> {
       role TEXT NOT NULL,
       content TEXT NOT NULL,
       timestamp INTEGER NOT NULL,
-      FOREIGN KEY (conversation_id) REFERENCES chat_conversations(id)
+      FOREIGN KEY (conversation_id) REFERENCES chat_conversations(id) ON DELETE CASCADE
     );
+  `);
+
+  // Index for efficient message queries by conversation
+  await expo.execAsync(`
+    CREATE INDEX IF NOT EXISTS idx_chat_messages_conversation
+    ON chat_messages(conversation_id, timestamp);
   `);
 
   // Seed default prompts if empty

@@ -45,7 +45,7 @@ export const chatConversations = sqliteTable('chat_conversations', {
   id: text('id').primaryKey(),
   type: text('type').notNull(), // 'chat' | 'checkin'
   title: text('title'),
-  linkedMoodId: text('linked_mood_id'),
+  linkedMoodId: text('linked_mood_id').references(() => moodEntries.id),
   startedAt: integer('started_at', { mode: 'timestamp' }).notNull(),
   endedAt: integer('ended_at', { mode: 'timestamp' }),
   metadata: text('metadata'), // JSON

@@ -15,10 +15,9 @@ import {
   getConversationMessages,
   getRecentConversations,
   deleteConversation,
-  linkConversationToMood,
   updateConversationMetadata,
+  createMoodAndLinkConversation,
 } from '@/src/lib/database';
-import { createMoodEntry } from '@/src/lib/database';
 import { inferMoodFromConversation } from '@/src/lib/ai/chatPrompts';
 
 interface ChatState {
@@ -199,15 +198,12 @@ export const useChatStore = create<ChatState>((set, get) => ({
       let moodId: string | null = null;
 
       if (logMood) {
-        // Create a mood entry from the check-in
-        const moodEntry = await createMoodEntry({
+        // Atomically create mood entry and link to conversation
+        const moodEntry = await createMoodAndLinkConversation(activeConversation.id, {
           mood: detectedMood,
           note: `Check-in conversation`,
         });
         moodId = moodEntry.id;
-
-        // Link conversation to mood entry
-        await linkConversationToMood(activeConversation.id, moodId);
       }
 
       // Update conversation metadata

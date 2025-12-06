@@ -3,11 +3,16 @@ import { db } from '../client';
 import {
   chatConversations,
   chatMessages,
+  moodEntries,
   type ChatConversationRow,
   type ChatMessageRow,
   type NewChatConversation,
   type NewChatMessage,
+  type NewMoodEntry,
+  type MoodEntryRow,
 } from '../schema';
+import type { MoodEntry } from '@/src/types/mood';
+import type { ActivityTagId } from '@/src/constants/theme';
 import type {
   ChatConversation,
   ChatMessage,
@@ -157,14 +162,62 @@ export async function getRecentConversations(
   return rows.map(toConversation);
 }
 
+// Helper to convert mood row to app type
+function toMoodEntry(row: MoodEntryRow): MoodEntry {
+  return {
+    id: row.id,
+    mood: row.mood as 1 | 2 | 3 | 4 | 5,
+    timestamp: row.timestamp,
+    activities: row.activities ? JSON.parse(row.activities) : [],
+    note: row.note ?? undefined,
+    createdAt: row.createdAt,
+  };
+}
+
+// Create mood entry and link to conversation atomically
+export async function createMoodAndLinkConversation(
+  conversationId: string,
+  moodData: {
+    mood: 1 | 2 | 3 | 4 | 5;
+    activities?: ActivityTagId[];
+    note?: string;
+  }
+): Promise<MoodEntry> {
+  const now = new Date();
+  const moodId = generateId();
+
+  const moodEntry: NewMoodEntry = {
+    id: moodId,
+    mood: moodData.mood,
+    timestamp: now,
+    activities: moodData.activities ? JSON.stringify(moodData.activities) : null,
+    note: moodData.note ?? null,
+    createdAt: now,
+  };
+
+  await db.transaction(async (tx) => {
+    await tx.insert(moodEntries).values(moodEntry);
+    await tx
+      .update(chatConversations)
+      .set({ linkedMoodId: moodId })
+      .where(eq(chatConversations.id, conversationId));
+  });
+
+  return toMoodEntry(moodEntry as MoodEntryRow);
+}
+
 // Delete a conversation and its messages
 export async function deleteConversation(id: string): Promise<void> {
-  await db.delete(chatMessages).where(eq(chatMessages.conversationId, id));
-  await db.delete(chatConversations).where(eq(chatConversations.id, id));
+  await db.transaction(async (tx) => {
+    await tx.delete(chatMessages).where(eq(chatMessages.conversationId, id));
+    await tx.delete(chatConversations).where(eq(chatConversations.id, id));
+  });
 }
 
 // Delete all conversations
 export async function deleteAllConversations(): Promise<void> {
-  await db.delete(chatMessages);
-  await db.delete(chatConversations);
+  await db.transaction(async (tx) => {
+    await tx.delete(chatMessages);
+    await tx.delete(chatConversations);
+  });
 }
