@@ -5,7 +5,12 @@
       "Bash(npx expo install expo-sqlite expo-notifications expo-local-authentication expo-file-system expo-sharing)",
       "Bash(cat:*)",
       "Bash(bun install:*)",
-      "WebFetch(domain:lottiefiles.com)"
+      "WebFetch(domain:lottiefiles.com)",
+      "Bash(npx tsc:*)",
+      "Bash(npx expo export:*)",
+      "Bash(git -C /Users/sambulosenda/Documents/zen-mobile-app add src/lib/database/client.ts src/lib/database/queries/chat.ts src/lib/database/schema.ts src/stores/useChatStore.ts)",
+      "Bash(git -C /Users/sambulosenda/Documents/zen-mobile-app add -A)",
+      "Bash(git -C /Users/sambulosenda/Documents/zen-mobile-app commit -m \"chore: Minor fixes and cleanup\")"
     ],
     "deny": [],
     "ask": []

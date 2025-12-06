@@ -25,9 +25,6 @@ const MOODS: Array<{ value: 1 | 2 | 3 | 4 | 5 }> = [
 ];
 
 export function MoodSelector({ selectedMood, onSelectMood }: MoodSelectorProps) {
-  const { isDark } = useTheme();
-  const themeColors = isDark ? darkColors : colors;
-
   return (
     <View className="items-center w-full">
       <View className="flex-row justify-between w-full" style={{ paddingHorizontal: spacing.xs }}>

@@ -127,7 +127,7 @@ export default function JournalScreen() {
         showThemeToggle
       />
 
-      <View className="flex-1" style={{ paddingTop: HEADER_EXPANDED_HEIGHT + insets.top }}>
+      <View className="flex-1" style={{ paddingTop: HEADER_EXPANDED_HEIGHT }}>
         <View className="px-6 mb-4">
           <Button fullWidth onPress={handleNewEntry}>
             New Entry

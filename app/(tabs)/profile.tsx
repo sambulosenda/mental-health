@@ -220,7 +220,7 @@ export default function ProfileScreen() {
         style={styles.scroll}
         contentContainerStyle={[
           styles.content,
-          { paddingTop: HEADER_EXPANDED_HEIGHT + insets.top },
+          { paddingTop: HEADER_EXPANDED_HEIGHT },
         ]}
         showsVerticalScrollIndicator={false}
         onScroll={scrollHandler}

@@ -79,7 +79,7 @@ export default function TrackScreen() {
           contentContainerStyle={{
             paddingHorizontal: spacing.lg,
             paddingBottom: spacing.xxl * 2,
-            paddingTop: HEADER_EXPANDED_HEIGHT + insets.top,
+            paddingTop: HEADER_EXPANDED_HEIGHT,
           }}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"

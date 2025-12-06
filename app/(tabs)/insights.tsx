@@ -103,7 +103,7 @@ export default function InsightsScreen() {
         contentContainerStyle={{
           paddingHorizontal: spacing.lg,
           paddingBottom: spacing.xxl,
-          paddingTop: HEADER_EXPANDED_HEIGHT + insets.top,
+          paddingTop: HEADER_EXPANDED_HEIGHT,
         }}
         showsVerticalScrollIndicator={false}
         onScroll={scrollHandler}
