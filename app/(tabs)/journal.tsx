@@ -1,14 +1,17 @@
 import { useEffect, useState, useCallback } from 'react';
 import { View, ScrollView, FlatList, RefreshControl, Share, Alert } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { Text, Card, Button, AnimatedListItem, SwipeableRow } from '@/src/components/ui';
+import Animated, { useSharedValue, useAnimatedScrollHandler } from 'react-native-reanimated';
+import { Text, Card, Button, AnimatedListItem, SwipeableRow, AnimatedHeader } from '@/src/components/ui';
 import { JournalCard, PromptCard, SearchBar } from '@/src/components/journal';
 import { useJournalStore } from '@/src/stores';
 import { colors, darkColors, spacing } from '@/src/constants/theme';
 import { useTheme } from '@/src/contexts/ThemeContext';
 import type { JournalEntry } from '@/src/types/journal';
+
+const HEADER_EXPANDED_HEIGHT = 120;
 
 type ViewMode = 'entries' | 'prompts';
 
@@ -16,6 +19,14 @@ export default function JournalScreen() {
   const router = useRouter();
   const { isDark } = useTheme();
   const themeColors = isDark ? darkColors : colors;
+  const insets = useSafeAreaInsets();
+
+  const scrollY = useSharedValue(0);
+  const scrollHandler = useAnimatedScrollHandler({
+    onScroll: (event) => {
+      scrollY.value = event.contentOffset.y;
+    },
+  });
   const {
     entries,
     prompts,
@@ -109,22 +120,21 @@ export default function JournalScreen() {
 
   return (
     <SafeAreaView className={`flex-1 ${isDark ? 'bg-background-dark' : 'bg-background'}`} edges={['top']}>
-      <View className="px-6 pt-6 pb-4">
-        <Text variant="h1" color="textPrimary">
-          Journal
-        </Text>
-        <Text variant="body" color="textSecondary" className="mt-1">
-          Capture your thoughts and reflections
-        </Text>
-      </View>
+      <AnimatedHeader
+        scrollY={scrollY}
+        title="Journal"
+        subtitle="Capture your thoughts and reflections"
+        showThemeToggle
+      />
 
-      <View className="px-6 mb-4">
-        <Button fullWidth onPress={handleNewEntry}>
-          New Entry
-        </Button>
-      </View>
+      <View className="flex-1" style={{ paddingTop: HEADER_EXPANDED_HEIGHT + insets.top }}>
+        <View className="px-6 mb-4">
+          <Button fullWidth onPress={handleNewEntry}>
+            New Entry
+          </Button>
+        </View>
 
-      <View className="flex-row px-6 gap-2 mb-4">
+        <View className="flex-row px-6 gap-2 mb-4">
         <Button
           variant={viewMode === 'entries' ? 'primary' : 'ghost'}
           size="sm"
@@ -222,7 +232,8 @@ export default function JournalScreen() {
             </View>
           ))}
         </ScrollView>
-      )}
+        )}
+      </View>
     </SafeAreaView>
   );
 }

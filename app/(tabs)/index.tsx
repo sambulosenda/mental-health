@@ -66,10 +66,10 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView className={`flex-1 ${isDark ? 'bg-background-dark' : 'bg-background'}`} edges={['top']}>
-      <AnimatedHeader scrollY={scrollY} title={greeting} subtitle={formattedDate} />
+      <AnimatedHeader scrollY={scrollY} title={greeting} subtitle={formattedDate} showThemeToggle />
       <Animated.ScrollView
         className="flex-1"
-        contentContainerStyle={{ paddingHorizontal: spacing.lg, paddingBottom: spacing.xxl, paddingTop: HEADER_EXPANDED_HEIGHT + insets.top }}
+        contentContainerStyle={{ paddingHorizontal: spacing.lg, paddingBottom: spacing.xxl, paddingTop: HEADER_EXPANDED_HEIGHT + insets.top - 8 }}
         showsVerticalScrollIndicator={false}
         onScroll={scrollHandler}
         scrollEventThrottle={16}
@@ -108,6 +108,53 @@ export default function HomeScreen() {
             />
           </Card>
         )}
+
+        {/* AI Chat Cards */}
+        <View className="mb-6">
+          <Text variant="h3" color="textPrimary" className="mb-4">
+            Talk with Zen
+          </Text>
+          <View className="gap-3">
+            <Card onPress={() => router.push('/chat?type=checkin')}>
+              <View className="flex-row items-center">
+                <View
+                  className="w-10 h-10 rounded-full items-center justify-center mr-3"
+                  style={{ backgroundColor: themeColors.primaryLight }}
+                >
+                  <Ionicons name="chatbubble-ellipses-outline" size={20} color={themeColors.primary} />
+                </View>
+                <View className="flex-1">
+                  <Text variant="bodyMedium" color="textPrimary">
+                    Quick Check-in
+                  </Text>
+                  <Text variant="caption" color="textSecondary">
+                    Let Zen help you process how you're feeling
+                  </Text>
+                </View>
+                <Ionicons name="chevron-forward" size={20} color={themeColors.textMuted} />
+              </View>
+            </Card>
+            <Card onPress={() => router.push('/chat?type=chat')}>
+              <View className="flex-row items-center">
+                <View
+                  className="w-10 h-10 rounded-full items-center justify-center mr-3"
+                  style={{ backgroundColor: themeColors.primaryLight }}
+                >
+                  <Ionicons name="chatbubbles-outline" size={20} color={themeColors.primary} />
+                </View>
+                <View className="flex-1">
+                  <Text variant="bodyMedium" color="textPrimary">
+                    Talk to Zen
+                  </Text>
+                  <Text variant="caption" color="textSecondary">
+                    Have a supportive conversation
+                  </Text>
+                </View>
+                <Ionicons name="chevron-forward" size={20} color={themeColors.textMuted} />
+              </View>
+            </Card>
+          </View>
+        </View>
 
         {(weeklyAverage !== null || uniqueDaysTracked > 0) && (
           <View className="mb-6">

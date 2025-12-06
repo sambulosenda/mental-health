@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
-import { View, StyleSheet, ScrollView, Alert, Pressable } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { View, StyleSheet, Alert, Pressable } from 'react-native';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { Host, Switch } from '@expo/ui/swift-ui';
-import { Text, Card, Button, NativeTimePicker } from '@/src/components/ui';
+import Animated, { useSharedValue, useAnimatedScrollHandler } from 'react-native-reanimated';
+import { Text, Card, Button, NativeTimePicker, ThemeToggleButton, AnimatedHeader } from '@/src/components/ui';
 import { useSettingsStore, useMoodStore, useJournalStore } from '@/src/stores';
 import {
   scheduleDailyReminder,
@@ -20,6 +21,8 @@ import { exportMoodToCSV, exportAllData } from '@/src/lib/export';
 import { colors, darkColors, spacing } from '@/src/constants/theme';
 import { useTheme } from '@/src/contexts/ThemeContext';
 
+const HEADER_EXPANDED_HEIGHT = 120;
+
 export default function ProfileScreen() {
   const {
     reminderEnabled,
@@ -33,8 +36,16 @@ export default function ProfileScreen() {
   const { entries: moodEntries, loadEntries: loadMoodEntries, clearEntries: clearMoodEntries } = useMoodStore();
   const { entries: journalEntries, loadEntries: loadJournalEntries, clearEntries: clearJournalEntries } = useJournalStore();
   const { mode, setMode, isDark } = useTheme();
+  const insets = useSafeAreaInsets();
 
   const themeColors = isDark ? darkColors : colors;
+
+  const scrollY = useSharedValue(0);
+  const scrollHandler = useAnimatedScrollHandler({
+    onScroll: (event) => {
+      scrollY.value = event.contentOffset.y;
+    },
+  });
 
   const [biometricAvailable, setBiometricAvailable] = useState(false);
   const [biometricName, setBiometricName] = useState('Biometric');
@@ -199,20 +210,22 @@ export default function ProfileScreen() {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: themeColors.background }]} edges={['top']}>
-        <ScrollView
+      <AnimatedHeader
+        scrollY={scrollY}
+        title="Profile"
+        subtitle="Settings and privacy"
+        showThemeToggle
+      />
+      <Animated.ScrollView
         style={styles.scroll}
-        contentContainerStyle={styles.content}
+        contentContainerStyle={[
+          styles.content,
+          { paddingTop: HEADER_EXPANDED_HEIGHT + insets.top },
+        ]}
         showsVerticalScrollIndicator={false}
+        onScroll={scrollHandler}
+        scrollEventThrottle={16}
       >
-        <View style={styles.header}>
-          <Text variant="h1" color="textPrimary">
-            Profile
-          </Text>
-          <Text variant="body" color="textSecondary" style={styles.subtitle}>
-            Settings and privacy
-          </Text>
-        </View>
-
         <View style={styles.section}>
           <Text variant="h3" color="textPrimary" style={styles.sectionTitle}>
             Notifications
@@ -257,40 +270,16 @@ export default function ProfileScreen() {
             Appearance
           </Text>
           <Card variant="outlined">
-            <View style={styles.settingText}>
-              <Text variant="bodyMedium" color="textPrimary">
-                Theme
-              </Text>
-              <Text variant="caption" color="textSecondary">
-                {mode === 'system' ? 'Using device setting' : mode === 'dark' ? 'Dark mode' : 'Light mode'}
-              </Text>
-            </View>
-            <View style={[styles.themeOptions, { marginTop: spacing.md }]}>
-              {(['system', 'light', 'dark'] as const).map((option) => (
-                <Pressable
-                  key={option}
-                  style={[
-                    styles.themeOption,
-                    {
-                      backgroundColor: mode === option ? themeColors.primary : themeColors.surfaceElevated,
-                      borderColor: mode === option ? themeColors.primary : themeColors.border,
-                    }
-                  ]}
-                  onPress={() => setMode(option)}
-                >
-                  <Ionicons
-                    name={option === 'system' ? 'phone-portrait' : option === 'light' ? 'sunny' : 'moon'}
-                    size={16}
-                    color={mode === option ? '#fff' : themeColors.textSecondary}
-                  />
-                  <Text
-                    variant="caption"
-                    style={{ color: mode === option ? '#fff' : themeColors.textPrimary, marginLeft: 6 }}
-                  >
-                    {option === 'system' ? 'Auto' : option.charAt(0).toUpperCase() + option.slice(1)}
-                  </Text>
-                </Pressable>
-              ))}
+            <View style={styles.settingRow}>
+              <View style={styles.settingText}>
+                <Text variant="bodyMedium" color="textPrimary">
+                  Theme
+                </Text>
+                <Text variant="caption" color="textSecondary">
+                  {mode === 'system' ? 'Using device setting' : mode === 'dark' ? 'Dark mode' : 'Light mode'}
+                </Text>
+              </View>
+              <ThemeToggleButton size="medium" />
             </View>
           </Card>
         </View>
@@ -383,7 +372,7 @@ export default function ProfileScreen() {
             </Text>
           </Card>
         </View>
-      </ScrollView>
+      </Animated.ScrollView>
 
       <NativeTimePicker
         value={getTimeAsDate()}
@@ -404,14 +393,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   content: {
-    padding: spacing.lg,
+    paddingHorizontal: spacing.lg,
     paddingBottom: spacing.xxl,
-  },
-  header: {
-    marginBottom: spacing.xl,
-  },
-  subtitle: {
-    marginTop: spacing.xs,
   },
   section: {
     marginBottom: spacing.xl,
@@ -427,20 +410,6 @@ const styles = StyleSheet.create({
   settingText: {
     flex: 1,
     marginRight: spacing.md,
-  },
-  themeOptions: {
-    flexDirection: 'row',
-    gap: spacing.sm,
-  },
-  themeOption: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: spacing.sm,
-    paddingHorizontal: spacing.sm,
-    borderRadius: 8,
-    borderWidth: 1,
   },
   timeRow: {
     flexDirection: 'row',

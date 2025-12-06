@@ -1,8 +1,9 @@
 import { useEffect, useState, useCallback } from 'react';
-import { View, ScrollView, RefreshControl, ActivityIndicator } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { View, RefreshControl, ActivityIndicator } from 'react-native';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { Text, Card, Button, NativePicker } from '@/src/components/ui';
+import Animated, { useSharedValue, useAnimatedScrollHandler } from 'react-native-reanimated';
+import { Text, Card, Button, NativePicker, AnimatedHeader } from '@/src/components/ui';
 import { MoodTrendChart, MoodCalendar, InsightList } from '@/src/components/insights';
 import type { Insight } from '@/src/components/insights';
 import { useMoodStore, useJournalStore } from '@/src/stores';
@@ -12,13 +13,23 @@ import { colors, darkColors, spacing } from '@/src/constants/theme';
 import { useTheme } from '@/src/contexts/ThemeContext';
 import type { DailyMoodSummary } from '@/src/types/mood';
 
+const HEADER_EXPANDED_HEIGHT = 120;
+
 const TIME_RANGES = ['Week', 'Month', 'Year'] as const;
 const DAYS_MAP = { Week: 7, Month: 30, Year: 365 } as const;
 
 export default function InsightsScreen() {
   const { isDark } = useTheme();
   const themeColors = isDark ? darkColors : colors;
+  const insets = useSafeAreaInsets();
   const { entries, loadEntries, getDailySummaries } = useMoodStore();
+
+  const scrollY = useSharedValue(0);
+  const scrollHandler = useAnimatedScrollHandler({
+    onScroll: (event) => {
+      scrollY.value = event.contentOffset.y;
+    },
+  });
   const { entries: journalEntries, loadEntries: loadJournalEntries } = useJournalStore();
   const [summaries, setSummaries] = useState<DailyMoodSummary[]>([]);
   const [insights, setInsights] = useState<Insight[]>([]);
@@ -81,10 +92,22 @@ export default function InsightsScreen() {
 
   return (
     <SafeAreaView className={`flex-1 ${isDark ? 'bg-background-dark' : 'bg-background'}`} edges={['top']}>
-      <ScrollView
+      <AnimatedHeader
+        scrollY={scrollY}
+        title="Insights"
+        subtitle="Discover patterns in your emotional journey"
+        showThemeToggle
+      />
+      <Animated.ScrollView
         className="flex-1"
-        contentContainerStyle={{ padding: spacing.lg, paddingBottom: spacing.xxl }}
+        contentContainerStyle={{
+          paddingHorizontal: spacing.lg,
+          paddingBottom: spacing.xxl,
+          paddingTop: HEADER_EXPANDED_HEIGHT + insets.top,
+        }}
         showsVerticalScrollIndicator={false}
+        onScroll={scrollHandler}
+        scrollEventThrottle={16}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -93,15 +116,6 @@ export default function InsightsScreen() {
           />
         }
       >
-        <View className="mb-8">
-          <Text variant="h1" color="textPrimary">
-            Insights
-          </Text>
-          <Text variant="body" color="textSecondary" className="mt-1">
-            Discover patterns in your emotional journey
-          </Text>
-        </View>
-
         <View className="mb-6">
           <NativePicker
             options={[...TIME_RANGES]}
@@ -191,7 +205,7 @@ export default function InsightsScreen() {
             </Card>
           )}
         </View>
-      </ScrollView>
+      </Animated.ScrollView>
     </SafeAreaView>
   );
 }

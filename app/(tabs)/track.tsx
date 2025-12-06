@@ -68,6 +68,7 @@ export default function TrackScreen() {
         scrollY={scrollY}
         title="Track Mood"
         subtitle="How are you feeling right now?"
+        showThemeToggle
       />
       <KeyboardAvoidingView
         className="flex-1"
