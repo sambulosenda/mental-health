@@ -1,18 +1,21 @@
 import { useEffect, useState, useCallback } from 'react';
-import { View, StyleSheet, ScrollView, FlatList, RefreshControl, Share, Alert } from 'react-native';
+import { View, ScrollView, FlatList, RefreshControl, Share, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Text, Card, Button, AnimatedListItem, SwipeableRow } from '@/src/components/ui';
 import { JournalCard, PromptCard, SearchBar } from '@/src/components/journal';
 import { useJournalStore } from '@/src/stores';
-import { colors, spacing } from '@/src/constants/theme';
+import { colors, darkColors, spacing } from '@/src/constants/theme';
+import { useTheme } from '@/src/contexts/ThemeContext';
 import type { JournalEntry } from '@/src/types/journal';
 
 type ViewMode = 'entries' | 'prompts';
 
 export default function JournalScreen() {
   const router = useRouter();
+  const { isDark } = useTheme();
+  const themeColors = isDark ? darkColors : colors;
   const {
     entries,
     prompts,
@@ -96,7 +99,6 @@ export default function JournalScreen() {
 
   const displayedEntries = searchQuery ? searchResults : entries;
 
-  // Group prompts by category
   const promptsByCategory = prompts.reduce((acc, prompt) => {
     if (!acc[prompt.category]) {
       acc[prompt.category] = [];
@@ -106,28 +108,28 @@ export default function JournalScreen() {
   }, {} as Record<string, typeof prompts>);
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
-        <View style={styles.header}>
+    <SafeAreaView className={`flex-1 ${isDark ? 'bg-background-dark' : 'bg-background'}`} edges={['top']}>
+      <View className="px-6 pt-6 pb-4">
         <Text variant="h1" color="textPrimary">
           Journal
         </Text>
-        <Text variant="body" color="textSecondary" style={styles.subtitle}>
+        <Text variant="body" color="textSecondary" className="mt-1">
           Capture your thoughts and reflections
         </Text>
       </View>
 
-      <View style={styles.actions}>
+      <View className="px-6 mb-4">
         <Button fullWidth onPress={handleNewEntry}>
           New Entry
         </Button>
       </View>
 
-      <View style={styles.tabs}>
+      <View className="flex-row px-6 gap-2 mb-4">
         <Button
           variant={viewMode === 'entries' ? 'primary' : 'ghost'}
           size="sm"
           onPress={() => setViewMode('entries')}
-          style={styles.tab}
+          className="flex-1"
         >
           Entries
         </Button>
@@ -135,15 +137,15 @@ export default function JournalScreen() {
           variant={viewMode === 'prompts' ? 'primary' : 'ghost'}
           size="sm"
           onPress={() => setViewMode('prompts')}
-          style={styles.tab}
+          className="flex-1"
         >
           Prompts
         </Button>
       </View>
 
       {viewMode === 'entries' ? (
-        <View style={styles.entriesContainer}>
-          <View style={styles.searchContainer}>
+        <View className="flex-1">
+          <View className="px-6 mb-4">
             <SearchBar
               value={searchQuery}
               onChangeText={setSearchQuery}
@@ -168,26 +170,26 @@ export default function JournalScreen() {
                   </SwipeableRow>
                 </AnimatedListItem>
               )}
-              contentContainerStyle={styles.listContent}
+              contentContainerStyle={{ paddingHorizontal: spacing.lg, paddingBottom: spacing.xxl }}
               showsVerticalScrollIndicator={false}
               refreshControl={
                 <RefreshControl
                   refreshing={refreshing}
                   onRefresh={onRefresh}
-                  tintColor={colors.primary}
-                  colors={[colors.primary]}
-                  progressBackgroundColor={colors.surface}
+                  tintColor={themeColors.primary}
+                  colors={[themeColors.primary]}
+                  progressBackgroundColor={themeColors.surface}
                 />
               }
             />
           ) : (
-            <View style={styles.emptyState}>
+            <View className="flex-1 justify-center items-center p-8">
               <Ionicons
                 name="book-outline"
                 size={64}
-                color={colors.textMuted}
+                color={themeColors.textMuted}
               />
-              <Text variant="body" color="textMuted" center style={styles.emptyText}>
+              <Text variant="body" color="textMuted" center className="mt-4">
                 {searchQuery
                   ? 'No entries match your search'
                   : 'No journal entries yet.\nTap "New Entry" to start writing.'}
@@ -197,18 +199,18 @@ export default function JournalScreen() {
         </View>
       ) : (
         <ScrollView
-          style={styles.promptsContainer}
-          contentContainerStyle={styles.promptsContent}
+          className="flex-1"
+          contentContainerStyle={{ paddingHorizontal: spacing.lg, paddingBottom: spacing.xxl }}
           showsVerticalScrollIndicator={false}
         >
-          <Text variant="body" color="textSecondary" style={styles.promptsIntro}>
+          <Text variant="body" color="textSecondary" className="mb-6">
             Choose a prompt to inspire your writing
           </Text>
 
-          {Object.entries(promptsByCategory).map(([ category, categoryPrompts]) => (
-            <View key={category} style={styles.categorySection}>
-              <Text variant="h3" color="textPrimary" style={styles.categoryTitle}>
-                {category.charAt(0).toUpperCase() + category.slice(1)}
+          {Object.entries(promptsByCategory).map(([category, categoryPrompts]) => (
+            <View key={category} className="mb-8">
+              <Text variant="h3" color="textPrimary" className="mb-4 capitalize">
+                {category}
               </Text>
               {categoryPrompts.map((prompt) => (
                 <PromptCard
@@ -224,68 +226,3 @@ export default function JournalScreen() {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  header: {
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.lg,
-    paddingBottom: spacing.md,
-  },
-  subtitle: {
-    marginTop: spacing.xs,
-  },
-  actions: {
-    paddingHorizontal: spacing.lg,
-    marginBottom: spacing.md,
-  },
-  tabs: {
-    flexDirection: 'row',
-    paddingHorizontal: spacing.lg,
-    gap: spacing.sm,
-    marginBottom: spacing.md,
-  },
-  tab: {
-    flex: 1,
-  },
-  entriesContainer: {
-    flex: 1,
-  },
-  searchContainer: {
-    paddingHorizontal: spacing.lg,
-    marginBottom: spacing.md,
-  },
-  listContent: {
-    paddingHorizontal: spacing.lg,
-    paddingBottom: spacing.xxl,
-  },
-  emptyState: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: spacing.xl,
-  },
-  emptyText: {
-    marginTop: spacing.md,
-  },
-  promptsContainer: {
-    flex: 1,
-  },
-  promptsContent: {
-    paddingHorizontal: spacing.lg,
-    paddingBottom: spacing.xxl,
-  },
-  promptsIntro: {
-    marginBottom: spacing.lg,
-  },
-  categorySection: {
-    marginBottom: spacing.xl,
-  },
-  categoryTitle: {
-    marginBottom: spacing.md,
-    textTransform: 'capitalize',
-  },
-});

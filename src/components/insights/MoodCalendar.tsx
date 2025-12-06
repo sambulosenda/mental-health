@@ -1,7 +1,8 @@
 import { useMemo, useState } from 'react';
-import { View, StyleSheet, Pressable } from 'react-native';
+import { View, Pressable } from 'react-native';
 import { Text, Card } from '@/src/components/ui';
-import { colors, spacing, moodLabels } from '@/src/constants/theme';
+import { colors, darkColors, spacing, moodLabels } from '@/src/constants/theme';
+import { useTheme } from '@/src/contexts/ThemeContext';
 import type { DailyMoodSummary } from '@/src/types/mood';
 import {
   format,
@@ -24,9 +25,9 @@ interface MoodCalendarProps {
 const WEEKDAYS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 
 function getMoodColor(avgMood: number | null): string {
-  if (avgMood === null) return colors.surfaceElevated;
+  if (avgMood === null) return 'transparent';
   const rounded = Math.round(avgMood);
-  return colors.mood[rounded] ?? colors.surfaceElevated;
+  return colors.mood[rounded] ?? 'transparent';
 }
 
 function getMoodOpacity(avgMood: number | null): number {
@@ -35,6 +36,8 @@ function getMoodOpacity(avgMood: number | null): number {
 }
 
 export function MoodCalendar({ summaries, isLoading }: MoodCalendarProps) {
+  const { isDark } = useTheme();
+  const themeColors = isDark ? darkColors : colors;
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDay, setSelectedDay] = useState<string | null>(null);
 
@@ -43,7 +46,6 @@ export function MoodCalendar({ summaries, isLoading }: MoodCalendarProps) {
     const monthEnd = endOfMonth(currentMonth);
     const days = eachDayOfInterval({ start: monthStart, end: monthEnd });
 
-    // Create a map for quick lookup
     const summaryMap = new Map(summaries.map((s) => [s.date, s]));
 
     return days.map((date) => {
@@ -60,7 +62,6 @@ export function MoodCalendar({ summaries, isLoading }: MoodCalendarProps) {
     });
   }, [currentMonth, summaries]);
 
-  // Calculate start padding (empty cells before first day)
   const startPadding = getDay(startOfMonth(currentMonth));
 
   const selectedDayData = selectedDay
@@ -84,39 +85,39 @@ export function MoodCalendar({ summaries, isLoading }: MoodCalendarProps) {
   }, [calendarData]);
 
   return (
-    <Card style={styles.container}>
-      <View style={styles.header}>
+    <Card className="p-4">
+      <View className="flex-row justify-between items-center mb-4">
         <Pressable
           onPress={() => setCurrentMonth(subMonths(currentMonth, 1))}
-          style={styles.navButton}
+          className="p-1"
         >
-          <Ionicons name="chevron-back" size={24} color={colors.textSecondary} />
+          <Ionicons name="chevron-back" size={24} color={themeColors.textSecondary} />
         </Pressable>
         <Text variant="h3" color="textPrimary">
           {format(currentMonth, 'MMMM yyyy')}
         </Text>
         <Pressable
           onPress={() => setCurrentMonth(addMonths(currentMonth, 1))}
-          style={styles.navButton}
+          className="p-1"
           disabled={isSameMonth(currentMonth, new Date())}
         >
           <Ionicons
             name="chevron-forward"
             size={24}
-            color={isSameMonth(currentMonth, new Date()) ? colors.border : colors.textSecondary}
+            color={isSameMonth(currentMonth, new Date()) ? themeColors.border : themeColors.textSecondary}
           />
         </Pressable>
       </View>
 
       {isLoading ? (
-        <View style={styles.loadingContainer}>
+        <View className="h-[280px] justify-center items-center">
           <Text variant="body" color="textMuted">Loading...</Text>
         </View>
       ) : (
         <>
-          <View style={styles.weekdayRow}>
+          <View className="flex-row mb-1">
             {WEEKDAYS.map((day, i) => (
-              <View key={i} style={styles.weekdayCell}>
+              <View key={i} className="flex-1 items-center py-1">
                 <Text variant="label" color="textMuted">
                   {day}
                 </Text>
@@ -124,31 +125,32 @@ export function MoodCalendar({ summaries, isLoading }: MoodCalendarProps) {
             ))}
           </View>
 
-          <View style={styles.grid}>
-            {/* Empty padding cells */}
+          <View className="flex-row flex-wrap">
             {Array.from({ length: startPadding }).map((_, i) => (
-              <View key={`pad-${i}`} style={styles.dayCell} />
+              <View key={`pad-${i}`} style={{ width: '14.28%', aspectRatio: 1 }} />
             ))}
 
-            {/* Day cells */}
             {calendarData.map((day) => (
               <Pressable
                 key={day.dateStr}
-                style={[
-                  styles.dayCell,
-                  {
-                    backgroundColor: getMoodColor(day.avgMood),
-                    opacity: getMoodOpacity(day.avgMood),
-                  },
-                  day.isToday && styles.todayCell,
-                  selectedDay === day.dateStr && styles.selectedCell,
-                ]}
+                style={{
+                  width: '14.28%',
+                  aspectRatio: 1,
+                  backgroundColor: day.avgMood !== null ? getMoodColor(day.avgMood) : themeColors.surfaceElevated,
+                  opacity: getMoodOpacity(day.avgMood),
+                  borderRadius: 8,
+                  marginBottom: 2,
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  borderWidth: day.isToday || selectedDay === day.dateStr ? 2 : 0,
+                  borderColor: day.isToday ? themeColors.primary : themeColors.primaryDark,
+                }}
                 onPress={() => setSelectedDay(day.dateStr === selectedDay ? null : day.dateStr)}
               >
                 <Text
                   variant="caption"
                   color={day.avgMood !== null ? 'textPrimary' : 'textMuted'}
-                  style={day.isToday && styles.todayText}
+                  style={day.isToday ? { fontWeight: '700' } : undefined}
                 >
                   {day.dayOfMonth}
                 </Text>
@@ -157,7 +159,10 @@ export function MoodCalendar({ summaries, isLoading }: MoodCalendarProps) {
           </View>
 
           {selectedDayData && selectedDayData.avgMood !== null && (
-            <View style={styles.selectedInfo}>
+            <View
+              className="mt-4 p-2 rounded-lg items-center gap-1"
+              style={{ backgroundColor: themeColors.surfaceElevated }}
+            >
               <Text variant="captionMedium" color="primary">
                 {format(selectedDayData.date, 'EEEE, MMM d')}
               </Text>
@@ -170,24 +175,28 @@ export function MoodCalendar({ summaries, isLoading }: MoodCalendarProps) {
             </View>
           )}
 
-          <View style={styles.legend}>
-            <Text variant="label" color="textMuted" style={styles.legendLabel}>
+          <View
+            className="flex-row items-center justify-center gap-1 mt-4 pt-4 border-t"
+            style={{ borderTopColor: themeColors.border }}
+          >
+            <Text variant="label" color="textMuted" className="mx-1">
               Less
             </Text>
             {[1, 2, 3, 4, 5].map((mood) => (
               <View
                 key={mood}
-                style={[styles.legendItem, { backgroundColor: colors.mood[mood] }]}
+                className="w-4 h-4 rounded"
+                style={{ backgroundColor: colors.mood[mood] }}
               />
             ))}
-            <Text variant="label" color="textMuted" style={styles.legendLabel}>
+            <Text variant="label" color="textMuted" className="mx-1">
               Better
             </Text>
           </View>
 
           {monthStats && (
-            <View style={styles.monthStats}>
-              <View style={styles.statItem}>
+            <View className="flex-row justify-around mt-4">
+              <View className="items-center">
                 <Text variant="bodyMedium" color="primary">
                   {monthStats.avg.toFixed(1)}
                 </Text>
@@ -195,7 +204,7 @@ export function MoodCalendar({ summaries, isLoading }: MoodCalendarProps) {
                   Avg
                 </Text>
               </View>
-              <View style={styles.statItem}>
+              <View className="items-center">
                 <Text variant="bodyMedium" color="primary">
                   {monthStats.daysTracked}
                 </Text>
@@ -210,89 +219,3 @@ export function MoodCalendar({ summaries, isLoading }: MoodCalendarProps) {
     </Card>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    padding: spacing.md,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: spacing.md,
-  },
-  navButton: {
-    padding: spacing.xs,
-  },
-  loadingContainer: {
-    height: 280,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  weekdayRow: {
-    flexDirection: 'row',
-    marginBottom: spacing.xs,
-  },
-  weekdayCell: {
-    flex: 1,
-    alignItems: 'center',
-    paddingVertical: spacing.xs,
-  },
-  grid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-  },
-  dayCell: {
-    width: '14.28%',
-    aspectRatio: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderRadius: 8,
-    marginBottom: 2,
-  },
-  todayCell: {
-    borderWidth: 2,
-    borderColor: colors.primary,
-  },
-  todayText: {
-    fontWeight: '700',
-  },
-  selectedCell: {
-    borderWidth: 2,
-    borderColor: colors.primaryDark,
-  },
-  selectedInfo: {
-    marginTop: spacing.md,
-    padding: spacing.sm,
-    backgroundColor: colors.surfaceElevated,
-    borderRadius: 8,
-    alignItems: 'center',
-    gap: spacing.xs,
-  },
-  legend: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: spacing.xs,
-    marginTop: spacing.md,
-    paddingTop: spacing.md,
-    borderTopWidth: 1,
-    borderTopColor: colors.border,
-  },
-  legendLabel: {
-    marginHorizontal: spacing.xs,
-  },
-  legendItem: {
-    width: 16,
-    height: 16,
-    borderRadius: 4,
-  },
-  monthStats: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginTop: spacing.md,
-  },
-  statItem: {
-    alignItems: 'center',
-  },
-});

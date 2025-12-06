@@ -1,7 +1,6 @@
 import { useState, useRef } from 'react';
 import {
   View,
-  StyleSheet,
   Dimensions,
   FlatList,
   type ViewToken,
@@ -10,15 +9,11 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import Animated, {
-  useAnimatedStyle,
-  withSpring,
-  interpolate,
-  useSharedValue,
-} from 'react-native-reanimated';
+import { useSharedValue } from 'react-native-reanimated';
 import { Text, Button } from '@/src/components/ui';
 import { useSettingsStore } from '@/src/stores';
-import { colors, spacing } from '@/src/constants/theme';
+import { colors, darkColors, spacing } from '@/src/constants/theme';
+import { useTheme } from '@/src/contexts/ThemeContext';
 
 const { width } = Dimensions.get('window');
 
@@ -63,6 +58,8 @@ const slides: OnboardingSlide[] = [
 
 export default function OnboardingScreen() {
   const router = useRouter();
+  const { isDark } = useTheme();
+  const themeColors = isDark ? darkColors : colors;
   const { setOnboardingComplete } = useSettingsStore();
   const [currentIndex, setCurrentIndex] = useState(0);
   const flatListRef = useRef<FlatList>(null);
@@ -95,15 +92,21 @@ export default function OnboardingScreen() {
     router.replace('/(tabs)');
   };
 
-  const renderSlide = ({ item, index }: { item: OnboardingSlide; index: number }) => (
-    <View style={styles.slide}>
-      <View style={[styles.iconContainer, { backgroundColor: item.color }]}>
-        <Ionicons name={item.icon} size={64} color={colors.textPrimary} />
+  const renderSlide = ({ item }: { item: OnboardingSlide }) => (
+    <View
+      style={{ width }}
+      className="flex-1 justify-center items-center px-8"
+    >
+      <View
+        className="w-[140px] h-[140px] rounded-full justify-center items-center mb-8"
+        style={{ backgroundColor: item.color }}
+      >
+        <Ionicons name={item.icon} size={64} color={themeColors.textPrimary} />
       </View>
-      <Text variant="h1" color="textPrimary" center style={styles.title}>
+      <Text variant="h1" color="textPrimary" center className="mb-4">
         {item.title}
       </Text>
-      <Text variant="body" color="textSecondary" center style={styles.description}>
+      <Text variant="body" color="textSecondary" center style={{ maxWidth: 280 }}>
         {item.description}
       </Text>
     </View>
@@ -112,10 +115,13 @@ export default function OnboardingScreen() {
   const isLastSlide = currentIndex === slides.length - 1;
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
+    <SafeAreaView
+      className="flex-1"
+      style={{ backgroundColor: themeColors.background }}
+    >
+      <View className="h-[50px] flex-row justify-end px-6">
         {!isLastSlide && (
-          <Pressable onPress={handleSkip} style={styles.skipButton}>
+          <Pressable onPress={handleSkip} className="p-2">
             <Text variant="captionMedium" color="textSecondary">
               Skip
             </Text>
@@ -139,15 +145,16 @@ export default function OnboardingScreen() {
         scrollEventThrottle={16}
       />
 
-      <View style={styles.footer}>
-        <View style={styles.pagination}>
+      <View className="px-8 pb-8">
+        <View className="flex-row justify-center items-center mb-8 gap-2">
           {slides.map((_, index) => (
             <View
               key={index}
-              style={[
-                styles.dot,
-                index === currentIndex && styles.dotActive,
-              ]}
+              className="h-2 rounded-full"
+              style={{
+                width: index === currentIndex ? 24 : 8,
+                backgroundColor: index === currentIndex ? themeColors.primary : themeColors.border,
+              }}
             />
           ))}
         </View>
@@ -159,61 +166,3 @@ export default function OnboardingScreen() {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  header: {
-    height: 50,
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    paddingHorizontal: spacing.lg,
-  },
-  skipButton: {
-    padding: spacing.sm,
-  },
-  slide: {
-    width,
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: spacing.xl,
-  },
-  iconContainer: {
-    width: 140,
-    height: 140,
-    borderRadius: 70,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: spacing.xl,
-  },
-  title: {
-    marginBottom: spacing.md,
-  },
-  description: {
-    maxWidth: 280,
-  },
-  footer: {
-    paddingHorizontal: spacing.xl,
-    paddingBottom: spacing.xl,
-  },
-  pagination: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: spacing.xl,
-    gap: spacing.sm,
-  },
-  dot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: colors.border,
-  },
-  dotActive: {
-    width: 24,
-    backgroundColor: colors.primary,
-  },
-});

@@ -1,3 +1,4 @@
+import '../global.css';
 import { useEffect, useState } from 'react';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import { Stack, useRouter, useSegments } from 'expo-router';
@@ -7,13 +8,17 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { initializeDatabase } from '@/src/lib/database';
 import { useSettingsStore } from '@/src/stores';
 import { BiometricLock } from '@/src/components/BiometricLock';
-import { colors } from '@/src/constants/theme';
+import { colors, darkColors } from '@/src/constants/theme';
+import { ThemeProvider, useTheme } from '@/src/contexts/ThemeContext';
 
-export default function RootLayout() {
+function RootLayoutContent() {
   const [isReady, setIsReady] = useState(false);
   const { hasCompletedOnboarding } = useSettingsStore();
   const router = useRouter();
   const segments = useSegments();
+  const { isDark } = useTheme();
+
+  const themeColors = isDark ? darkColors : colors;
 
   useEffect(() => {
     async function prepare() {
@@ -42,8 +47,8 @@ export default function RootLayout() {
 
   if (!isReady) {
     return (
-      <View style={styles.loading}>
-        <ActivityIndicator size="large" color={colors.primary} />
+      <View style={[styles.loading, { backgroundColor: themeColors.background }]}>
+        <ActivityIndicator size="large" color={themeColors.primary} />
       </View>
     );
   }
@@ -52,11 +57,11 @@ export default function RootLayout() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
         <BiometricLock>
-          <StatusBar style="dark" />
+          <StatusBar style={isDark ? 'light' : 'dark'} />
           <Stack
             screenOptions={{
               headerShown: false,
-              contentStyle: { backgroundColor: colors.background },
+              contentStyle: { backgroundColor: themeColors.background },
               animation: 'slide_from_right',
               animationDuration: 250,
               gestureEnabled: true,
@@ -82,11 +87,18 @@ export default function RootLayout() {
   );
 }
 
+export default function RootLayout() {
+  return (
+    <ThemeProvider>
+      <RootLayoutContent />
+    </ThemeProvider>
+  );
+}
+
 const styles = StyleSheet.create({
   loading: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: colors.background,
   },
 });

@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import Animated, {
@@ -10,7 +10,8 @@ import Animated, {
   withTiming,
   cancelAnimation,
 } from 'react-native-reanimated';
-import { colors, spacing, borderRadius } from '@/src/constants/theme';
+import { colors, darkColors } from '@/src/constants/theme';
+import { useTheme } from '@/src/contexts/ThemeContext';
 import { useVoiceRecognition } from '@/src/hooks/useVoiceRecognition';
 import { Text } from '@/src/components/ui';
 
@@ -20,6 +21,8 @@ interface VoiceButtonProps {
 }
 
 export function VoiceButton({ onTranscription, disabled }: VoiceButtonProps) {
+  const { isDark } = useTheme();
+  const themeColors = isDark ? darkColors : colors;
   const {
     state,
     partialTranscript,
@@ -85,16 +88,32 @@ export function VoiceButton({ onTranscription, disabled }: VoiceButtonProps) {
 
   if (!isAvailable) {
     return (
-      <View style={[styles.button, styles.unavailable]}>
-        <Ionicons name="mic-off" size={24} color={colors.textMuted} />
+      <View
+        className="w-12 h-12 rounded-full items-center justify-center border-2"
+        style={{
+          backgroundColor: themeColors.surface,
+          borderColor: themeColors.border,
+        }}
+      >
+        <Ionicons name="mic-off" size={24} color={themeColors.textMuted} />
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
+    <View className="items-center">
       {partialTranscript ? (
-        <View style={styles.transcriptBubble}>
+        <View
+          className="absolute bottom-14 px-2 py-1 rounded-lg max-w-[200px]"
+          style={{
+            backgroundColor: themeColors.surfaceElevated,
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.1,
+            shadowRadius: 4,
+            elevation: 3,
+          }}
+        >
           <Text variant="caption" color="textSecondary" numberOfLines={2}>
             {partialTranscript}
           </Text>
@@ -111,75 +130,33 @@ export function VoiceButton({ onTranscription, disabled }: VoiceButtonProps) {
         accessibilityState={{ disabled }}
       >
         <Animated.View
+          className="w-12 h-12 rounded-full items-center justify-center border-2"
           style={[
-            styles.button,
-            isRecording && styles.recording,
-            disabled && styles.disabled,
-            state === 'error' && styles.error,
+            {
+              backgroundColor: isRecording
+                ? themeColors.errorLight
+                : themeColors.surfaceElevated,
+              borderColor: isRecording || state === 'error'
+                ? themeColors.error
+                : themeColors.border,
+              opacity: disabled ? 0.5 : 1,
+            },
             animatedStyle,
           ]}
         >
           <Ionicons
             name={isRecording ? 'stop' : 'mic'}
             size={24}
-            color={isRecording ? colors.error : state === 'error' ? colors.error : colors.primary}
+            color={isRecording || state === 'error' ? themeColors.error : themeColors.primary}
           />
         </Animated.View>
       </Pressable>
 
       {error ? (
-        <Text variant="caption" color="error" style={styles.errorText}>
+        <Text variant="caption" color="error" center className="mt-1">
           {error}
         </Text>
       ) : null}
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    alignItems: 'center',
-  },
-  button: {
-    width: 48,
-    height: 48,
-    borderRadius: borderRadius.full,
-    backgroundColor: colors.surfaceElevated,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 2,
-    borderColor: colors.border,
-  },
-  recording: {
-    backgroundColor: colors.errorLight,
-    borderColor: colors.error,
-  },
-  disabled: {
-    opacity: 0.5,
-  },
-  unavailable: {
-    backgroundColor: colors.surface,
-    borderColor: colors.border,
-  },
-  error: {
-    borderColor: colors.error,
-  },
-  transcriptBubble: {
-    position: 'absolute',
-    bottom: 56,
-    backgroundColor: colors.surfaceElevated,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.xs,
-    borderRadius: borderRadius.md,
-    maxWidth: 200,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  errorText: {
-    marginTop: spacing.xs,
-    textAlign: 'center',
-  },
-});

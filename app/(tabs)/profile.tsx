@@ -17,7 +17,8 @@ import {
   authenticate,
 } from '@/src/lib/biometrics';
 import { exportMoodToCSV, exportAllData } from '@/src/lib/export';
-import { colors, spacing } from '@/src/constants/theme';
+import { colors, darkColors, spacing } from '@/src/constants/theme';
+import { useTheme } from '@/src/contexts/ThemeContext';
 
 export default function ProfileScreen() {
   const {
@@ -31,6 +32,9 @@ export default function ProfileScreen() {
 
   const { entries: moodEntries, loadEntries: loadMoodEntries, clearEntries: clearMoodEntries } = useMoodStore();
   const { entries: journalEntries, loadEntries: loadJournalEntries, clearEntries: clearJournalEntries } = useJournalStore();
+  const { mode, setMode, isDark } = useTheme();
+
+  const themeColors = isDark ? darkColors : colors;
 
   const [biometricAvailable, setBiometricAvailable] = useState(false);
   const [biometricName, setBiometricName] = useState('Biometric');
@@ -194,7 +198,7 @@ export default function ProfileScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <SafeAreaView style={[styles.container, { backgroundColor: themeColors.background }]} edges={['top']}>
         <ScrollView
         style={styles.scroll}
         contentContainerStyle={styles.content}
@@ -233,7 +237,7 @@ export default function ProfileScreen() {
               </Host>
             </View>
             {reminderEnabled && (
-              <Pressable style={styles.timeRow} onPress={handleTimeChange}>
+              <Pressable style={[styles.timeRow, { borderTopColor: themeColors.border }]} onPress={handleTimeChange}>
                 <View style={styles.settingText}>
                   <Text variant="caption" color="textSecondary">
                     Reminder Time
@@ -242,9 +246,52 @@ export default function ProfileScreen() {
                     {formatTime(reminderTime)}
                   </Text>
                 </View>
-                <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
+                <Ionicons name="chevron-forward" size={20} color={themeColors.textMuted} />
               </Pressable>
             )}
+          </Card>
+        </View>
+
+        <View style={styles.section}>
+          <Text variant="h3" color="textPrimary" style={styles.sectionTitle}>
+            Appearance
+          </Text>
+          <Card variant="outlined">
+            <View style={styles.settingText}>
+              <Text variant="bodyMedium" color="textPrimary">
+                Theme
+              </Text>
+              <Text variant="caption" color="textSecondary">
+                {mode === 'system' ? 'Using device setting' : mode === 'dark' ? 'Dark mode' : 'Light mode'}
+              </Text>
+            </View>
+            <View style={[styles.themeOptions, { marginTop: spacing.md }]}>
+              {(['system', 'light', 'dark'] as const).map((option) => (
+                <Pressable
+                  key={option}
+                  style={[
+                    styles.themeOption,
+                    {
+                      backgroundColor: mode === option ? themeColors.primary : themeColors.surfaceElevated,
+                      borderColor: mode === option ? themeColors.primary : themeColors.border,
+                    }
+                  ]}
+                  onPress={() => setMode(option)}
+                >
+                  <Ionicons
+                    name={option === 'system' ? 'phone-portrait' : option === 'light' ? 'sunny' : 'moon'}
+                    size={16}
+                    color={mode === option ? '#fff' : themeColors.textSecondary}
+                  />
+                  <Text
+                    variant="caption"
+                    style={{ color: mode === option ? '#fff' : themeColors.textPrimary, marginLeft: 6 }}
+                  >
+                    {option === 'system' ? 'Auto' : option.charAt(0).toUpperCase() + option.slice(1)}
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
           </Card>
         </View>
 
@@ -380,6 +427,20 @@ const styles = StyleSheet.create({
   settingText: {
     flex: 1,
     marginRight: spacing.md,
+  },
+  themeOptions: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+  },
+  themeOption: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.sm,
+    borderRadius: 8,
+    borderWidth: 1,
   },
   timeRow: {
     flexDirection: 'row',

@@ -1,14 +1,17 @@
 import { useEffect, useState } from 'react';
-import { View, StyleSheet, Alert } from 'react-native';
+import { Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { JournalEditor } from '@/src/components/journal';
 import { useJournalStore } from '@/src/stores';
-import { colors, spacing } from '@/src/constants/theme';
+import { colors, darkColors } from '@/src/constants/theme';
+import { useTheme } from '@/src/contexts/ThemeContext';
 import type { JournalPrompt } from '@/src/types/journal';
 
 export default function JournalEntryModal() {
   const router = useRouter();
+  const { isDark } = useTheme();
+  const themeColors = isDark ? darkColors : colors;
   const params = useLocalSearchParams<{ promptId?: string; editId?: string }>();
   const {
     draftTitle,
@@ -34,12 +37,9 @@ export default function JournalEntryModal() {
   }, []);
 
   useEffect(() => {
-    // Handle editing existing entry
     if (params.editId) {
       loadEntryForEditing(params.editId);
-    }
-    // Handle prompt selection
-    else if (params.promptId) {
+    } else if (params.promptId) {
       const prompt = prompts.find((p) => p.id === params.promptId);
       if (prompt) {
         setSelectedPrompt(prompt);
@@ -52,7 +52,6 @@ export default function JournalEntryModal() {
     content: string;
     mood?: 1 | 2 | 3 | 4 | 5;
   }) => {
-    // Update store with editor data
     setDraftTitle(data.title);
     setDraftContent(data.content);
     if (data.mood) {
@@ -91,7 +90,11 @@ export default function JournalEntryModal() {
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+    <SafeAreaView
+      className="flex-1"
+      style={{ backgroundColor: themeColors.surface }}
+      edges={['top', 'bottom']}
+    >
       <JournalEditor
         initialTitle={draftTitle}
         initialContent={draftContent}
@@ -104,10 +107,3 @@ export default function JournalEntryModal() {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.surface,
-  },
-});

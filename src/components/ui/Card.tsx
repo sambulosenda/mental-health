@@ -1,17 +1,17 @@
-import { View, ViewProps, StyleSheet, Pressable, Platform } from 'react-native';
+import { View, ViewProps, Pressable } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withSpring,
 } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
-import { colors, spacing, borderRadius, shadows } from '@/src/constants/theme';
+import { useTheme } from '@/src/contexts/ThemeContext';
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 interface CardProps extends ViewProps {
   variant?: 'elevated' | 'outlined' | 'flat';
-  padding?: keyof typeof spacing;
+  padding?: 'sm' | 'md' | 'lg';
   onPress?: () => void;
 }
 
@@ -20,9 +20,11 @@ export function Card({
   padding = 'md',
   onPress,
   style,
+  className,
   children,
   ...props
-}: CardProps) {
+}: CardProps & { className?: string }) {
+  const { isDark } = useTheme();
   const scale = useSharedValue(1);
 
   const animatedStyle = useAnimatedStyle(() => ({
@@ -42,14 +44,28 @@ export function Card({
     onPress?.();
   };
 
+  const paddingClass = {
+    sm: 'p-2',
+    md: 'p-4',
+    lg: 'p-6',
+  }[padding];
+
+  const variantClass = {
+    elevated: isDark
+      ? 'bg-surface-dark shadow-md'
+      : 'bg-surface shadow-md',
+    outlined: isDark
+      ? 'bg-surface-dark border border-border-dark'
+      : 'bg-surface border border-border',
+    flat: isDark
+      ? 'bg-surface-dark-elevated'
+      : 'bg-surface-elevated',
+  }[variant];
+
   const content = (
     <View
-      style={[
-        styles.base,
-        styles[variant],
-        { padding: spacing[padding] },
-        style,
-      ]}
+      className={`rounded-lg ${paddingClass} ${variantClass} ${className || ''}`}
+      style={style}
       {...props}
     >
       {children}
@@ -64,11 +80,6 @@ export function Card({
         onPressOut={handlePressOut}
         style={animatedStyle}
         accessibilityRole="button"
-        android_ripple={{
-          color: colors.primaryLight,
-          borderless: false,
-          foreground: true,
-        }}
       >
         {content}
       </AnimatedPressable>
@@ -77,20 +88,3 @@ export function Card({
 
   return content;
 }
-
-const styles = StyleSheet.create({
-  base: {
-    borderRadius: borderRadius.lg,
-    backgroundColor: colors.surface,
-  },
-  elevated: {
-    ...shadows.md,
-  },
-  outlined: {
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  flat: {
-    backgroundColor: colors.surfaceElevated,
-  },
-});

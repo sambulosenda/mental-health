@@ -1,4 +1,4 @@
-import { StyleSheet, View } from 'react-native';
+import { View } from 'react-native';
 import Animated, {
   useAnimatedStyle,
   interpolate,
@@ -6,7 +6,8 @@ import Animated, {
   SharedValue,
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { colors, spacing, typography } from '@/src/constants/theme';
+import { colors, darkColors, spacing, typography } from '@/src/constants/theme';
+import { useTheme } from '@/src/contexts/ThemeContext';
 
 interface AnimatedHeaderProps {
   scrollY: SharedValue<number>;
@@ -23,6 +24,8 @@ export function AnimatedHeader({
   collapsedHeight = 60,
   expandedHeight = 120,
 }: AnimatedHeaderProps) {
+  const { isDark } = useTheme();
+  const themeColors = isDark ? darkColors : colors;
   const insets = useSafeAreaInsets();
   const totalCollapsed = collapsedHeight + insets.top;
   const totalExpanded = expandedHeight + insets.top;
@@ -70,11 +73,39 @@ export function AnimatedHeader({
   }));
 
   return (
-    <Animated.View style={[styles.header, headerStyle, { paddingTop: insets.top }]}>
-      <View style={styles.content}>
-        <Animated.Text style={[styles.title, titleStyle]}>{title}</Animated.Text>
+    <Animated.View
+      style={[
+        {
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          backgroundColor: themeColors.background,
+          zIndex: 100,
+          justifyContent: 'flex-end',
+          paddingTop: insets.top,
+        },
+        headerStyle,
+      ]}
+    >
+      <View className="px-6 pb-2">
+        <Animated.Text
+          style={[
+            typography.h1,
+            { color: themeColors.textPrimary, transformOrigin: 'left center' },
+            titleStyle,
+          ]}
+        >
+          {title}
+        </Animated.Text>
         {subtitle && (
-          <Animated.Text style={[styles.subtitle, subtitleStyle]}>
+          <Animated.Text
+            style={[
+              typography.body,
+              { color: themeColors.textSecondary, marginTop: spacing.xs },
+              subtitleStyle,
+            ]}
+          >
             {subtitle}
           </Animated.Text>
         )}
@@ -82,29 +113,3 @@ export function AnimatedHeader({
     </Animated.View>
   );
 }
-
-const styles = StyleSheet.create({
-  header: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: colors.background,
-    zIndex: 100,
-    justifyContent: 'flex-end',
-  },
-  content: {
-    paddingHorizontal: spacing.lg,
-    paddingBottom: spacing.sm,
-  },
-  title: {
-    ...typography.h1,
-    color: colors.textPrimary,
-    transformOrigin: 'left center',
-  },
-  subtitle: {
-    ...typography.body,
-    color: colors.textSecondary,
-    marginTop: spacing.xs,
-  },
-});

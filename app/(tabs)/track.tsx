@@ -1,17 +1,19 @@
-import { View, StyleSheet, TextInput, KeyboardAvoidingView, Platform, Alert } from 'react-native';
+import { View, TextInput, KeyboardAvoidingView, Platform, Alert } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import Animated, { useSharedValue, useAnimatedScrollHandler } from 'react-native-reanimated';
 import { Text, Card, Button, AnimatedHeader } from '@/src/components/ui';
 import { MoodSliderSelector, ActivityTags } from '@/src/components/mood';
 import { useMoodStore } from '@/src/stores';
-import { colors, spacing, borderRadius, typography } from '@/src/constants/theme';
+import { spacing, typography } from '@/src/constants/theme';
+import { useTheme } from '@/src/contexts/ThemeContext';
 
 const HEADER_EXPANDED_HEIGHT = 120;
 
 export default function TrackScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { isDark } = useTheme();
   const {
     draftMood,
     draftActivities,
@@ -53,7 +55,6 @@ export default function TrackScreen() {
 
   const canSave = draftMood !== null;
 
-  // Scroll animation
   const scrollY = useSharedValue(0);
   const scrollHandler = useAnimatedScrollHandler({
     onScroll: (event) => {
@@ -62,36 +63,37 @@ export default function TrackScreen() {
   });
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
-        <AnimatedHeader
+    <SafeAreaView className={`flex-1 ${isDark ? 'bg-background-dark' : 'bg-background'}`} edges={['top']}>
+      <AnimatedHeader
         scrollY={scrollY}
         title="Track Mood"
         subtitle="How are you feeling right now?"
       />
       <KeyboardAvoidingView
-        style={styles.keyboardView}
+        className="flex-1"
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
         <Animated.ScrollView
-          style={styles.scroll}
-          contentContainerStyle={[
-            styles.content,
-            { paddingTop: HEADER_EXPANDED_HEIGHT + insets.top },
-          ]}
+          className="flex-1"
+          contentContainerStyle={{
+            paddingHorizontal: spacing.lg,
+            paddingBottom: spacing.xxl * 2,
+            paddingTop: HEADER_EXPANDED_HEIGHT + insets.top,
+          }}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
           onScroll={scrollHandler}
           scrollEventThrottle={16}
         >
-          <Card style={styles.moodCard}>
+          <Card className="p-6 py-8 mb-6">
             <MoodSliderSelector
               selectedMood={draftMood}
               onSelectMood={setDraftMood}
             />
           </Card>
 
-          <View style={styles.section}>
-            <Text variant="h3" color="textPrimary" style={styles.sectionTitle}>
+          <View className="mb-6">
+            <Text variant="h3" color="textPrimary" className="mb-4">
               What are you doing?
             </Text>
             <ActivityTags
@@ -100,14 +102,19 @@ export default function TrackScreen() {
             />
           </View>
 
-          <View style={styles.section}>
-            <Text variant="h3" color="textPrimary" style={styles.sectionTitle}>
+          <View className="mb-6">
+            <Text variant="h3" color="textPrimary" className="mb-4">
               Add a note (optional)
             </Text>
             <TextInput
-              style={styles.noteInput}
+              className={`rounded-md border-[1.5px] p-4 min-h-[120px] ${
+                isDark
+                  ? 'bg-surface-dark-elevated border-border-dark'
+                  : 'bg-surface-elevated border-border'
+              }`}
+              style={[typography.body, { color: isDark ? '#FAFAFA' : '#2C3E3E' }]}
               placeholder="How are you really feeling? What's on your mind?"
-              placeholderTextColor={colors.textMuted}
+              placeholderTextColor={isDark ? '#707070' : '#8A9A9A'}
               value={draftNote}
               onChangeText={setDraftNote}
               multiline
@@ -115,12 +122,12 @@ export default function TrackScreen() {
               textAlignVertical="top"
               maxLength={500}
             />
-            <Text variant="caption" color="textMuted" style={styles.charCount}>
+            <Text variant="caption" color="textMuted" className="text-right mt-1">
               {draftNote.length}/500
             </Text>
           </View>
 
-          <View style={styles.actions}>
+          <View className="mt-6 gap-2">
             <Button
               fullWidth
               onPress={handleSave}
@@ -134,7 +141,7 @@ export default function TrackScreen() {
                 variant="ghost"
                 fullWidth
                 onPress={handleClear}
-                style={styles.clearButton}
+                className="mt-1"
               >
                 Clear
               </Button>
@@ -145,52 +152,3 @@ export default function TrackScreen() {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  keyboardView: {
-    flex: 1,
-  },
-  scroll: {
-    flex: 1,
-  },
-  content: {
-    paddingHorizontal: spacing.lg,
-    paddingBottom: spacing.xxl * 2,
-  },
-  moodCard: {
-    padding: spacing.lg,
-    paddingVertical: spacing.xl,
-    marginBottom: spacing.xl,
-  },
-  section: {
-    marginBottom: spacing.lg,
-  },
-  sectionTitle: {
-    marginBottom: spacing.md,
-  },
-  noteInput: {
-    ...typography.body,
-    backgroundColor: colors.surfaceElevated,
-    borderRadius: borderRadius.md,
-    borderWidth: 1.5,
-    borderColor: colors.border,
-    padding: spacing.md,
-    minHeight: 120,
-    color: colors.textPrimary,
-  },
-  charCount: {
-    textAlign: 'right',
-    marginTop: spacing.xs,
-  },
-  actions: {
-    marginTop: spacing.lg,
-    gap: spacing.sm,
-  },
-  clearButton: {
-    marginTop: spacing.xs,
-  },
-});
