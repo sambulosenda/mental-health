@@ -1,9 +1,10 @@
-import { View, StyleSheet, Pressable, Platform } from 'react-native';
+import { View, Pressable, Platform } from 'react-native';
 import { formatDistanceToNow } from 'date-fns';
 import { Card, Text, NativeContextMenu, showContextMenuFallback } from '@/src/components/ui';
 import type { ContextMenuAction } from '@/src/components/ui';
 import { MoodAnimation } from './MoodAnimation';
-import { colors, spacing, borderRadius, moodLabels, activityTags } from '@/src/constants/theme';
+import { colors, moodLabels, activityTags } from '@/src/constants/theme';
+import { useTheme } from '@/src/contexts/ThemeContext';
 import type { MoodEntry } from '@/src/types/mood';
 
 interface MoodCardProps {
@@ -16,6 +17,7 @@ interface MoodCardProps {
 }
 
 export function MoodCard({ entry, compact = false, onPress, onEdit, onDelete, onShare }: MoodCardProps) {
+  const { isDark } = useTheme();
   const timeAgo = formatDistanceToNow(entry.timestamp, { addSuffix: true });
   const activityLabels = entry.activities
     .map((id) => activityTags.find((t) => t.id === id)?.label)
@@ -41,7 +43,6 @@ export function MoodCard({ entry, compact = false, onPress, onEdit, onDelete, on
   ];
 
   const handleLongPress = () => {
-    // Only use fallback on Android - iOS uses native ContextMenu
     if (Platform.OS !== 'ios') {
       showContextMenuFallback(moodLabels[entry.mood].label, contextMenuActions);
     }
@@ -50,13 +51,14 @@ export function MoodCard({ entry, compact = false, onPress, onEdit, onDelete, on
   if (compact) {
     return (
       <Pressable onPress={onPress} onLongPress={handleLongPress} delayLongPress={400}>
-        <View style={styles.compactContainer}>
+        <View className="flex-row items-center py-2">
           <View
-            style={[styles.moodDot, { backgroundColor: colors.mood[entry.mood] }]}
+            className="w-8 h-8 rounded-full items-center justify-center"
+            style={{ backgroundColor: colors.mood[entry.mood] }}
           >
             <MoodAnimation mood={entry.mood} size={20} loop={false} />
           </View>
-          <View style={styles.compactContent}>
+          <View className="ml-2">
             <Text variant="captionMedium" color="textPrimary">
               {moodLabels[entry.mood].label}
             </Text>
@@ -71,14 +73,15 @@ export function MoodCard({ entry, compact = false, onPress, onEdit, onDelete, on
 
   const cardContent = (
     <Pressable onPress={onPress} onLongPress={handleLongPress} delayLongPress={400}>
-      <Card style={styles.card}>
-        <View style={styles.header}>
+      <Card className="mb-2">
+        <View className="flex-row items-center">
           <View
-            style={[styles.moodBadge, { backgroundColor: colors.mood[entry.mood] }]}
+            className="w-11 h-11 rounded-full items-center justify-center"
+            style={{ backgroundColor: colors.mood[entry.mood] }}
           >
             <MoodAnimation mood={entry.mood} size={28} loop={false} />
           </View>
-          <View style={styles.headerText}>
+          <View className="ml-4">
             <Text variant="bodyMedium" color="textPrimary">
               {moodLabels[entry.mood].label}
             </Text>
@@ -89,9 +92,12 @@ export function MoodCard({ entry, compact = false, onPress, onEdit, onDelete, on
         </View>
 
         {activityLabels.length > 0 && (
-          <View style={styles.activities}>
+          <View className="flex-row flex-wrap mt-4 gap-1">
             {activityLabels.map((label, index) => (
-              <View key={index} style={styles.activityChip}>
+              <View
+                key={index}
+                className={`px-2 py-1 rounded-sm ${isDark ? 'bg-surface-dark-elevated' : 'bg-surface-elevated'}`}
+              >
                 <Text variant="label" color="textSecondary">
                   {label}
                 </Text>
@@ -101,7 +107,7 @@ export function MoodCard({ entry, compact = false, onPress, onEdit, onDelete, on
         )}
 
         {entry.note && (
-          <Text variant="body" color="textSecondary" style={styles.note}>
+          <Text variant="body" color="textSecondary" className="mt-4 italic">
             {entry.note}
           </Text>
         )}
@@ -118,55 +124,3 @@ export function MoodCard({ entry, compact = false, onPress, onEdit, onDelete, on
     </NativeContextMenu>
   );
 }
-
-const styles = StyleSheet.create({
-  card: {
-    marginBottom: spacing.sm,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  moodBadge: {
-    width: 44,
-    height: 44,
-    borderRadius: borderRadius.full,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  headerText: {
-    marginLeft: spacing.md,
-  },
-  activities: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    marginTop: spacing.md,
-    gap: spacing.xs,
-  },
-  activityChip: {
-    backgroundColor: colors.surfaceElevated,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.xs,
-    borderRadius: borderRadius.sm,
-  },
-  note: {
-    marginTop: spacing.md,
-    fontStyle: 'italic',
-  },
-  // Compact styles
-  compactContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: spacing.sm,
-  },
-  moodDot: {
-    width: 32,
-    height: 32,
-    borderRadius: borderRadius.full,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  compactContent: {
-    marginLeft: spacing.sm,
-  },
-});

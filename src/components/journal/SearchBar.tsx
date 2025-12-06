@@ -1,6 +1,7 @@
-import { View, TextInput, StyleSheet, Pressable } from 'react-native';
+import { View, TextInput, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { colors, spacing, borderRadius, typography } from '@/src/constants/theme';
+import { colors, darkColors, typography } from '@/src/constants/theme';
+import { useTheme } from '@/src/contexts/ThemeContext';
 
 interface SearchBarProps {
   value: string;
@@ -17,23 +18,31 @@ export function SearchBar({
   onClear,
   placeholder = 'Search entries...',
 }: SearchBarProps) {
+  const { isDark } = useTheme();
+  const themeColors = isDark ? darkColors : colors;
+
   const handleClear = () => {
     onChangeText('');
     onClear?.();
   };
 
   return (
-    <View style={styles.container}>
+    <View
+      className={`flex-row items-center rounded-md px-4 h-11 ${
+        isDark ? 'bg-surface-dark-elevated' : 'bg-surface-elevated'
+      }`}
+    >
       <Ionicons
         name="search"
         size={20}
-        color={colors.textMuted}
-        style={styles.icon}
+        color={themeColors.textMuted}
+        style={{ marginRight: 8 }}
       />
       <TextInput
-        style={styles.input}
+        className="flex-1 h-full"
+        style={[typography.body, { color: themeColors.textPrimary }]}
         placeholder={placeholder}
-        placeholderTextColor={colors.textMuted}
+        placeholderTextColor={themeColors.textMuted}
         value={value}
         onChangeText={onChangeText}
         onSubmitEditing={onSubmit}
@@ -44,36 +53,12 @@ export function SearchBar({
       {value.length > 0 && (
         <Pressable
           onPress={handleClear}
-          style={styles.clearButton}
+          className="p-1 ml-1"
           accessibilityLabel="Clear search"
         >
-          <Ionicons name="close-circle" size={20} color={colors.textMuted} />
+          <Ionicons name="close-circle" size={20} color={themeColors.textMuted} />
         </Pressable>
       )}
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.surfaceElevated,
-    borderRadius: borderRadius.md,
-    paddingHorizontal: spacing.md,
-    height: 44,
-  },
-  icon: {
-    marginRight: spacing.sm,
-  },
-  input: {
-    ...typography.body,
-    flex: 1,
-    color: colors.textPrimary,
-    height: '100%',
-  },
-  clearButton: {
-    padding: spacing.xs,
-    marginLeft: spacing.xs,
-  },
-});

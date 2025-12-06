@@ -1,10 +1,11 @@
-import { View, StyleSheet, Pressable, Platform } from 'react-native';
+import { View, Pressable, Platform } from 'react-native';
 import { formatDistanceToNow, format } from 'date-fns';
 import { Ionicons } from '@expo/vector-icons';
 import { Card, Text, NativeContextMenu, showContextMenuFallback } from '@/src/components/ui';
 import type { ContextMenuAction } from '@/src/components/ui';
 import { MoodAnimation } from '@/src/components/mood/MoodAnimation';
-import { colors, spacing, borderRadius } from '@/src/constants/theme';
+import { colors, darkColors } from '@/src/constants/theme';
+import { useTheme } from '@/src/contexts/ThemeContext';
 import type { JournalEntry } from '@/src/types/journal';
 
 interface JournalCardProps {
@@ -16,10 +17,11 @@ interface JournalCardProps {
 }
 
 export function JournalCard({ entry, onPress, onEdit, onDelete, onShare }: JournalCardProps) {
+  const { isDark } = useTheme();
+  const themeColors = isDark ? darkColors : colors;
   const timeAgo = formatDistanceToNow(entry.createdAt, { addSuffix: true });
   const fullDate = format(entry.createdAt, 'MMM d, yyyy • h:mm a');
 
-  // Get preview text (first 150 chars)
   const preview = entry.content.length > 150
     ? entry.content.substring(0, 150).trim() + '...'
     : entry.content;
@@ -44,7 +46,6 @@ export function JournalCard({ entry, onPress, onEdit, onDelete, onShare }: Journ
   ];
 
   const handleLongPress = () => {
-    // Only use fallback on Android - iOS uses native ContextMenu
     if (Platform.OS !== 'ios') {
       showContextMenuFallback(entry.title || 'Journal Entry', contextMenuActions);
     }
@@ -52,9 +53,9 @@ export function JournalCard({ entry, onPress, onEdit, onDelete, onShare }: Journ
 
   const cardContent = (
     <Pressable onPress={onPress} onLongPress={handleLongPress} delayLongPress={400}>
-      <Card style={styles.card}>
-        <View style={styles.header}>
-          <View style={styles.headerLeft}>
+      <Card className="mb-2">
+        <View className="flex-row justify-between items-start mb-2">
+          <View className="flex-1 mr-2">
             {entry.title ? (
               <Text variant="bodyMedium" color="textPrimary" numberOfLines={1}>
                 {entry.title}
@@ -70,10 +71,8 @@ export function JournalCard({ entry, onPress, onEdit, onDelete, onShare }: Journ
           </View>
           {entry.mood && (
             <View
-              style={[
-                styles.moodBadge,
-                { backgroundColor: colors.mood[entry.mood] },
-              ]}
+              className="w-8 h-8 rounded-full items-center justify-center"
+              style={{ backgroundColor: colors.mood[entry.mood] }}
             >
               <MoodAnimation mood={entry.mood as 1 | 2 | 3 | 4 | 5} size={16} loop={false} />
             </View>
@@ -84,15 +83,19 @@ export function JournalCard({ entry, onPress, onEdit, onDelete, onShare }: Journ
           variant="body"
           color="textSecondary"
           numberOfLines={3}
-          style={styles.preview}
+          className="mb-2"
+          style={{ lineHeight: 22 }}
         >
           {preview}
         </Text>
 
         {entry.tags.length > 0 && (
-          <View style={styles.tags}>
+          <View className="flex-row flex-wrap gap-1 mb-2">
             {entry.tags.slice(0, 3).map((tag, index) => (
-              <View key={index} style={styles.tag}>
+              <View
+                key={index}
+                className={`px-2 py-0.5 rounded-sm ${isDark ? 'bg-surface-dark-elevated' : 'bg-surface-elevated'}`}
+              >
                 <Text variant="label" color="textSecondary">
                   #{tag}
                 </Text>
@@ -106,11 +109,14 @@ export function JournalCard({ entry, onPress, onEdit, onDelete, onShare }: Journ
           </View>
         )}
 
-        <View style={styles.footer}>
+        <View
+          className="flex-row justify-between items-center pt-2 border-t"
+          style={{ borderTopColor: themeColors.borderLight }}
+        >
           <Text variant="caption" color="textMuted">
             {fullDate}
           </Text>
-          <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
+          <Ionicons name="chevron-forward" size={16} color={themeColors.textMuted} />
         </View>
       </Card>
     </Pressable>
@@ -125,53 +131,3 @@ export function JournalCard({ entry, onPress, onEdit, onDelete, onShare }: Journ
     </NativeContextMenu>
   );
 }
-
-const styles = StyleSheet.create({
-  card: {
-    marginBottom: spacing.sm,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: spacing.sm,
-  },
-  headerLeft: {
-    flex: 1,
-    marginRight: spacing.sm,
-  },
-  moodBadge: {
-    width: 32,
-    height: 32,
-    borderRadius: borderRadius.full,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  moodEmoji: {
-    fontSize: 18,
-  },
-  preview: {
-    marginBottom: spacing.sm,
-    lineHeight: 22,
-  },
-  tags: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: spacing.xs,
-    marginBottom: spacing.sm,
-  },
-  tag: {
-    backgroundColor: colors.surfaceElevated,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 2,
-    borderRadius: borderRadius.sm,
-  },
-  footer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingTop: spacing.sm,
-    borderTopWidth: 1,
-    borderTopColor: colors.borderLight,
-  },
-});

@@ -11,6 +11,7 @@ export default function ModalsLayout() {
       }}
     >
       <Stack.Screen name="journal-entry" />
+      <Stack.Screen name="chat" />
     </Stack>
   );
 }

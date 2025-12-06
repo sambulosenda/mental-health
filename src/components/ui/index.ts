@@ -13,3 +13,5 @@ export { NativePicker } from './NativePicker';
 export { NativeTimePicker } from './NativeDateTimePicker';
 export { NativeGauge } from './NativeGauge';
 export { NativeBottomSheet } from './NativeBottomSheet';
+export { ShimmerText } from './ShimmerText';
+export { ThemeToggleButton } from './ThemeToggleButton';

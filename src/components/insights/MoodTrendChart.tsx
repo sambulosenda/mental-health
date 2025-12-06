@@ -1,8 +1,9 @@
 import { useState, useMemo } from 'react';
-import { View, StyleSheet, Pressable } from 'react-native';
+import { View, Pressable } from 'react-native';
 import { CartesianChart, Line } from 'victory-native';
 import { Text, Card } from '@/src/components/ui';
-import { colors, spacing } from '@/src/constants/theme';
+import { colors, darkColors, spacing } from '@/src/constants/theme';
+import { useTheme } from '@/src/contexts/ThemeContext';
 import type { DailyMoodSummary } from '@/src/types/mood';
 import { format, subDays } from 'date-fns';
 
@@ -14,6 +15,8 @@ interface MoodTrendChartProps {
 type TimeRange = 7 | 30;
 
 export function MoodTrendChart({ summaries, isLoading }: MoodTrendChartProps) {
+  const { isDark } = useTheme();
+  const themeColors = isDark ? darkColors : colors;
   const [timeRange, setTimeRange] = useState<TimeRange>(7);
 
   const chartData = useMemo(() => {
@@ -46,7 +49,6 @@ export function MoodTrendChart({ summaries, isLoading }: MoodTrendChartProps) {
     const min = Math.min(...validEntries.map((d) => d.avgMood));
     const max = Math.max(...validEntries.map((d) => d.avgMood));
 
-    // Trend calculation
     const firstHalf = validEntries.slice(0, Math.floor(validEntries.length / 2));
     const secondHalf = validEntries.slice(Math.floor(validEntries.length / 2));
     const firstAvg = firstHalf.length > 0
@@ -64,14 +66,18 @@ export function MoodTrendChart({ summaries, isLoading }: MoodTrendChartProps) {
   }, [chartData]);
 
   return (
-    <Card style={styles.container}>
-      <View style={styles.header}>
+    <Card className="p-4">
+      <View className="flex-row justify-between items-center mb-4">
         <Text variant="h3" color="textPrimary">
           Mood Trends
         </Text>
-        <View style={styles.toggleContainer}>
+        <View
+          className="flex-row rounded-lg p-0.5"
+          style={{ backgroundColor: themeColors.surfaceElevated }}
+        >
           <Pressable
-            style={[styles.toggle, timeRange === 7 && styles.toggleActive]}
+            className="px-4 py-1 rounded-md"
+            style={timeRange === 7 ? { backgroundColor: themeColors.primary } : undefined}
             onPress={() => setTimeRange(7)}
           >
             <Text
@@ -82,7 +88,8 @@ export function MoodTrendChart({ summaries, isLoading }: MoodTrendChartProps) {
             </Text>
           </Pressable>
           <Pressable
-            style={[styles.toggle, timeRange === 30 && styles.toggleActive]}
+            className="px-4 py-1 rounded-md"
+            style={timeRange === 30 ? { backgroundColor: themeColors.primary } : undefined}
             onPress={() => setTimeRange(30)}
           >
             <Text
@@ -96,20 +103,20 @@ export function MoodTrendChart({ summaries, isLoading }: MoodTrendChartProps) {
       </View>
 
       {isLoading ? (
-        <View style={styles.loadingContainer}>
+        <View className="h-[200px] justify-center items-center">
           <Text variant="body" color="textMuted">
             Loading...
           </Text>
         </View>
       ) : !hasData ? (
-        <View style={styles.emptyContainer}>
+        <View className="h-[200px] justify-center items-center px-6">
           <Text variant="body" color="textMuted" center>
             No mood data for this period.{'\n'}Start tracking to see trends.
           </Text>
         </View>
       ) : (
         <>
-          <View style={styles.chartContainer}>
+          <View style={{ height: 200, marginHorizontal: -spacing.sm }}>
             <CartesianChart
               data={chartData}
               xKey="day"
@@ -118,8 +125,8 @@ export function MoodTrendChart({ summaries, isLoading }: MoodTrendChartProps) {
               axisOptions={{
                 font: null,
                 tickCount: { x: timeRange === 7 ? 7 : 6, y: 5 },
-                lineColor: colors.border,
-                labelColor: colors.textMuted,
+                lineColor: themeColors.border,
+                labelColor: themeColors.textMuted,
                 formatXLabel: (val) => {
                   const item = chartData.find((d) => d.day === val);
                   return item?.label ?? '';
@@ -130,7 +137,7 @@ export function MoodTrendChart({ summaries, isLoading }: MoodTrendChartProps) {
               {({ points }) => (
                 <Line
                   points={points.avgMood.filter((p) => p.y !== null && (p.yValue ?? 0) > 0)}
-                  color={colors.primary}
+                  color={themeColors.primary}
                   strokeWidth={3}
                   curveType="natural"
                   animate={{ type: 'spring', duration: 300 }}
@@ -140,8 +147,11 @@ export function MoodTrendChart({ summaries, isLoading }: MoodTrendChartProps) {
           </View>
 
           {stats && (
-            <View style={styles.statsRow}>
-              <View style={styles.statItem}>
+            <View
+              className="flex-row justify-around items-center mt-4 pt-4 border-t"
+              style={{ borderTopColor: themeColors.border }}
+            >
+              <View className="items-center">
                 <Text variant="h3" color="primary">
                   {stats.avg.toFixed(1)}
                 </Text>
@@ -149,8 +159,11 @@ export function MoodTrendChart({ summaries, isLoading }: MoodTrendChartProps) {
                   Average
                 </Text>
               </View>
-              <View style={styles.statDivider} />
-              <View style={styles.statItem}>
+              <View
+                className="w-px h-8"
+                style={{ backgroundColor: themeColors.divider }}
+              />
+              <View className="items-center">
                 <Text variant="h3" color="primary">
                   {stats.days}
                 </Text>
@@ -158,8 +171,11 @@ export function MoodTrendChart({ summaries, isLoading }: MoodTrendChartProps) {
                   Days tracked
                 </Text>
               </View>
-              <View style={styles.statDivider} />
-              <View style={styles.statItem}>
+              <View
+                className="w-px h-8"
+                style={{ backgroundColor: themeColors.divider }}
+              />
+              <View className="items-center">
                 <Text variant="h3" color={stats.trend === 'up' ? 'success' : stats.trend === 'down' ? 'error' : 'primary'}>
                   {stats.trend === 'up' ? '↑' : stats.trend === 'down' ? '↓' : '→'}
                 </Text>
@@ -174,61 +190,3 @@ export function MoodTrendChart({ summaries, isLoading }: MoodTrendChartProps) {
     </Card>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    padding: spacing.md,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: spacing.md,
-  },
-  toggleContainer: {
-    flexDirection: 'row',
-    backgroundColor: colors.surfaceElevated,
-    borderRadius: 8,
-    padding: 2,
-  },
-  toggle: {
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.xs,
-    borderRadius: 6,
-  },
-  toggleActive: {
-    backgroundColor: colors.primary,
-  },
-  chartContainer: {
-    height: 200,
-    marginHorizontal: -spacing.sm,
-  },
-  loadingContainer: {
-    height: 200,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  emptyContainer: {
-    height: 200,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: spacing.lg,
-  },
-  statsRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    marginTop: spacing.md,
-    paddingTop: spacing.md,
-    borderTopWidth: 1,
-    borderTopColor: colors.border,
-  },
-  statItem: {
-    alignItems: 'center',
-  },
-  statDivider: {
-    width: 1,
-    height: 32,
-    backgroundColor: colors.divider,
-  },
-});

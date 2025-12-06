@@ -1,10 +1,11 @@
 import { useEffect, useState, useCallback } from 'react';
-import { View, StyleSheet, AppState, type AppStateStatus } from 'react-native';
+import { View, AppState, type AppStateStatus } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Text, Button } from '@/src/components/ui';
-import { colors, spacing } from '@/src/constants/theme';
+import { colors, darkColors, spacing } from '@/src/constants/theme';
 import { authenticate, checkBiometricAvailability, getBiometricDisplayName } from '@/src/lib/biometrics';
 import { useSettingsStore } from '@/src/stores';
+import { useTheme } from '@/src/contexts/ThemeContext';
 
 interface BiometricLockProps {
   children: React.ReactNode;
@@ -12,6 +13,8 @@ interface BiometricLockProps {
 
 export function BiometricLock({ children }: BiometricLockProps) {
   const { biometricEnabled } = useSettingsStore();
+  const { isDark } = useTheme();
+  const themeColors = isDark ? darkColors : colors;
   const [isLocked, setIsLocked] = useState(biometricEnabled);
   const [biometricName, setBiometricName] = useState('Biometric');
   const [isAuthenticating, setIsAuthenticating] = useState(false);
@@ -67,21 +70,27 @@ export function BiometricLock({ children }: BiometricLockProps) {
   }
 
   return (
-    <View style={styles.container}>
-      <View style={styles.content}>
-        <View style={styles.iconContainer}>
-          <Ionicons name="lock-closed" size={48} color={colors.primary} />
+    <View
+      className="flex-1 justify-center items-center p-8"
+      style={{ backgroundColor: themeColors.background }}
+    >
+      <View className="items-center max-w-[300px]">
+        <View
+          className="w-[100px] h-[100px] rounded-full justify-center items-center mb-8"
+          style={{ backgroundColor: themeColors.primaryLight }}
+        >
+          <Ionicons name="lock-closed" size={48} color={themeColors.primary} />
         </View>
-        <Text variant="h2" color="textPrimary" center style={styles.title}>
+        <Text variant="h2" color="textPrimary" center className="mb-2">
           DaySi is Locked
         </Text>
-        <Text variant="body" color="textSecondary" center style={styles.subtitle}>
+        <Text variant="body" color="textSecondary" center className="mb-8">
           Use {biometricName} to unlock and access your data
         </Text>
         <Button
           onPress={handleAuthenticate}
           disabled={isAuthenticating}
-          style={styles.button}
+          className="min-w-[200px]"
         >
           {isAuthenticating ? 'Authenticating...' : `Unlock with ${biometricName}`}
         </Button>
@@ -89,35 +98,3 @@ export function BiometricLock({ children }: BiometricLockProps) {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: spacing.xl,
-  },
-  content: {
-    alignItems: 'center',
-    maxWidth: 300,
-  },
-  iconContainer: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    backgroundColor: colors.primaryLight,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: spacing.xl,
-  },
-  title: {
-    marginBottom: spacing.sm,
-  },
-  subtitle: {
-    marginBottom: spacing.xl,
-  },
-  button: {
-    minWidth: 200,
-  },
-});

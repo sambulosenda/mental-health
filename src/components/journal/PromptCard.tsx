@@ -1,7 +1,8 @@
-import { StyleSheet, Pressable } from 'react-native';
+import { Pressable } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { Card, Text } from '@/src/components/ui';
-import { colors, spacing } from '@/src/constants/theme';
+import { colors, darkColors } from '@/src/constants/theme';
+import { useTheme } from '@/src/contexts/ThemeContext';
 import type { JournalPrompt } from '@/src/types/journal';
 
 interface PromptCardProps {
@@ -17,38 +18,26 @@ const CATEGORY_COLORS: Record<string, string> = {
 };
 
 export function PromptCard({ prompt, onPress }: PromptCardProps) {
+  const { isDark } = useTheme();
+  const themeColors = isDark ? darkColors : colors;
+
   const handlePress = async () => {
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     onPress();
   };
 
-  const categoryColor = CATEGORY_COLORS[prompt.category] || colors.primary;
+  const categoryColor = CATEGORY_COLORS[prompt.category] || themeColors.primary;
 
   return (
     <Pressable onPress={handlePress}>
-      <Card variant="outlined" style={styles.card}>
-        <Text
-          variant="label"
-          style={[styles.category, { color: categoryColor }]}
-        >
+      <Card variant="outlined" className="mb-2">
+        <Text variant="label" className="mb-1" style={{ color: categoryColor }}>
           {prompt.category.toUpperCase()}
         </Text>
-        <Text variant="body" color="textPrimary" style={styles.text}>
+        <Text variant="body" color="textPrimary" style={{ lineHeight: 24 }}>
           {prompt.text}
         </Text>
       </Card>
     </Pressable>
   );
 }
-
-const styles = StyleSheet.create({
-  card: {
-    marginBottom: spacing.sm,
-  },
-  category: {
-    marginBottom: spacing.xs,
-  },
-  text: {
-    lineHeight: 24,
-  },
-});

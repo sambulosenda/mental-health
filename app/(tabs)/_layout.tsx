@@ -1,14 +1,18 @@
 import { NativeTabs, VectorIcon, Icon, Label } from 'expo-router/unstable-native-tabs';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { colors } from '@/src/constants/theme';
+import { colors, darkColors } from '@/src/constants/theme';
+import { useTheme } from '@/src/contexts/ThemeContext';
 
 export default function TabLayout() {
+  const { isDark } = useTheme();
+  const themeColors = isDark ? darkColors : colors;
+
   return (
     <NativeTabs
-      iconColor={colors.textMuted}
-      tintColor={colors.primary}
-      backgroundColor={colors.surface}
-      indicatorColor={colors.primary}
+      iconColor={themeColors.textMuted}
+      tintColor={themeColors.primary}
+      backgroundColor={themeColors.surface}
+      indicatorColor={themeColors.primary}
     >
       <NativeTabs.Trigger name="index">
         <Icon src={<VectorIcon family={Ionicons as any} name="home-outline" />} />

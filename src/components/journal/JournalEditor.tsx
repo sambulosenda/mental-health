@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from 'react';
 import {
   View,
   TextInput,
-  StyleSheet,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -12,7 +11,8 @@ import * as Haptics from 'expo-haptics';
 import { Text, Button } from '@/src/components/ui';
 import { MoodSelector } from '@/src/components/mood';
 import { VoiceButton } from './VoiceButton';
-import { colors, spacing, borderRadius, typography } from '@/src/constants/theme';
+import { colors, darkColors, typography } from '@/src/constants/theme';
+import { useTheme } from '@/src/contexts/ThemeContext';
 import type { JournalPrompt } from '@/src/types/journal';
 
 interface JournalEditorProps {
@@ -38,6 +38,8 @@ export function JournalEditor({
   onCancel,
   isSaving = false,
 }: JournalEditorProps) {
+  const { isDark } = useTheme();
+  const themeColors = isDark ? darkColors : colors;
   const [title, setTitle] = useState(initialTitle);
   const [content, setContent] = useState(initialContent);
   const [mood, setMood] = useState<(1 | 2 | 3 | 4 | 5) | null>(initialMood ?? null);
@@ -72,24 +74,38 @@ export function JournalEditor({
 
   return (
     <KeyboardAvoidingView
-      style={styles.container}
+      className="flex-1"
+      style={{ backgroundColor: themeColors.surface }}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       {prompt && (
-        <View style={styles.promptBanner}>
+        <View
+          className="p-4 border-b"
+          style={{
+            backgroundColor: themeColors.primaryLight + '20',
+            borderBottomColor: themeColors.border,
+          }}
+        >
           <Text variant="label" color="primary">
             {prompt.category.toUpperCase()}
           </Text>
-          <Text variant="body" color="textPrimary" style={styles.promptText}>
+          <Text variant="body" color="textPrimary" className="mt-1">
             {prompt.text}
           </Text>
         </View>
       )}
 
       <TextInput
-        style={styles.titleInput}
+        className="px-4 py-3 pb-2 border-b"
+        style={[
+          typography.h3,
+          {
+            color: themeColors.textPrimary,
+            borderBottomColor: themeColors.borderLight,
+          },
+        ]}
         placeholder="Title (optional)"
-        placeholderTextColor={colors.textMuted}
+        placeholderTextColor={themeColors.textMuted}
         value={title}
         onChangeText={setTitle}
         maxLength={100}
@@ -99,9 +115,10 @@ export function JournalEditor({
 
       <TextInput
         ref={contentRef}
-        style={styles.contentInput}
+        className="flex-1 p-4"
+        style={[typography.body, { color: themeColors.textPrimary, lineHeight: 26 }]}
         placeholder="What's on your mind?"
-        placeholderTextColor={colors.textMuted}
+        placeholderTextColor={themeColors.textMuted}
         value={content}
         onChangeText={setContent}
         multiline
@@ -110,17 +127,23 @@ export function JournalEditor({
         autoFocus={!prompt}
       />
 
-      <View style={styles.footer}>
-        <View style={styles.footerLeft}>
+      <View
+        className="flex-row items-center justify-between px-4 py-2 border-t"
+        style={{ borderTopColor: themeColors.borderLight }}
+      >
+        <View className="flex-row items-center gap-2">
           <Text variant="caption" color="textMuted">
             {content.length.toLocaleString()} characters
           </Text>
           {hasUnsavedChanges && (
-            <View style={styles.unsavedDot} />
+            <View
+              className="w-2 h-2 rounded-full"
+              style={{ backgroundColor: themeColors.warning }}
+            />
           )}
         </View>
 
-        <View style={styles.footerRight}>
+        <View className="flex-row items-center gap-2">
           <VoiceButton
             onTranscription={(text) => {
               setContent((prev) => prev + (prev ? ' ' : '') + text);
@@ -128,21 +151,27 @@ export function JournalEditor({
           />
           <Pressable
             onPress={toggleMoodPicker}
-            style={styles.moodToggle}
+            className="p-2"
             accessibilityLabel="Add mood to entry"
           >
             <Ionicons
               name={mood ? 'happy' : 'happy-outline'}
               size={24}
-              color={mood ? colors.mood[mood] : colors.textMuted}
+              color={mood ? colors.mood[mood] : themeColors.textMuted}
             />
           </Pressable>
         </View>
       </View>
 
       {showMoodPicker && (
-        <View style={styles.moodPicker}>
-          <Text variant="captionMedium" color="textSecondary" style={styles.moodLabel}>
+        <View
+          className="p-4 border-t"
+          style={{
+            backgroundColor: themeColors.surfaceElevated,
+            borderTopColor: themeColors.border,
+          }}
+        >
+          <Text variant="captionMedium" color="textSecondary" center className="mb-4">
             How does this make you feel?
           </Text>
           <MoodSelector
@@ -155,19 +184,18 @@ export function JournalEditor({
         </View>
       )}
 
-      <View style={styles.actions}>
-        <Button
-          variant="ghost"
-          onPress={onCancel}
-          style={styles.cancelButton}
-        >
+      <View
+        className="flex-row p-4 gap-2 border-t"
+        style={{ borderTopColor: themeColors.border }}
+      >
+        <Button variant="ghost" onPress={onCancel} className="flex-1">
           Cancel
         </Button>
         <Button
           onPress={handleSave}
           disabled={!canSave}
           loading={isSaving}
-          style={styles.saveButton}
+          className="flex-[2]"
         >
           Save Entry
         </Button>
@@ -175,85 +203,3 @@ export function JournalEditor({
     </KeyboardAvoidingView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.surface,
-  },
-  promptBanner: {
-    backgroundColor: colors.primaryLight + '20',
-    padding: spacing.md,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-  },
-  promptText: {
-    marginTop: spacing.xs,
-  },
-  titleInput: {
-    ...typography.h3,
-    color: colors.textPrimary,
-    padding: spacing.md,
-    paddingBottom: spacing.sm,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.borderLight,
-  },
-  contentInput: {
-    ...typography.body,
-    color: colors.textPrimary,
-    flex: 1,
-    padding: spacing.md,
-    lineHeight: 26,
-  },
-  footer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    borderTopWidth: 1,
-    borderTopColor: colors.borderLight,
-  },
-  footerLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-  },
-  footerRight: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-  },
-  unsavedDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: colors.warning,
-  },
-  moodToggle: {
-    padding: spacing.sm,
-  },
-  moodPicker: {
-    padding: spacing.md,
-    backgroundColor: colors.surfaceElevated,
-    borderTopWidth: 1,
-    borderTopColor: colors.border,
-  },
-  moodLabel: {
-    marginBottom: spacing.md,
-    textAlign: 'center',
-  },
-  actions: {
-    flexDirection: 'row',
-    padding: spacing.md,
-    gap: spacing.sm,
-    borderTopWidth: 1,
-    borderTopColor: colors.border,
-  },
-  cancelButton: {
-    flex: 1,
-  },
-  saveButton: {
-    flex: 2,
-  },
-});

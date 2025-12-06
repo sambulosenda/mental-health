@@ -1,4 +1,4 @@
-import { View, Pressable, StyleSheet, ScrollView } from 'react-native';
+import { View, Pressable, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import Animated, {
@@ -7,7 +7,8 @@ import Animated, {
   withSpring,
 } from 'react-native-reanimated';
 import { Text } from '@/src/components/ui';
-import { colors, spacing, borderRadius, activityTags, type ActivityTagId } from '@/src/constants/theme';
+import { colors, darkColors, spacing, activityTags, type ActivityTagId } from '@/src/constants/theme';
+import { useTheme } from '@/src/contexts/ThemeContext';
 
 interface ActivityTagsProps {
   selectedActivities: ActivityTagId[];
@@ -29,11 +30,11 @@ const iconMap: Record<string, keyof typeof Ionicons.glyphMap> = {
 
 export function ActivityTags({ selectedActivities, onToggleActivity }: ActivityTagsProps) {
   return (
-    <View style={styles.container}>
+    <View className="my-2">
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={{ paddingHorizontal: spacing.md, gap: spacing.sm }}
       >
         {activityTags.map((tag) => (
           <ActivityTag
@@ -59,6 +60,8 @@ interface ActivityTagProps {
 }
 
 function ActivityTag({ id, label, icon, isSelected, onPress }: ActivityTagProps) {
+  const { isDark } = useTheme();
+  const themeColors = isDark ? darkColors : colors;
   const scale = useSharedValue(1);
 
   const animatedStyle = useAnimatedStyle(() => ({
@@ -81,21 +84,26 @@ function ActivityTag({ id, label, icon, isSelected, onPress }: ActivityTagProps)
       accessibilityState={{ checked: isSelected }}
     >
       <Animated.View
+        className="flex-row items-center px-4 py-2 rounded-full border-[1.5px]"
         style={[
-          styles.tag,
-          isSelected && styles.tagSelected,
+          {
+            backgroundColor: isSelected
+              ? themeColors.primaryLight + '30'
+              : themeColors.surfaceElevated,
+            borderColor: isSelected ? themeColors.primary : themeColors.border,
+          },
           animatedStyle,
         ]}
       >
         <Ionicons
           name={iconName}
           size={18}
-          color={isSelected ? colors.primary : colors.textSecondary}
+          color={isSelected ? themeColors.primary : themeColors.textSecondary}
         />
         <Text
           variant="captionMedium"
           color={isSelected ? 'primary' : 'textSecondary'}
-          style={styles.tagLabel}
+          className="ml-1"
         >
           {label}
         </Text>
@@ -103,30 +111,3 @@ function ActivityTag({ id, label, icon, isSelected, onPress }: ActivityTagProps)
     </Pressable>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    marginVertical: spacing.sm,
-  },
-  scrollContent: {
-    paddingHorizontal: spacing.md,
-    gap: spacing.sm,
-  },
-  tag: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    borderRadius: borderRadius.full,
-    backgroundColor: colors.surfaceElevated,
-    borderWidth: 1.5,
-    borderColor: colors.border,
-  },
-  tagSelected: {
-    backgroundColor: colors.primaryLight + '30',
-    borderColor: colors.primary,
-  },
-  tagLabel: {
-    marginLeft: spacing.xs,
-  },
-});

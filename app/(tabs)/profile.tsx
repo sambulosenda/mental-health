@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
-import { View, StyleSheet, ScrollView, Alert, Pressable } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { View, StyleSheet, Alert, Pressable } from 'react-native';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { Host, Switch } from '@expo/ui/swift-ui';
-import { Text, Card, Button, NativeTimePicker } from '@/src/components/ui';
+import Animated, { useSharedValue, useAnimatedScrollHandler } from 'react-native-reanimated';
+import { Text, Card, Button, NativeTimePicker, ThemeToggleButton, AnimatedHeader } from '@/src/components/ui';
 import { useSettingsStore, useMoodStore, useJournalStore } from '@/src/stores';
 import {
   scheduleDailyReminder,
@@ -17,7 +18,10 @@ import {
   authenticate,
 } from '@/src/lib/biometrics';
 import { exportMoodToCSV, exportAllData } from '@/src/lib/export';
-import { colors, spacing } from '@/src/constants/theme';
+import { colors, darkColors, spacing } from '@/src/constants/theme';
+import { useTheme } from '@/src/contexts/ThemeContext';
+
+const HEADER_EXPANDED_HEIGHT = 120;
 
 export default function ProfileScreen() {
   const {
@@ -31,6 +35,17 @@ export default function ProfileScreen() {
 
   const { entries: moodEntries, loadEntries: loadMoodEntries, clearEntries: clearMoodEntries } = useMoodStore();
   const { entries: journalEntries, loadEntries: loadJournalEntries, clearEntries: clearJournalEntries } = useJournalStore();
+  const { mode, setMode, isDark } = useTheme();
+  const insets = useSafeAreaInsets();
+
+  const themeColors = isDark ? darkColors : colors;
+
+  const scrollY = useSharedValue(0);
+  const scrollHandler = useAnimatedScrollHandler({
+    onScroll: (event) => {
+      scrollY.value = event.contentOffset.y;
+    },
+  });
 
   const [biometricAvailable, setBiometricAvailable] = useState(false);
   const [biometricName, setBiometricName] = useState('Biometric');
@@ -194,21 +209,23 @@ export default function ProfileScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
-        <ScrollView
+    <SafeAreaView style={[styles.container, { backgroundColor: themeColors.background }]} edges={['top']}>
+      <AnimatedHeader
+        scrollY={scrollY}
+        title="Profile"
+        subtitle="Settings and privacy"
+        showThemeToggle
+      />
+      <Animated.ScrollView
         style={styles.scroll}
-        contentContainerStyle={styles.content}
+        contentContainerStyle={[
+          styles.content,
+          { paddingTop: HEADER_EXPANDED_HEIGHT + insets.top },
+        ]}
         showsVerticalScrollIndicator={false}
+        onScroll={scrollHandler}
+        scrollEventThrottle={16}
       >
-        <View style={styles.header}>
-          <Text variant="h1" color="textPrimary">
-            Profile
-          </Text>
-          <Text variant="body" color="textSecondary" style={styles.subtitle}>
-            Settings and privacy
-          </Text>
-        </View>
-
         <View style={styles.section}>
           <Text variant="h3" color="textPrimary" style={styles.sectionTitle}>
             Notifications
@@ -233,7 +250,7 @@ export default function ProfileScreen() {
               </Host>
             </View>
             {reminderEnabled && (
-              <Pressable style={styles.timeRow} onPress={handleTimeChange}>
+              <Pressable style={[styles.timeRow, { borderTopColor: themeColors.border }]} onPress={handleTimeChange}>
                 <View style={styles.settingText}>
                   <Text variant="caption" color="textSecondary">
                     Reminder Time
@@ -242,9 +259,28 @@ export default function ProfileScreen() {
                     {formatTime(reminderTime)}
                   </Text>
                 </View>
-                <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
+                <Ionicons name="chevron-forward" size={20} color={themeColors.textMuted} />
               </Pressable>
             )}
+          </Card>
+        </View>
+
+        <View style={styles.section}>
+          <Text variant="h3" color="textPrimary" style={styles.sectionTitle}>
+            Appearance
+          </Text>
+          <Card variant="outlined">
+            <View style={styles.settingRow}>
+              <View style={styles.settingText}>
+                <Text variant="bodyMedium" color="textPrimary">
+                  Theme
+                </Text>
+                <Text variant="caption" color="textSecondary">
+                  {mode === 'system' ? 'Using device setting' : mode === 'dark' ? 'Dark mode' : 'Light mode'}
+                </Text>
+              </View>
+              <ThemeToggleButton size="medium" />
+            </View>
           </Card>
         </View>
 
@@ -336,7 +372,7 @@ export default function ProfileScreen() {
             </Text>
           </Card>
         </View>
-      </ScrollView>
+      </Animated.ScrollView>
 
       <NativeTimePicker
         value={getTimeAsDate()}
@@ -357,14 +393,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   content: {
-    padding: spacing.lg,
+    paddingHorizontal: spacing.lg,
     paddingBottom: spacing.xxl,
-  },
-  header: {
-    marginBottom: spacing.xl,
-  },
-  subtitle: {
-    marginTop: spacing.xs,
   },
   section: {
     marginBottom: spacing.xl,

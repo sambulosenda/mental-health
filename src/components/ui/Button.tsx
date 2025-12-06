@@ -1,12 +1,11 @@
 import {
   Pressable,
   PressableProps,
-  StyleSheet,
   ViewStyle,
   ActivityIndicator,
 } from 'react-native';
 import * as Haptics from 'expo-haptics';
-import { colors, spacing, borderRadius, typography } from '@/src/constants/theme';
+import { useTheme } from '@/src/contexts/ThemeContext';
 import { Text } from './Text';
 
 type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger';
@@ -18,6 +17,7 @@ interface ButtonProps extends Omit<PressableProps, 'style'> {
   loading?: boolean;
   fullWidth?: boolean;
   style?: ViewStyle;
+  className?: string;
   children: string;
 }
 
@@ -28,10 +28,13 @@ export function Button({
   fullWidth = false,
   disabled,
   style,
+  className,
   children,
   onPress,
   ...props
 }: ButtonProps) {
+  const { isDark } = useTheme();
+
   const handlePress = async (e: any) => {
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     onPress?.(e);
@@ -39,44 +42,43 @@ export function Button({
 
   const isDisabled = disabled || loading;
 
-  const getRippleColor = () => {
-    if (variant === 'primary') return 'rgba(255, 255, 255, 0.2)';
-    if (variant === 'danger') return 'rgba(255, 255, 255, 0.2)';
-    return colors.primaryLight;
-  };
+  const sizeClass = {
+    sm: 'h-9 px-4',
+    md: 'h-12 px-6',
+    lg: 'h-14 px-8',
+  }[size];
+
+  const variantClass = {
+    primary: 'bg-primary',
+    secondary: isDark
+      ? 'bg-surface-dark border-[1.5px] border-primary'
+      : 'bg-surface border-[1.5px] border-primary',
+    ghost: 'bg-transparent',
+    danger: 'bg-error',
+  }[variant];
 
   return (
     <Pressable
-      style={({ pressed }) => [
-        styles.base,
-        styles[variant],
-        styles[`size_${size}`],
-        fullWidth && styles.fullWidth,
-        pressed && styles.pressed,
-        isDisabled && styles.disabled,
-        style,
-      ]}
+      className={`items-center justify-center rounded-md ${sizeClass} ${variantClass} ${fullWidth ? 'w-full' : ''} ${isDisabled ? 'opacity-50' : ''} ${className || ''}`}
+      style={style}
       disabled={isDisabled}
       onPress={handlePress}
       accessibilityRole="button"
       accessibilityState={{ disabled: isDisabled }}
-      android_ripple={{
-        color: getRippleColor(),
-        borderless: false,
-        foreground: true,
-      }}
       {...props}
     >
       {loading ? (
         <ActivityIndicator
           size="small"
-          color={variant === 'primary' ? colors.textInverse : colors.primary}
+          color={variant === 'primary' ? '#FFFFFF' : '#6B8E8E'}
         />
       ) : (
         <Text
           variant={size === 'sm' ? 'captionMedium' : 'bodyMedium'}
-          color={variant === 'primary' || variant === 'danger' ? 'textInverse' : 'primary'}
-          style={isDisabled ? styles.disabledText : undefined}
+          style={{
+            color: variant === 'primary' || variant === 'danger' ? '#FFFFFF' : '#6B8E8E',
+            opacity: isDisabled ? 0.7 : 1,
+          }}
         >
           {children}
         </Text>
@@ -84,50 +86,3 @@ export function Button({
     </Pressable>
   );
 }
-
-const styles = StyleSheet.create({
-  base: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: borderRadius.md,
-  },
-  primary: {
-    backgroundColor: colors.primary,
-  },
-  secondary: {
-    backgroundColor: colors.surface,
-    borderWidth: 1.5,
-    borderColor: colors.primary,
-  },
-  ghost: {
-    backgroundColor: 'transparent',
-  },
-  danger: {
-    backgroundColor: colors.error,
-  },
-  size_sm: {
-    height: 36,
-    paddingHorizontal: spacing.md,
-  },
-  size_md: {
-    height: 48,
-    paddingHorizontal: spacing.lg,
-  },
-  size_lg: {
-    height: 56,
-    paddingHorizontal: spacing.xl,
-  },
-  fullWidth: {
-    width: '100%',
-  },
-  pressed: {
-    opacity: 0.85,
-    transform: [{ scale: 0.98 }],
-  },
-  disabled: {
-    opacity: 0.5,
-  },
-  disabledText: {
-    opacity: 0.7,
-  },
-});

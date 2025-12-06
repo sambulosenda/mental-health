@@ -49,6 +49,58 @@ export const colors = {
   divider: '#E8EBEB',
 } as const;
 
+// Dark mode colors
+export const darkColors = {
+  // Primary palette - same as light
+  primary: '#6B8E8E',
+  primaryLight: '#A8C5C5',
+  primaryDark: '#4A6B6B',
+
+  // Mood colors - same as light (for consistency)
+  mood: {
+    1: '#E8B4B4',
+    2: '#E8D4B4',
+    3: '#E8E4B4',
+    4: '#C4E8B4',
+    5: '#B4D4E8',
+  } as Record<number, string>,
+
+  moodText: {
+    1: '#8B5A5A',
+    2: '#8B7A5A',
+    3: '#7B7A4A',
+    4: '#5A7B5A',
+    5: '#5A6A7B',
+  } as Record<number, string>,
+
+  // Dark backgrounds
+  background: '#121212',
+  surface: '#1E1E1E',
+  surfaceElevated: '#2A2A2A',
+
+  // Dark text
+  textPrimary: '#FAFAFA',
+  textSecondary: '#B0B0B0',
+  textMuted: '#707070',
+  textInverse: '#1E1E1E',
+
+  // Semantic - slightly adjusted for dark
+  error: '#E57373',
+  errorLight: '#3D2020',
+  success: '#81C784',
+  successLight: '#1D3D1D',
+  warning: '#FFB74D',
+  warningLight: '#3D3020',
+
+  // Dark borders
+  border: '#3A3A3A',
+  borderLight: '#2A2A2A',
+  divider: '#2A2A2A',
+} as const;
+
+// Helper to get colors based on theme
+export const getThemeColors = (isDark: boolean) => isDark ? darkColors : colors;
+
 export const spacing = {
   xs: 4,
   sm: 8,
