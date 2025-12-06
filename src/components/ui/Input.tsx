@@ -2,16 +2,17 @@ import {
   TextInput,
   TextInputProps,
   View,
-  StyleSheet,
 } from 'react-native';
 import { useState } from 'react';
-import { colors, spacing, borderRadius, typography } from '@/src/constants/theme';
+import { typography } from '@/src/constants/theme';
+import { useTheme } from '@/src/contexts/ThemeContext';
 import { Text } from './Text';
 
 interface InputProps extends TextInputProps {
   label?: string;
   error?: string;
   helper?: string;
+  className?: string;
 }
 
 export function Input({
@@ -19,10 +20,12 @@ export function Input({
   error,
   helper,
   style,
+  className,
   onFocus,
   onBlur,
   ...props
 }: InputProps) {
+  const { isDark } = useTheme();
   const [isFocused, setIsFocused] = useState(false);
 
   const handleFocus = (e: any) => {
@@ -35,21 +38,33 @@ export function Input({
     onBlur?.(e);
   };
 
+  const baseClass = isDark
+    ? 'bg-surface-dark-elevated border-border-dark'
+    : 'bg-surface-elevated border-border';
+
+  const focusedClass = isFocused
+    ? isDark
+      ? 'border-primary bg-surface-dark'
+      : 'border-primary bg-surface'
+    : '';
+
+  const errorClass = error ? 'border-error' : '';
+
   return (
-    <View style={styles.container}>
+    <View className={`w-full ${className || ''}`}>
       {label && (
-        <Text variant="captionMedium" color="textSecondary" style={styles.label}>
+        <Text variant="captionMedium" color="textSecondary" className="mb-1">
           {label}
         </Text>
       )}
       <TextInput
+        className={`rounded-md border-[1.5px] px-4 py-3 ${baseClass} ${focusedClass} ${errorClass}`}
         style={[
-          styles.input,
-          isFocused && styles.inputFocused,
-          error && styles.inputError,
+          typography.body,
+          { color: isDark ? '#FAFAFA' : '#2C3E3E' },
           style,
         ]}
-        placeholderTextColor={colors.textMuted}
+        placeholderTextColor={isDark ? '#707070' : '#8A9A9A'}
         onFocus={handleFocus}
         onBlur={handleBlur}
         accessibilityLabel={label}
@@ -59,7 +74,7 @@ export function Input({
         <Text
           variant="caption"
           color={error ? 'error' : 'textMuted'}
-          style={styles.helper}
+          className="mt-1"
         >
           {error || helper}
         </Text>
@@ -67,32 +82,3 @@ export function Input({
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    width: '100%',
-  },
-  label: {
-    marginBottom: spacing.xs,
-  },
-  input: {
-    ...typography.body,
-    backgroundColor: colors.surfaceElevated,
-    borderRadius: borderRadius.md,
-    borderWidth: 1.5,
-    borderColor: colors.border,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm + 4,
-    color: colors.textPrimary,
-  },
-  inputFocused: {
-    borderColor: colors.primary,
-    backgroundColor: colors.surface,
-  },
-  inputError: {
-    borderColor: colors.error,
-  },
-  helper: {
-    marginTop: spacing.xs,
-  },
-});

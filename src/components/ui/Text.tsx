@@ -1,5 +1,6 @@
 import { Text as RNText, TextProps as RNTextProps, StyleSheet } from 'react-native';
-import { colors, typography } from '@/src/constants/theme';
+import { colors, darkColors, typography } from '@/src/constants/theme';
+import { useTheme } from '@/src/contexts/ThemeContext';
 
 type TextVariant = keyof typeof typography;
 
@@ -17,7 +18,10 @@ export function Text({
   children,
   ...props
 }: TextProps) {
-  const textColor = color in colors ? colors[color as keyof typeof colors] : color;
+  const { isDark } = useTheme();
+  const themeColors = isDark ? darkColors : colors;
+
+  const textColor = color in themeColors ? themeColors[color as keyof typeof themeColors] : color;
 
   return (
     <RNText

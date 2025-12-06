@@ -1,4 +1,4 @@
-import { StyleSheet, View } from 'react-native';
+import { View } from 'react-native';
 import Animated, {
   useAnimatedStyle,
   interpolate,
@@ -6,7 +6,9 @@ import Animated, {
   SharedValue,
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { colors, spacing, typography } from '@/src/constants/theme';
+import { colors, darkColors, spacing, typography } from '@/src/constants/theme';
+import { useTheme } from '@/src/contexts/ThemeContext';
+import { ThemeToggleButton } from './ThemeToggleButton';
 
 interface AnimatedHeaderProps {
   scrollY: SharedValue<number>;
@@ -14,6 +16,7 @@ interface AnimatedHeaderProps {
   subtitle?: string;
   collapsedHeight?: number;
   expandedHeight?: number;
+  showThemeToggle?: boolean;
 }
 
 export function AnimatedHeader({
@@ -22,7 +25,10 @@ export function AnimatedHeader({
   subtitle,
   collapsedHeight = 60,
   expandedHeight = 120,
+  showThemeToggle = false,
 }: AnimatedHeaderProps) {
+  const { isDark } = useTheme();
+  const themeColors = isDark ? darkColors : colors;
   const insets = useSafeAreaInsets();
   const totalCollapsed = collapsedHeight + insets.top;
   const totalExpanded = expandedHeight + insets.top;
@@ -37,22 +43,35 @@ export function AnimatedHeader({
     return { height };
   });
 
-  const titleStyle = useAnimatedStyle(() => {
-    const scale = interpolate(
-      scrollY.value,
-      [0, 50],
-      [1, 0.85],
-      Extrapolation.CLAMP
-    );
+  const scrollDistance = totalExpanded - totalCollapsed;
+
+  const collapsedTitleStyle = useAnimatedStyle(() => {
     const translateY = interpolate(
       scrollY.value,
-      [0, 50],
-      [0, -8],
+      [scrollDistance - 20, scrollDistance],
+      [30, 0],
+      Extrapolation.CLAMP
+    );
+    const opacity = interpolate(
+      scrollY.value,
+      [scrollDistance - 20, scrollDistance],
+      [0, 1],
       Extrapolation.CLAMP
     );
     return {
-      transform: [{ scale }, { translateY }],
+      transform: [{ translateY }],
+      opacity,
     };
+  });
+
+  const expandedTitleStyle = useAnimatedStyle(() => {
+    const opacity = interpolate(
+      scrollY.value,
+      [0, scrollDistance * 0.5],
+      [1, 0],
+      Extrapolation.CLAMP
+    );
+    return { opacity };
   });
 
   const subtitleStyle = useAnimatedStyle(() => ({
@@ -69,42 +88,80 @@ export function AnimatedHeader({
     ],
   }));
 
+  const borderStyle = useAnimatedStyle(() => ({
+    borderBottomWidth: interpolate(
+      scrollY.value,
+      [0, 10],
+      [0, 0.5],
+      Extrapolation.CLAMP
+    ),
+    borderBottomColor: themeColors.border,
+  }));
+
   return (
-    <Animated.View style={[styles.header, headerStyle, { paddingTop: insets.top }]}>
-      <View style={styles.content}>
-        <Animated.Text style={[styles.title, titleStyle]}>{title}</Animated.Text>
+    <Animated.View
+      style={[
+        {
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          backgroundColor: themeColors.background,
+          zIndex: 100,
+          paddingTop: insets.top,
+        },
+        headerStyle,
+        borderStyle,
+      ]}
+    >
+      {/* Collapsed title - slides up when scrolled */}
+      <View className="absolute left-0 right-0 overflow-hidden" style={{ top: insets.top, height: collapsedHeight }}>
+        <View className="flex-1 justify-center px-6">
+          <Animated.Text
+            style={[
+              typography.bodyMedium,
+              { color: themeColors.textPrimary, textAlign: 'center' },
+              collapsedTitleStyle,
+            ]}
+          >
+            {title}
+          </Animated.Text>
+        </View>
+      </View>
+
+      {/* Expanded title - fades out when scrolling */}
+      <View className="flex-1 justify-end px-6 pb-2">
+        <Animated.Text
+          style={[
+            typography.h1,
+            { color: themeColors.textPrimary },
+            expandedTitleStyle,
+          ]}
+        >
+          {title}
+        </Animated.Text>
         {subtitle && (
-          <Animated.Text style={[styles.subtitle, subtitleStyle]}>
+          <Animated.Text
+            style={[
+              typography.body,
+              { color: themeColors.textSecondary, marginTop: spacing.xs },
+              subtitleStyle,
+            ]}
+          >
             {subtitle}
           </Animated.Text>
         )}
       </View>
+
+      {/* Theme toggle - top right, vertically centered in collapsed header */}
+      {showThemeToggle && (
+        <View
+          className="absolute right-4 justify-center"
+          style={{ top: insets.top, height: collapsedHeight, zIndex: 10 }}
+        >
+          <ThemeToggleButton size="small" />
+        </View>
+      )}
     </Animated.View>
   );
 }
-
-const styles = StyleSheet.create({
-  header: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: colors.background,
-    zIndex: 100,
-    justifyContent: 'flex-end',
-  },
-  content: {
-    paddingHorizontal: spacing.lg,
-    paddingBottom: spacing.sm,
-  },
-  title: {
-    ...typography.h1,
-    color: colors.textPrimary,
-    transformOrigin: 'left center',
-  },
-  subtitle: {
-    ...typography.body,
-    color: colors.textSecondary,
-    marginTop: spacing.xs,
-  },
-});

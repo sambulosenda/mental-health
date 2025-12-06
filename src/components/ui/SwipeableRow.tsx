@@ -12,7 +12,8 @@ import Animated, {
 } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { haptics } from '@/src/utils/haptics';
-import { colors, spacing } from '@/src/constants/theme';
+import { colors, darkColors } from '@/src/constants/theme';
+import { useTheme } from '@/src/contexts/ThemeContext';
 
 interface SwipeableRowProps {
   children: ReactNode;
@@ -25,6 +26,8 @@ export function SwipeableRow({
   onDelete,
   deleteThreshold = -100,
 }: SwipeableRowProps) {
+  const { isDark } = useTheme();
+  const themeColors = isDark ? darkColors : colors;
   const translateX = useSharedValue(0);
   const itemHeight = useSharedValue<number | null>(null);
   const isDeleting = useSharedValue(false);
@@ -61,7 +64,7 @@ export function SwipeableRow({
 
   const animatedRowStyle = useAnimatedStyle(() => ({
     transform: [{ translateX: translateX.value }],
-    backgroundColor: colors.background,
+    backgroundColor: themeColors.background,
   }));
 
   const containerStyle = useAnimatedStyle(() => {
@@ -100,7 +103,7 @@ export function SwipeableRow({
 
   return (
     <Animated.View style={[styles.container, containerStyle]}>
-      <View style={styles.deleteBackground}>
+      <View style={[styles.deleteBackground, { backgroundColor: themeColors.error }]}>
         <Animated.View style={[styles.deleteIcon, deleteIconStyle]}>
           <Ionicons name="trash" size={24} color="white" />
         </Animated.View>
@@ -122,7 +125,6 @@ const styles = StyleSheet.create({
     top: 0,
     bottom: 0,
     width: 100,
-    backgroundColor: colors.error,
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 16,

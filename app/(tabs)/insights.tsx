@@ -1,32 +1,45 @@
 import { useEffect, useState, useCallback } from 'react';
-import { View, StyleSheet, ScrollView, RefreshControl, ActivityIndicator } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { View, RefreshControl, ActivityIndicator } from 'react-native';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { Text, Card, Button, NativePicker } from '@/src/components/ui';
+import Animated, { useSharedValue, useAnimatedScrollHandler } from 'react-native-reanimated';
+import { Text, Card, Button, NativePicker, AnimatedHeader } from '@/src/components/ui';
 import { MoodTrendChart, MoodCalendar, InsightList } from '@/src/components/insights';
 import type { Insight } from '@/src/components/insights';
 import { useMoodStore, useJournalStore } from '@/src/stores';
 import { detectPatterns } from '@/src/lib/insights';
 import { useAIInsights } from '@/src/lib/ai';
-import { colors, spacing } from '@/src/constants/theme';
+import { colors, darkColors, spacing } from '@/src/constants/theme';
+import { useTheme } from '@/src/contexts/ThemeContext';
 import type { DailyMoodSummary } from '@/src/types/mood';
+
+const HEADER_EXPANDED_HEIGHT = 120;
 
 const TIME_RANGES = ['Week', 'Month', 'Year'] as const;
 const DAYS_MAP = { Week: 7, Month: 30, Year: 365 } as const;
 
 export default function InsightsScreen() {
+  const { isDark } = useTheme();
+  const themeColors = isDark ? darkColors : colors;
+  const insets = useSafeAreaInsets();
   const { entries, loadEntries, getDailySummaries } = useMoodStore();
+
+  const scrollY = useSharedValue(0);
+  const scrollHandler = useAnimatedScrollHandler({
+    onScroll: (event) => {
+      scrollY.value = event.contentOffset.y;
+    },
+  });
   const { entries: journalEntries, loadEntries: loadJournalEntries } = useJournalStore();
   const [summaries, setSummaries] = useState<DailyMoodSummary[]>([]);
   const [insights, setInsights] = useState<Insight[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [timeRangeIndex, setTimeRangeIndex] = useState(1); // Default to Month
+  const [timeRangeIndex, setTimeRangeIndex] = useState(1);
 
   const selectedRange = TIME_RANGES[timeRangeIndex];
   const daysToFetch = DAYS_MAP[selectedRange];
 
-  // AI Insights
   const {
     state: aiState,
     insights: aiInsights,
@@ -45,7 +58,6 @@ export default function InsightsScreen() {
       const dailySummaries = await getDailySummaries(daysToFetch);
       setSummaries(dailySummaries);
 
-      // Detect patterns
       const detectedInsights = detectPatterns({
         entries,
         summaries: dailySummaries,
@@ -62,7 +74,6 @@ export default function InsightsScreen() {
     loadData();
   }, [daysToFetch]);
 
-  // Re-run pattern detection when entries change
   useEffect(() => {
     if (summaries.length > 0) {
       const detectedInsights = detectPatterns({
@@ -80,29 +91,32 @@ export default function InsightsScreen() {
   }, [loadData]);
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
-        <ScrollView
-        style={styles.scroll}
-        contentContainerStyle={styles.content}
+    <SafeAreaView className={`flex-1 ${isDark ? 'bg-background-dark' : 'bg-background'}`} edges={['top']}>
+      <AnimatedHeader
+        scrollY={scrollY}
+        title="Insights"
+        subtitle="Discover patterns in your emotional journey"
+        showThemeToggle
+      />
+      <Animated.ScrollView
+        className="flex-1"
+        contentContainerStyle={{
+          paddingHorizontal: spacing.lg,
+          paddingBottom: spacing.xxl,
+          paddingTop: HEADER_EXPANDED_HEIGHT + insets.top,
+        }}
         showsVerticalScrollIndicator={false}
+        onScroll={scrollHandler}
+        scrollEventThrottle={16}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            tintColor={colors.primary}
+            tintColor={themeColors.primary}
           />
         }
       >
-        <View style={styles.header}>
-          <Text variant="h1" color="textPrimary">
-            Insights
-          </Text>
-          <Text variant="body" color="textSecondary" style={styles.subtitle}>
-            Discover patterns in your emotional journey
-          </Text>
-        </View>
-
-        <View style={styles.pickerContainer}>
+        <View className="mb-6">
           <NativePicker
             options={[...TIME_RANGES]}
             selectedIndex={timeRangeIndex}
@@ -110,19 +124,19 @@ export default function InsightsScreen() {
           />
         </View>
 
-        <View style={styles.section}>
+        <View className="mb-6">
           <MoodTrendChart summaries={summaries} isLoading={isLoading} />
         </View>
 
-        <View style={styles.section}>
-          <Text variant="h3" color="textPrimary" style={styles.sectionTitle}>
+        <View className="mb-6">
+          <Text variant="h3" color="textPrimary" className="mb-4">
             {selectedRange} Overview
           </Text>
           <MoodCalendar summaries={summaries} isLoading={isLoading} />
         </View>
 
-        <View style={styles.section}>
-          <Text variant="h3" color="textPrimary" style={styles.sectionTitle}>
+        <View className="mb-6">
+          <Text variant="h3" color="textPrimary" className="mb-4">
             Patterns & Insights
           </Text>
           <InsightList
@@ -131,27 +145,27 @@ export default function InsightsScreen() {
           />
         </View>
 
-        <View style={styles.section}>
-          <Text variant="h3" color="textPrimary" style={styles.sectionTitle}>
+        <View className="mb-6">
+          <Text variant="h3" color="textPrimary" className="mb-4">
             AI Insights
           </Text>
           {!isModelReady ? (
-            <Card variant="outlined" style={styles.aiCard}>
-              <View style={styles.aiLoadingRow}>
-                <ActivityIndicator size="small" color={colors.primary} />
-                <Text variant="body" color="textSecondary" style={styles.aiLoadingText}>
+            <Card variant="outlined" className="p-4 items-center">
+              <View className="flex-row items-center">
+                <ActivityIndicator size="small" color={themeColors.primary} />
+                <Text variant="body" color="textSecondary" className="ml-2">
                   Loading AI model...
                 </Text>
               </View>
-              <Text variant="caption" color="textMuted" style={styles.aiText}>
+              <Text variant="caption" color="textMuted" className="mt-2 text-center">
                 First-time setup may take a moment while the model downloads.
               </Text>
             </Card>
           ) : aiState === 'generating' ? (
-            <Card variant="outlined" style={styles.aiCard}>
-              <View style={styles.aiLoadingRow}>
-                <ActivityIndicator size="small" color={colors.primary} />
-                <Text variant="body" color="textSecondary" style={styles.aiLoadingText}>
+            <Card variant="outlined" className="p-4 items-center">
+              <View className="flex-row items-center">
+                <ActivityIndicator size="small" color={themeColors.primary} />
+                <Text variant="body" color="textSecondary" className="ml-2">
                   Analyzing your patterns...
                 </Text>
               </View>
@@ -161,91 +175,37 @@ export default function InsightsScreen() {
               <InsightList insights={aiInsights} />
               <Button
                 variant="ghost"
-                size="small"
+                size="sm"
                 onPress={generateInsights}
-                style={styles.refreshButton}
+                className="mt-2 self-center"
               >
                 Refresh AI Insights
               </Button>
             </View>
           ) : (
-            <Card variant="outlined" style={styles.aiCard}>
-              <Ionicons name="sparkles" size={24} color={colors.primary} />
-              <Text variant="body" color="textSecondary" style={styles.aiText}>
+            <Card variant="outlined" className="p-4 items-center">
+              <Ionicons name="sparkles" size={24} color={themeColors.primary} />
+              <Text variant="body" color="textSecondary" className="mt-2 text-center">
                 {aiError || 'Generate personalized insights based on your mood and journal entries.'}
               </Text>
               <Button
                 variant="secondary"
-                size="small"
+                size="sm"
                 onPress={generateInsights}
                 disabled={entries.length < 3}
-                style={styles.generateButton}
+                className="mt-4"
               >
                 Generate AI Insights
               </Button>
               {entries.length < 3 && (
-                <Text variant="caption" color="textMuted" style={styles.aiHint}>
+                <Text variant="caption" color="textMuted" className="mt-1">
                   Need at least 3 mood entries
                 </Text>
               )}
             </Card>
           )}
         </View>
-      </ScrollView>
+      </Animated.ScrollView>
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  scroll: {
-    flex: 1,
-  },
-  content: {
-    padding: spacing.lg,
-    paddingBottom: spacing.xxl,
-  },
-  header: {
-    marginBottom: spacing.xl,
-  },
-  subtitle: {
-    marginTop: spacing.xs,
-  },
-  pickerContainer: {
-    marginBottom: spacing.lg,
-  },
-  section: {
-    marginBottom: spacing.lg,
-  },
-  sectionTitle: {
-    marginBottom: spacing.md,
-  },
-  aiCard: {
-    padding: spacing.md,
-    alignItems: 'center',
-  },
-  aiText: {
-    marginTop: spacing.sm,
-    textAlign: 'center',
-  },
-  aiLoadingRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  aiLoadingText: {
-    marginLeft: spacing.sm,
-  },
-  generateButton: {
-    marginTop: spacing.md,
-  },
-  refreshButton: {
-    marginTop: spacing.sm,
-    alignSelf: 'center',
-  },
-  aiHint: {
-    marginTop: spacing.xs,
-  },
-});

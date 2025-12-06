@@ -58,6 +58,37 @@ export async function initializeDatabase(): Promise<void> {
     );
   `);
 
+  // Create chat_conversations table
+  await expo.execAsync(`
+    CREATE TABLE IF NOT EXISTS chat_conversations (
+      id TEXT PRIMARY KEY,
+      type TEXT NOT NULL,
+      title TEXT,
+      linked_mood_id TEXT,
+      started_at INTEGER NOT NULL,
+      ended_at INTEGER,
+      metadata TEXT
+    );
+  `);
+
+  // Create chat_messages table
+  await expo.execAsync(`
+    CREATE TABLE IF NOT EXISTS chat_messages (
+      id TEXT PRIMARY KEY,
+      conversation_id TEXT NOT NULL,
+      role TEXT NOT NULL,
+      content TEXT NOT NULL,
+      timestamp INTEGER NOT NULL,
+      FOREIGN KEY (conversation_id) REFERENCES chat_conversations(id) ON DELETE CASCADE
+    );
+  `);
+
+  // Index for efficient message queries by conversation
+  await expo.execAsync(`
+    CREATE INDEX IF NOT EXISTS idx_chat_messages_conversation
+    ON chat_messages(conversation_id, timestamp);
+  `);
+
   // Seed default prompts if empty
   const result = await expo.getFirstAsync<{ count: number }>('SELECT COUNT(*) as count FROM prompts');
   if (result?.count === 0) {

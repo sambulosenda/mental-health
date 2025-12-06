@@ -40,6 +40,26 @@ export const insights = sqliteTable('insights', {
   expiresAt: integer('expires_at', { mode: 'timestamp' }),
 });
 
+// Chat conversations table
+export const chatConversations = sqliteTable('chat_conversations', {
+  id: text('id').primaryKey(),
+  type: text('type').notNull(), // 'chat' | 'checkin'
+  title: text('title'),
+  linkedMoodId: text('linked_mood_id').references(() => moodEntries.id),
+  startedAt: integer('started_at', { mode: 'timestamp' }).notNull(),
+  endedAt: integer('ended_at', { mode: 'timestamp' }),
+  metadata: text('metadata'), // JSON
+});
+
+// Chat messages table
+export const chatMessages = sqliteTable('chat_messages', {
+  id: text('id').primaryKey(),
+  conversationId: text('conversation_id').notNull(),
+  role: text('role').notNull(), // 'user' | 'assistant'
+  content: text('content').notNull(),
+  timestamp: integer('timestamp', { mode: 'timestamp' }).notNull(),
+});
+
 // Type exports for use in application
 export type MoodEntryRow = typeof moodEntries.$inferSelect;
 export type NewMoodEntry = typeof moodEntries.$inferInsert;
@@ -47,3 +67,7 @@ export type JournalEntryRow = typeof journalEntries.$inferSelect;
 export type NewJournalEntry = typeof journalEntries.$inferInsert;
 export type PromptRow = typeof prompts.$inferSelect;
 export type InsightRow = typeof insights.$inferSelect;
+export type ChatConversationRow = typeof chatConversations.$inferSelect;
+export type NewChatConversation = typeof chatConversations.$inferInsert;
+export type ChatMessageRow = typeof chatMessages.$inferSelect;
+export type NewChatMessage = typeof chatMessages.$inferInsert;

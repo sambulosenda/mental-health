@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { View, StyleSheet, Pressable } from 'react-native';
+import { View, Pressable } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -8,7 +8,8 @@ import { format } from 'date-fns';
 import { Text, Card, Button, AnimatedHeader, AnimatedListItem, NativeGauge, NativeBottomSheet } from '@/src/components/ui';
 import { MoodCard, MoodAnimation } from '@/src/components/mood';
 import { useMoodStore } from '@/src/stores';
-import { colors, spacing, moodLabels, activityTags } from '@/src/constants/theme';
+import { colors, darkColors, spacing, moodLabels, activityTags } from '@/src/constants/theme';
+import { useTheme } from '@/src/contexts/ThemeContext';
 import type { MoodEntry } from '@/src/types/mood';
 
 const HEADER_EXPANDED_HEIGHT = 120;
@@ -16,6 +17,8 @@ const HEADER_EXPANDED_HEIGHT = 120;
 export default function HomeScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { isDark } = useTheme();
+  const themeColors = isDark ? darkColors : colors;
   const { todayEntries, entries, loadTodayEntries, loadEntries } = useMoodStore();
   const [selectedEntry, setSelectedEntry] = useState<MoodEntry | null>(null);
   const [showDetails, setShowDetails] = useState(false);
@@ -41,7 +44,6 @@ export default function HomeScreen() {
   const latestMood = todayEntries[0];
   const recentEntries = entries.slice(0, 5);
 
-  // Scroll animation
   const scrollY = useSharedValue(0);
   const scrollHandler = useAnimatedScrollHandler({
     onScroll: (event) => {
@@ -49,7 +51,6 @@ export default function HomeScreen() {
     },
   });
 
-  // Calculate weekly stats
   const weekAgo = new Date();
   weekAgo.setDate(weekAgo.getDate() - 7);
 
@@ -59,27 +60,23 @@ export default function HomeScreen() {
       ? weekEntries.reduce((sum, e) => sum + e.mood, 0) / weekEntries.length
       : null;
 
-  // Count unique days tracked this week
   const uniqueDaysTracked = new Set(
     weekEntries.map((e) => new Date(e.timestamp).toDateString())
   ).size;
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
-        <AnimatedHeader scrollY={scrollY} title={greeting} subtitle={formattedDate} />
-        <Animated.ScrollView
-        style={styles.scroll}
-        contentContainerStyle={[
-          styles.content,
-          { paddingTop: HEADER_EXPANDED_HEIGHT + insets.top },
-        ]}
+    <SafeAreaView className={`flex-1 ${isDark ? 'bg-background-dark' : 'bg-background'}`} edges={['top']}>
+      <AnimatedHeader scrollY={scrollY} title={greeting} subtitle={formattedDate} showThemeToggle />
+      <Animated.ScrollView
+        className="flex-1"
+        contentContainerStyle={{ paddingHorizontal: spacing.lg, paddingBottom: spacing.xxl, paddingTop: HEADER_EXPANDED_HEIGHT + insets.top - 8 }}
         showsVerticalScrollIndicator={false}
         onScroll={scrollHandler}
         scrollEventThrottle={16}
       >
         {latestMood ? (
-          <Card style={styles.statusCard}>
-            <Text variant="captionMedium" color="primary" style={styles.statusLabel}>
+          <Card className="mb-6">
+            <Text variant="captionMedium" color="primary" className="mb-2">
               Latest Check-in
             </Text>
             <MoodCard entry={latestMood} compact />
@@ -87,58 +84,105 @@ export default function HomeScreen() {
               variant="secondary"
               size="sm"
               onPress={() => router.navigate('/(tabs)/track')}
-              style={styles.trackAgainButton}
+              className="mt-4"
             >
               Log Another
             </Button>
           </Card>
         ) : (
-          <Card style={styles.promptCard} onPress={() => router.navigate('/(tabs)/track')}>
-            <Text variant="captionMedium" color="primary" style={styles.promptLabel}>
+          <Card className="mb-6" onPress={() => router.navigate('/(tabs)/track')}>
+            <Text variant="captionMedium" color="primary" className="mb-1">
               Today's Check-in
             </Text>
             <Text variant="h3" color="textPrimary">
               How are you feeling?
             </Text>
-            <Text variant="body" color="textSecondary" style={styles.promptHint}>
+            <Text variant="body" color="textSecondary" className="mt-2">
               Tap to log your first mood of the day
             </Text>
             <Ionicons
               name="add-circle"
               size={32}
-              color={colors.primary}
-              style={styles.addIcon}
+              color={themeColors.primary}
+              style={{ position: 'absolute', right: 16, top: 16 }}
             />
           </Card>
         )}
 
+        {/* AI Chat Cards */}
+        <View className="mb-6">
+          <Text variant="h3" color="textPrimary" className="mb-4">
+            Talk with Zen
+          </Text>
+          <View className="gap-3">
+            <Card onPress={() => router.push('/chat?type=checkin')}>
+              <View className="flex-row items-center">
+                <View
+                  className="w-10 h-10 rounded-full items-center justify-center mr-3"
+                  style={{ backgroundColor: themeColors.primaryLight }}
+                >
+                  <Ionicons name="chatbubble-ellipses-outline" size={20} color={themeColors.primary} />
+                </View>
+                <View className="flex-1">
+                  <Text variant="bodyMedium" color="textPrimary">
+                    Quick Check-in
+                  </Text>
+                  <Text variant="caption" color="textSecondary">
+                    Let Zen help you process how you're feeling
+                  </Text>
+                </View>
+                <Ionicons name="chevron-forward" size={20} color={themeColors.textMuted} />
+              </View>
+            </Card>
+            <Card onPress={() => router.push('/chat?type=chat')}>
+              <View className="flex-row items-center">
+                <View
+                  className="w-10 h-10 rounded-full items-center justify-center mr-3"
+                  style={{ backgroundColor: themeColors.primaryLight }}
+                >
+                  <Ionicons name="chatbubbles-outline" size={20} color={themeColors.primary} />
+                </View>
+                <View className="flex-1">
+                  <Text variant="bodyMedium" color="textPrimary">
+                    Talk to Zen
+                  </Text>
+                  <Text variant="caption" color="textSecondary">
+                    Have a supportive conversation
+                  </Text>
+                </View>
+                <Ionicons name="chevron-forward" size={20} color={themeColors.textMuted} />
+              </View>
+            </Card>
+          </View>
+        </View>
+
         {(weeklyAverage !== null || uniqueDaysTracked > 0) && (
-          <View style={styles.section}>
-            <Text variant="h3" color="textPrimary" style={styles.sectionTitle}>
+          <View className="mb-6">
+            <Text variant="h3" color="textPrimary" className="mb-4">
               This Week
             </Text>
             <Card variant="flat">
-              <View style={styles.weeklyStatsWithGauge}>
+              <View className="flex-row items-center py-2 gap-6">
                 <NativeGauge
                   value={uniqueDaysTracked}
                   maxValue={7}
                   label="Days Tracked"
                   size={90}
                 />
-                <View style={styles.weeklyStatsText}>
-                  <View style={styles.statRow}>
+                <View className="flex-1 gap-2">
+                  <View className="flex-row justify-between items-center">
                     <Text variant="caption" color="textSecondary">Avg. Mood</Text>
                     <Text variant="bodyMedium" color="primary">
                       {weeklyAverage?.toFixed(1) ?? '-'}
                     </Text>
                   </View>
-                  <View style={styles.statRow}>
+                  <View className="flex-row justify-between items-center">
                     <Text variant="caption" color="textSecondary">Check-ins</Text>
                     <Text variant="bodyMedium" color="primary">
                       {weekEntries.length}
                     </Text>
                   </View>
-                  <View style={styles.statRow}>
+                  <View className="flex-row justify-between items-center">
                     <Text variant="caption" color="textSecondary">Today</Text>
                     <Text variant="bodyMedium" color="primary">
                       {todayEntries.length}
@@ -150,8 +194,8 @@ export default function HomeScreen() {
           </View>
         )}
 
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
+        <View className="mb-6">
+          <View className="flex-row justify-between items-center mb-4">
             <Text variant="h3" color="textPrimary">
               Recent Activity
             </Text>
@@ -164,7 +208,7 @@ export default function HomeScreen() {
             )}
           </View>
           {recentEntries.length > 0 ? (
-            <View style={styles.recentList}>
+            <View className="gap-4">
               {recentEntries.map((entry, index) => (
                 <AnimatedListItem key={entry.id} index={index}>
                   <MoodCard entry={entry} onPress={() => handleMoodPress(entry)} />
@@ -172,12 +216,12 @@ export default function HomeScreen() {
               ))}
             </View>
           ) : (
-            <Card variant="flat" style={styles.emptyCard}>
+            <Card variant="flat" className="p-8 items-center">
               <Ionicons
                 name="happy-outline"
                 size={48}
-                color={colors.textMuted}
-                style={styles.emptyIcon}
+                color={themeColors.textMuted}
+                style={{ marginBottom: 16 }}
               />
               <Text variant="body" color="textMuted" center>
                 No entries yet.{'\n'}Start tracking your mood to see your activity here.
@@ -193,12 +237,15 @@ export default function HomeScreen() {
         title="Mood Details"
       >
         {selectedEntry && (
-          <View style={styles.detailsContent}>
-            <View style={styles.detailsHeader}>
-              <View style={[styles.moodBadge, { backgroundColor: colors.mood[selectedEntry.mood] }]}>
+          <View className="pt-2">
+            <View className="flex-row items-center mb-6">
+              <View
+                className="w-14 h-14 rounded-full items-center justify-center"
+                style={{ backgroundColor: colors.mood[selectedEntry.mood] }}
+              >
                 <MoodAnimation mood={selectedEntry.mood} size={32} />
               </View>
-              <View style={styles.detailsHeaderText}>
+              <View className="ml-4 flex-1">
                 <Text variant="h3" color="textPrimary">
                   {moodLabels[selectedEntry.mood].label}
                 </Text>
@@ -209,15 +256,18 @@ export default function HomeScreen() {
             </View>
 
             {selectedEntry.activities.length > 0 && (
-              <View style={styles.detailsSection}>
-                <Text variant="captionMedium" color="textMuted" style={styles.detailsLabel}>
+              <View className="mb-4">
+                <Text variant="captionMedium" color="textMuted" className="mb-1">
                   Activities
                 </Text>
-                <View style={styles.activitiesList}>
+                <View className="flex-row flex-wrap gap-1">
                   {selectedEntry.activities.map((actId) => {
                     const activity = activityTags.find((t) => t.id === actId);
                     return activity ? (
-                      <View key={actId} style={styles.activityChip}>
+                      <View
+                        key={actId}
+                        className={`px-2 py-1 rounded-lg ${isDark ? 'bg-surface-dark-elevated' : 'bg-surface-elevated'}`}
+                      >
                         <Text variant="caption" color="textSecondary">
                           {activity.label}
                         </Text>
@@ -229,8 +279,8 @@ export default function HomeScreen() {
             )}
 
             {selectedEntry.note && (
-              <View style={styles.detailsSection}>
-                <Text variant="captionMedium" color="textMuted" style={styles.detailsLabel}>
+              <View className="mb-4">
+                <Text variant="captionMedium" color="textMuted" className="mb-1">
                   Note
                 </Text>
                 <Text variant="body" color="textSecondary">
@@ -251,116 +301,3 @@ function getGreeting(): string {
   if (hour < 17) return 'Good afternoon';
   return 'Good evening';
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  scroll: {
-    flex: 1,
-  },
-  content: {
-    paddingHorizontal: spacing.lg,
-    paddingBottom: spacing.xxl,
-  },
-  promptCard: {
-    marginBottom: spacing.xl,
-  },
-  promptLabel: {
-    marginBottom: spacing.xs,
-  },
-  promptHint: {
-    marginTop: spacing.sm,
-  },
-  addIcon: {
-    position: 'absolute',
-    right: spacing.md,
-    top: spacing.md,
-  },
-  statusCard: {
-    marginBottom: spacing.xl,
-  },
-  statusLabel: {
-    marginBottom: spacing.sm,
-  },
-  trackAgainButton: {
-    marginTop: spacing.md,
-  },
-  section: {
-    marginBottom: spacing.lg,
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: spacing.md,
-  },
-  sectionTitle: {
-    marginBottom: spacing.md,
-  },
-  weeklyStatsWithGauge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: spacing.sm,
-    gap: spacing.lg,
-  },
-  weeklyStatsText: {
-    flex: 1,
-    gap: spacing.sm,
-  },
-  statRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  recentList: {
-    gap: spacing.md,
-  },
-  emptyCard: {
-    padding: spacing.xl,
-    alignItems: 'center',
-  },
-  emptyIcon: {
-    marginBottom: spacing.md,
-  },
-  detailsContent: {
-    paddingTop: spacing.sm,
-  },
-  detailsHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: spacing.lg,
-  },
-  moodBadge: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  moodEmoji: {
-    fontSize: 32,
-  },
-  detailsHeaderText: {
-    marginLeft: spacing.md,
-    flex: 1,
-  },
-  detailsSection: {
-    marginBottom: spacing.md,
-  },
-  detailsLabel: {
-    marginBottom: spacing.xs,
-  },
-  activitiesList: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: spacing.xs,
-  },
-  activityChip: {
-    backgroundColor: colors.surfaceElevated,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.xs,
-    borderRadius: 8,
-  },
-});
