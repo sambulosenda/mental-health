@@ -219,8 +219,16 @@ export const useExerciseStore = create<ExerciseState>((set, get) => ({
         isLoading: false,
       });
     } catch (error) {
+      console.error('Failed to complete exercise:', error);
       const message = error instanceof Error ? error.message : 'Failed to complete exercise';
-      set({ error: message, isLoading: false });
+      // Clear activeSession and exerciseFlow to prevent user from being stuck
+      // The error state will show and allow the user to start fresh
+      set({
+        error: message,
+        isLoading: false,
+        activeSession: null,
+        exerciseFlow: null,
+      });
     }
   },
 

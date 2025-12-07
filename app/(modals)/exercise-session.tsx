@@ -75,8 +75,13 @@ function ExerciseSessionContent() {
   }, [exerciseFlow, abandonExercise, router]);
 
   const handleComplete = useCallback(async () => {
-    await completeExercise();
-    router.back();
+    try {
+      await completeExercise();
+      router.back();
+    } catch (error) {
+      console.error('Failed to complete exercise:', error);
+      Alert.alert('Error', 'Failed to save exercise. Please try again.');
+    }
   }, [completeExercise, router]);
 
   if (error) {
@@ -89,7 +94,7 @@ function ExerciseSessionContent() {
           <Text variant="body" color="textSecondary" center className="mb-6">
             {error}
           </Text>
-          <Button onPress={() => { reset(); router.back(); }}>
+          <Button onPress={async () => { await abandonExercise(); reset(); router.back(); }}>
             Go Back
           </Button>
         </View>

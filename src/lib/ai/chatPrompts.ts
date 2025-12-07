@@ -150,7 +150,9 @@ export function buildUserContext(
 
           // Extract key insights based on exercise type
           if (template.id === 'thought-record' && s.responses['balanced-thought']) {
-            insights.push(`reframed thought: "${String(s.responses['balanced-thought']).slice(0, 60)}..."`);
+            const text = String(s.responses['balanced-thought']);
+            const truncated = text.slice(0, 60);
+            insights.push(`reframed thought: "${truncated}${text.length > 60 ? '...' : ''}"`);
           } else if (template.id === 'gratitude-list' && s.responses['gratitude-items']) {
             const items = s.responses['gratitude-items'];
             if (Array.isArray(items) && items.length > 0) {
