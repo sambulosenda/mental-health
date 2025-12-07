@@ -1,4 +1,5 @@
-import { View } from 'react-native';
+import { View, Pressable } from 'react-native';
+import { ReactNode } from 'react';
 import Animated, {
   useAnimatedStyle,
   interpolate,
@@ -6,6 +7,8 @@ import Animated, {
   SharedValue,
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
+import * as Haptics from 'expo-haptics';
 import { colors, darkColors, spacing, typography } from '@/src/constants/theme';
 import { useTheme } from '@/src/contexts/ThemeContext';
 import { ThemeToggleButton } from './ThemeToggleButton';
@@ -17,6 +20,10 @@ interface AnimatedHeaderProps {
   collapsedHeight?: number;
   expandedHeight?: number;
   showThemeToggle?: boolean;
+  rightAction?: ReactNode | {
+    icon: keyof typeof Ionicons.glyphMap;
+    onPress: () => void;
+  };
 }
 
 export function AnimatedHeader({
@@ -26,6 +33,7 @@ export function AnimatedHeader({
   collapsedHeight = 60,
   expandedHeight = 120,
   showThemeToggle = false,
+  rightAction,
 }: AnimatedHeaderProps) {
   const { isDark } = useTheme();
   const themeColors = isDark ? darkColors : colors;
@@ -153,13 +161,27 @@ export function AnimatedHeader({
         )}
       </View>
 
-      {/* Theme toggle - top right, vertically centered in collapsed header */}
-      {showThemeToggle && (
+      {/* Right actions - top right, vertically centered in collapsed header */}
+      {(showThemeToggle || rightAction) && (
         <View
-          className="absolute right-4 justify-center"
+          className="absolute right-4 justify-center flex-row items-center gap-2"
           style={{ top: insets.top, height: collapsedHeight, zIndex: 10 }}
         >
-          <ThemeToggleButton size="small" />
+          {rightAction && (
+            typeof rightAction === 'object' && 'icon' in rightAction ? (
+              <Pressable
+                onPress={async () => {
+                  await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  rightAction.onPress();
+                }}
+                className="w-9 h-9 rounded-full items-center justify-center"
+                style={{ backgroundColor: themeColors.primaryLight }}
+              >
+                <Ionicons name={rightAction.icon} size={20} color={themeColors.primary} />
+              </Pressable>
+            ) : rightAction
+          )}
+          {showThemeToggle && <ThemeToggleButton size="small" />}
         </View>
       )}
     </Animated.View>

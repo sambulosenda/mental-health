@@ -92,7 +92,7 @@ export default function JournalEntryModal() {
   return (
     <SafeAreaView
       className="flex-1"
-      style={{ backgroundColor: themeColors.surface }}
+      style={{ backgroundColor: themeColors.background }}
       edges={['top', 'bottom']}
     >
       <JournalEditor

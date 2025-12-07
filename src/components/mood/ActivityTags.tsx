@@ -1,13 +1,14 @@
-import { View, Pressable, ScrollView } from 'react-native';
+import { View, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withSpring,
+  withSequence,
 } from 'react-native-reanimated';
 import { Text } from '@/src/components/ui';
-import { colors, darkColors, spacing, activityTags, type ActivityTagId } from '@/src/constants/theme';
+import { colors, darkColors, activityTags, type ActivityTagId } from '@/src/constants/theme';
 import { useTheme } from '@/src/contexts/ThemeContext';
 
 interface ActivityTagsProps {
@@ -30,28 +31,22 @@ const iconMap: Record<string, keyof typeof Ionicons.glyphMap> = {
 
 export function ActivityTags({ selectedActivities, onToggleActivity }: ActivityTagsProps) {
   return (
-    <View className="my-2">
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ paddingHorizontal: spacing.md, gap: spacing.sm }}
-      >
-        {activityTags.map((tag) => (
-          <ActivityTag
-            key={tag.id}
-            id={tag.id}
-            label={tag.label}
-            icon={tag.icon}
-            isSelected={selectedActivities.includes(tag.id)}
-            onPress={() => onToggleActivity(tag.id)}
-          />
-        ))}
-      </ScrollView>
+    <View className="flex-row flex-wrap gap-2">
+      {activityTags.map((tag) => (
+        <ActivityChip
+          key={tag.id}
+          id={tag.id}
+          label={tag.label}
+          icon={tag.icon}
+          isSelected={selectedActivities.includes(tag.id)}
+          onPress={() => onToggleActivity(tag.id)}
+        />
+      ))}
     </View>
   );
 }
 
-interface ActivityTagProps {
+interface ActivityChipProps {
   id: ActivityTagId;
   label: string;
   icon: string;
@@ -59,7 +54,7 @@ interface ActivityTagProps {
   onPress: () => void;
 }
 
-function ActivityTag({ id, label, icon, isSelected, onPress }: ActivityTagProps) {
+function ActivityChip({ label, icon, isSelected, onPress }: ActivityChipProps) {
   const { isDark } = useTheme();
   const themeColors = isDark ? darkColors : colors;
   const scale = useSharedValue(1);
@@ -70,7 +65,10 @@ function ActivityTag({ id, label, icon, isSelected, onPress }: ActivityTagProps)
 
   const handlePress = async () => {
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    scale.value = withSpring(isSelected ? 1 : 1.05, { damping: 15 });
+    scale.value = withSequence(
+      withSpring(0.92, { damping: 15 }),
+      withSpring(1, { damping: 12 })
+    );
     onPress();
   };
 
@@ -84,26 +82,28 @@ function ActivityTag({ id, label, icon, isSelected, onPress }: ActivityTagProps)
       accessibilityState={{ checked: isSelected }}
     >
       <Animated.View
-        className="flex-row items-center px-4 py-2 rounded-full border-[1.5px]"
+        className="flex-row items-center px-3 py-2 rounded-full"
         style={[
           {
             backgroundColor: isSelected
-              ? themeColors.primaryLight + '30'
+              ? themeColors.primary
               : themeColors.surfaceElevated,
-            borderColor: isSelected ? themeColors.primary : themeColors.border,
           },
           animatedStyle,
         ]}
       >
         <Ionicons
           name={iconName}
-          size={18}
-          color={isSelected ? themeColors.primary : themeColors.textSecondary}
+          size={16}
+          color={isSelected ? '#FFFFFF' : themeColors.textSecondary}
+          style={{ marginRight: 6 }}
         />
         <Text
-          variant="captionMedium"
-          color={isSelected ? 'primary' : 'textSecondary'}
-          className="ml-1"
+          variant="caption"
+          style={{
+            color: isSelected ? '#FFFFFF' : themeColors.textSecondary,
+            fontWeight: isSelected ? '600' : '500',
+          }}
         >
           {label}
         </Text>
