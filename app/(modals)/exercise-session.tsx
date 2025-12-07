@@ -13,6 +13,8 @@ import type { MoodValue } from '@/src/types/exercise';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useEffect } from 'react';
 import { ActivityIndicator, Alert, View } from 'react-native';
+import { useKeyboardHandler } from 'react-native-keyboard-controller';
+import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 function ExerciseSessionContent() {
@@ -20,6 +22,24 @@ function ExerciseSessionContent() {
   const { templateId } = useLocalSearchParams<{ templateId: string }>();
   const { isDark } = useTheme();
   const themeColors = isDark ? darkColors : colors;
+
+  // Keyboard-aware button positioning
+  const keyboardHeight = useSharedValue(0);
+
+  useKeyboardHandler({
+    onMove: (e) => {
+      'worklet';
+      keyboardHeight.value = e.height;
+    },
+    onEnd: (e) => {
+      'worklet';
+      keyboardHeight.value = withTiming(e.height, { duration: 100 });
+    },
+  });
+
+  const animatedButtonStyle = useAnimatedStyle(() => ({
+    paddingBottom: keyboardHeight.value > 0 ? keyboardHeight.value + 16 : 24,
+  }));
 
   const {
     exerciseFlow,
@@ -225,7 +245,7 @@ function ExerciseSessionContent() {
 
       {/* Continue button (not shown for complete step or breathing step) */}
       {!isCompleteStep && currentExerciseStep?.type !== 'breathing' && (
-        <View className="px-6 pb-6">
+        <Animated.View style={[{ paddingHorizontal: 24 }, animatedButtonStyle]}>
           <Button
             onPress={handleContinue}
             disabled={!canContinue}
@@ -235,7 +255,7 @@ function ExerciseSessionContent() {
           >
             Continue
           </Button>
-        </View>
+        </Animated.View>
       )}
     </SafeAreaView>
   );

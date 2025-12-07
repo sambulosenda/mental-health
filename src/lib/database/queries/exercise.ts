@@ -56,9 +56,8 @@ function isValidStatus(status: string): status is ExerciseSessionStatus {
   return VALID_STATUSES.includes(status as ExerciseSessionStatus);
 }
 
-// Validate mood value is 1-5 or null/undefined
-function isValidMoodValue(mood: number | null | undefined): mood is MoodValue | undefined {
-  if (mood === null || mood === undefined) return true;
+// Validate mood value is 1-5
+function isValidMoodValue(mood: number): mood is MoodValue {
   return Number.isInteger(mood) && mood >= 1 && mood <= 5;
 }
 
@@ -70,13 +69,18 @@ function toExerciseSession(row: ExerciseSessionRow): ExerciseSession {
     console.warn(`Invalid session status "${row.status}", defaulting to "in_progress"`);
   }
 
-  // Validate mood values
-  const moodBefore = isValidMoodValue(row.moodBefore) ? (row.moodBefore as MoodValue | undefined) : undefined;
-  const moodAfter = isValidMoodValue(row.moodAfter) ? (row.moodAfter as MoodValue | undefined) : undefined;
-  if (!isValidMoodValue(row.moodBefore)) {
+  // Validate mood values: null → undefined, invalid number → undefined with warning
+  const moodBefore = row.moodBefore === null
+    ? undefined
+    : isValidMoodValue(row.moodBefore) ? row.moodBefore : undefined;
+  const moodAfter = row.moodAfter === null
+    ? undefined
+    : isValidMoodValue(row.moodAfter) ? row.moodAfter : undefined;
+
+  if (row.moodBefore !== null && !isValidMoodValue(row.moodBefore)) {
     console.warn(`Invalid moodBefore value "${row.moodBefore}", ignoring`);
   }
-  if (!isValidMoodValue(row.moodAfter)) {
+  if (row.moodAfter !== null && !isValidMoodValue(row.moodAfter)) {
     console.warn(`Invalid moodAfter value "${row.moodAfter}", ignoring`);
   }
 

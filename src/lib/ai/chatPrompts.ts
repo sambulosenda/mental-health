@@ -149,14 +149,43 @@ export function buildUserContext(
           if (!template) return;
 
           // Extract key insights based on exercise type
-          if (template.id === 'thought-record' && s.responses['balanced-thought']) {
-            const text = String(s.responses['balanced-thought']);
-            const truncated = text.slice(0, 60);
-            insights.push(`reframed thought: "${truncated}${text.length > 60 ? '...' : ''}"`);
-          } else if (template.id === 'gratitude-list' && s.responses['gratitude-items']) {
+          if (template.id === 'thought-record') {
+            // Include situation, automatic thought, and balanced thought
+            if (s.responses['situation']) {
+              const text = String(s.responses['situation']).slice(0, 40);
+              insights.push(`situation: "${text}${String(s.responses['situation']).length > 40 ? '...' : ''}"`);
+            }
+            if (s.responses['automatic-thoughts']) {
+              const text = String(s.responses['automatic-thoughts']).slice(0, 50);
+              insights.push(`thought pattern: "${text}${String(s.responses['automatic-thoughts']).length > 50 ? '...' : ''}"`);
+            }
+            if (s.responses['balanced-thought']) {
+              const text = String(s.responses['balanced-thought']).slice(0, 60);
+              insights.push(`reframed to: "${text}${String(s.responses['balanced-thought']).length > 60 ? '...' : ''}"`);
+            }
+          } else if (template.id === 'gratitude-list') {
             const items = s.responses['gratitude-items'];
             if (Array.isArray(items) && items.length > 0) {
-              insights.push(`grateful for: ${items.slice(0, 2).join(', ')}`);
+              insights.push(`grateful for: ${items.slice(0, 3).join(', ')}`);
+            }
+            if (s.responses['why']) {
+              const text = String(s.responses['why']).slice(0, 50);
+              insights.push(`meaningful because: "${text}${String(s.responses['why']).length > 50 ? '...' : ''}"`);
+            }
+          } else if (template.id === 'box-breathing' && s.responses['reflection']) {
+            const text = String(s.responses['reflection']).slice(0, 50);
+            insights.push(`after breathing: "${text}${String(s.responses['reflection']).length > 50 ? '...' : ''}"`);
+          } else if (template.id === 'grounding-54321') {
+            // Summarize grounding observations
+            const senses: string[] = [];
+            if (s.responses['see'] && Array.isArray(s.responses['see'])) {
+              senses.push(`saw ${s.responses['see'].slice(0, 2).join(', ')}`);
+            }
+            if (s.responses['touch'] && Array.isArray(s.responses['touch'])) {
+              senses.push(`felt ${s.responses['touch'].slice(0, 1).join('')}`);
+            }
+            if (senses.length > 0) {
+              insights.push(`grounded by: ${senses.join('; ')}`);
             }
           }
         });
