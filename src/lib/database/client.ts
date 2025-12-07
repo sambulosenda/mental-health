@@ -89,6 +89,26 @@ export async function initializeDatabase(): Promise<void> {
     ON chat_messages(conversation_id, timestamp);
   `);
 
+  // Create exercise_sessions table
+  await expo.execAsync(`
+    CREATE TABLE IF NOT EXISTS exercise_sessions (
+      id TEXT PRIMARY KEY,
+      template_id TEXT NOT NULL,
+      status TEXT NOT NULL,
+      started_at INTEGER NOT NULL,
+      completed_at INTEGER,
+      responses TEXT,
+      mood_before INTEGER,
+      mood_after INTEGER
+    );
+  `);
+
+  // Index for efficient session queries
+  await expo.execAsync(`
+    CREATE INDEX IF NOT EXISTS idx_exercise_sessions_template
+    ON exercise_sessions(template_id, started_at);
+  `);
+
   // Seed default prompts if empty
   const result = await expo.getFirstAsync<{ count: number }>('SELECT COUNT(*) as count FROM prompts');
   if (result?.count === 0) {

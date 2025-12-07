@@ -2,6 +2,7 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import type { ChatMessage } from '@/src/types/chat';
 import type { MoodEntry } from '@/src/types/mood';
 import type { JournalEntry } from '@/src/types/journal';
+import type { ExerciseSession } from '@/src/types/exercise';
 
 export type ChatAIState = 'idle' | 'loading' | 'ready' | 'generating' | 'error';
 
@@ -9,6 +10,7 @@ interface UseAIChatOptions {
   isCheckin?: boolean;
   moodEntries?: MoodEntry[];
   journalEntries?: JournalEntry[];
+  exerciseSessions?: ExerciseSession[];
 }
 
 interface UseAIChatReturn {

@@ -1,7 +1,9 @@
 import type { MoodEntry } from '@/src/types/mood';
 import type { JournalEntry } from '@/src/types/journal';
 import type { ChatMessage, CheckinStep } from '@/src/types/chat';
+import type { ExerciseSession } from '@/src/types/exercise';
 import { activityTags } from '@/src/constants/theme';
+import { EXERCISE_TEMPLATES } from '@/src/constants/exercises';
 
 const MOOD_LABELS = ['Very Low', 'Low', 'Neutral', 'Good', 'Great'];
 
@@ -64,12 +66,13 @@ End by asking if they'd like to save this as a mood check-in. Max 3 sentences.`,
 Give brief, warm closing encouragement. Acknowledge their self-awareness for checking in. Max 2 sentences.`,
 };
 
-// Build context from user's mood and journal data
+// Build context from user's mood, journal, and exercise data
 export function buildUserContext(
   moodEntries: MoodEntry[],
-  journalEntries: JournalEntry[]
+  journalEntries: JournalEntry[],
+  exerciseSessions?: ExerciseSession[]
 ): string {
-  if (moodEntries.length === 0 && journalEntries.length === 0) {
+  if (moodEntries.length === 0 && journalEntries.length === 0 && (!exerciseSessions || exerciseSessions.length === 0)) {
     return '';
   }
 
@@ -101,6 +104,67 @@ export function buildUserContext(
       .map(e => e.content.slice(0, 50).replace(/\n/g, ' '))
       .join('; ');
     parts.push(`Recent journal themes: ${themes}`);
+  }
+
+  // Add exercise history context
+  if (exerciseSessions && exerciseSessions.length > 0) {
+    const completed = exerciseSessions.filter(s => s.status === 'completed');
+
+    if (completed.length > 0) {
+      // Count exercises by type
+      const exerciseCounts: Record<string, number> = {};
+      completed.forEach(s => {
+        const template = EXERCISE_TEMPLATES.find(t => t.id === s.templateId);
+        if (template) {
+          exerciseCounts[template.name] = (exerciseCounts[template.name] || 0) + 1;
+        }
+      });
+
+      const topExercises = Object.entries(exerciseCounts)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 2)
+        .map(([name, count]) => `${name} (${count}x)`);
+
+      // Calculate average mood improvement
+      const withMoodData = completed.filter(s => s.moodBefore && s.moodAfter);
+      let moodImpact = '';
+      if (withMoodData.length >= 2) {
+        const avgDelta = withMoodData.reduce((sum, s) =>
+          sum + ((s.moodAfter || 0) - (s.moodBefore || 0)), 0) / withMoodData.length;
+        if (avgDelta > 0.3) {
+          moodImpact = `, exercises typically improve mood by +${avgDelta.toFixed(1)}`;
+        }
+      }
+
+      // Get recent exercise insights (from thought records, gratitude, etc.)
+      const recentWithResponses = completed
+        .filter(s => s.responses && Object.keys(s.responses).length > 0)
+        .slice(0, 3);
+
+      let exerciseInsights = '';
+      if (recentWithResponses.length > 0) {
+        const insights: string[] = [];
+        recentWithResponses.forEach(s => {
+          const template = EXERCISE_TEMPLATES.find(t => t.id === s.templateId);
+          if (!template) return;
+
+          // Extract key insights based on exercise type
+          if (template.id === 'thought-record' && s.responses['balanced-thought']) {
+            insights.push(`reframed thought: "${String(s.responses['balanced-thought']).slice(0, 60)}..."`);
+          } else if (template.id === 'gratitude-list' && s.responses['gratitude-items']) {
+            const items = s.responses['gratitude-items'];
+            if (Array.isArray(items) && items.length > 0) {
+              insights.push(`grateful for: ${items.slice(0, 2).join(', ')}`);
+            }
+          }
+        });
+        if (insights.length > 0) {
+          exerciseInsights = `. Recent reflections: ${insights.join('; ')}`;
+        }
+      }
+
+      parts.push(`Exercises: completed ${completed.length} total, uses ${topExercises.join(', ')}${moodImpact}${exerciseInsights}`);
+    }
   }
 
   return parts.length > 0

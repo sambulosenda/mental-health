@@ -6,10 +6,11 @@ import Animated, { useSharedValue, useAnimatedScrollHandler } from 'react-native
 import { Text, Card, Button, NativePicker, AnimatedHeader } from '@/src/components/ui';
 import { MoodTrendChart, MoodCalendar, InsightList } from '@/src/components/insights';
 import type { Insight } from '@/src/components/insights';
-import { useMoodStore, useJournalStore } from '@/src/stores';
+import { useMoodStore, useJournalStore, useExerciseStore } from '@/src/stores';
 import { detectPatterns } from '@/src/lib/insights';
 import { useAIInsights } from '@/src/lib/ai';
 import { colors, darkColors, spacing } from '@/src/constants/theme';
+import { EXERCISE_TEMPLATES } from '@/src/constants/exercises';
 import { useTheme } from '@/src/contexts/ThemeContext';
 import type { DailyMoodSummary } from '@/src/types/mood';
 
@@ -31,6 +32,7 @@ export default function InsightsScreen() {
     },
   });
   const { entries: journalEntries, loadEntries: loadJournalEntries } = useJournalStore();
+  const { recentSessions, loadRecentSessions } = useExerciseStore();
   const [summaries, setSummaries] = useState<DailyMoodSummary[]>([]);
   const [insights, setInsights] = useState<Insight[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -54,7 +56,7 @@ export default function InsightsScreen() {
 
   const loadData = useCallback(async () => {
     try {
-      await Promise.all([loadEntries(), loadJournalEntries()]);
+      await Promise.all([loadEntries(), loadJournalEntries(), loadRecentSessions()]);
       const dailySummaries = await getDailySummaries(daysToFetch);
       setSummaries(dailySummaries);
 
@@ -68,7 +70,7 @@ export default function InsightsScreen() {
     } finally {
       setIsLoading(false);
     }
-  }, [loadEntries, loadJournalEntries, getDailySummaries, entries, daysToFetch]);
+  }, [loadEntries, loadJournalEntries, loadRecentSessions, getDailySummaries, entries, daysToFetch]);
 
   useEffect(() => {
     loadData();
@@ -143,6 +145,73 @@ export default function InsightsScreen() {
             insights={insights}
             emptyMessage="Track your mood for at least a week to discover patterns and insights."
           />
+        </View>
+
+        {/* Exercise Stats */}
+        <View className="mb-6">
+          <Text variant="h3" color="textPrimary" className="mb-4">
+            Exercise Activity
+          </Text>
+          {(() => {
+            const completed = recentSessions.filter(s => s.status === 'completed');
+            if (completed.length === 0) {
+              return (
+                <Card variant="flat" className="p-4 items-center">
+                  <Ionicons name="fitness-outline" size={32} color={themeColors.textMuted} />
+                  <Text variant="body" color="textMuted" center className="mt-2">
+                    Complete exercises to see your stats here
+                  </Text>
+                </Card>
+              );
+            }
+
+            // Calculate stats
+            const withMoodData = completed.filter(s => s.moodBefore && s.moodAfter);
+            const avgMoodDelta = withMoodData.length > 0
+              ? withMoodData.reduce((sum, s) => sum + ((s.moodAfter || 0) - (s.moodBefore || 0)), 0) / withMoodData.length
+              : null;
+
+            // Most used exercise
+            const exerciseCounts: Record<string, number> = {};
+            completed.forEach(s => {
+              exerciseCounts[s.templateId] = (exerciseCounts[s.templateId] || 0) + 1;
+            });
+            const topExerciseId = Object.entries(exerciseCounts)
+              .sort((a, b) => b[1] - a[1])[0]?.[0];
+            const topExercise = EXERCISE_TEMPLATES.find(t => t.id === topExerciseId);
+
+            return (
+              <Card variant="flat">
+                <View className="flex-row justify-between">
+                  <View className="items-center flex-1">
+                    <Text variant="h2" color="primary">{completed.length}</Text>
+                    <Text variant="caption" color="textMuted">Completed</Text>
+                  </View>
+                  <View className="items-center flex-1">
+                    <Text variant="h2" color={avgMoodDelta && avgMoodDelta > 0 ? 'primary' : 'textPrimary'}>
+                      {avgMoodDelta !== null ? (avgMoodDelta > 0 ? '+' : '') + avgMoodDelta.toFixed(1) : '-'}
+                    </Text>
+                    <Text variant="caption" color="textMuted">Avg Mood Δ</Text>
+                  </View>
+                  <View className="items-center flex-1">
+                    <View
+                      className="w-8 h-8 rounded-full items-center justify-center mb-1"
+                      style={{ backgroundColor: topExercise?.color ? `${topExercise.color}20` : themeColors.primaryLight }}
+                    >
+                      <Ionicons
+                        name={(topExercise?.icon as any) || 'fitness-outline'}
+                        size={16}
+                        color={topExercise?.color || themeColors.primary}
+                      />
+                    </View>
+                    <Text variant="caption" color="textMuted" numberOfLines={1}>
+                      {topExercise?.name.split(' ')[0] || 'None'}
+                    </Text>
+                  </View>
+                </View>
+              </Card>
+            );
+          })()}
         </View>
 
         <View className="mb-6">
