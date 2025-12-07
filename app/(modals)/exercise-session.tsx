@@ -1,5 +1,5 @@
 import { useEffect, useCallback } from 'react';
-import { View, Alert } from 'react-native';
+import { View, Alert, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useExerciseStore } from '@/src/stores';
@@ -8,13 +8,14 @@ import {
   ExerciseStepRenderer,
   MoodStepRenderer,
   ExerciseComplete,
+  ExerciseErrorBoundary,
 } from '@/src/components/exercises';
 import { Button } from '@/src/components/ui';
 import { colors, darkColors } from '@/src/constants/theme';
 import { useTheme } from '@/src/contexts/ThemeContext';
 import type { MoodValue } from '@/src/types/exercise';
 
-export default function ExerciseSessionScreen() {
+function ExerciseSessionContent() {
   const router = useRouter();
   const { templateId } = useLocalSearchParams<{ templateId: string }>();
   const { isDark } = useTheme();
@@ -75,7 +76,7 @@ export default function ExerciseSessionScreen() {
     return (
       <SafeAreaView className={`flex-1 ${isDark ? 'bg-background-dark' : 'bg-background'}`}>
         <View className="flex-1 items-center justify-center">
-          {/* Loading state */}
+          <ActivityIndicator size="large" color={themeColors.primary} />
         </View>
       </SafeAreaView>
     );
@@ -207,5 +208,21 @@ export default function ExerciseSessionScreen() {
         </View>
       )}
     </SafeAreaView>
+  );
+}
+
+export default function ExerciseSessionScreen() {
+  const router = useRouter();
+  const { reset } = useExerciseStore();
+
+  const handleErrorReset = () => {
+    reset();
+    router.back();
+  };
+
+  return (
+    <ExerciseErrorBoundary onReset={handleErrorReset}>
+      <ExerciseSessionContent />
+    </ExerciseErrorBoundary>
   );
 }

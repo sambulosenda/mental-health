@@ -33,11 +33,11 @@ interface ExerciseState {
 
   // Actions
   startExercise: (templateId: string) => Promise<void>;
-  setMoodBefore: (mood: MoodValue) => void;
-  setMoodAfter: (mood: MoodValue) => void;
+  setMoodBefore: (mood: MoodValue) => Promise<void>;
+  setMoodAfter: (mood: MoodValue) => Promise<void>;
   advanceStep: () => void;
   goBackStep: () => void;
-  setStepResponse: (stepId: string, response: string | string[]) => void;
+  setStepResponse: (stepId: string, response: string | string[]) => Promise<void>;
   completeExercise: () => Promise<void>;
   abandonExercise: () => Promise<void>;
 
@@ -87,35 +87,45 @@ export const useExerciseStore = create<ExerciseState>((set, get) => ({
   },
 
   // Set mood before exercise
-  setMoodBefore: (mood) => {
+  setMoodBefore: async (mood) => {
     const { exerciseFlow, activeSession } = get();
     if (!exerciseFlow || !activeSession) return;
 
-    // Update database
-    setSessionMoodBefore(activeSession.id, mood);
-
+    // Update local state immediately for responsiveness
     set({
       exerciseFlow: {
         ...exerciseFlow,
         moodBefore: mood,
       },
     });
+
+    // Update database
+    try {
+      await setSessionMoodBefore(activeSession.id, mood);
+    } catch (error) {
+      console.error('Failed to save mood before:', error);
+    }
   },
 
   // Set mood after exercise
-  setMoodAfter: (mood) => {
+  setMoodAfter: async (mood) => {
     const { exerciseFlow, activeSession } = get();
     if (!exerciseFlow || !activeSession) return;
 
-    // Update database
-    setSessionMoodAfter(activeSession.id, mood);
-
+    // Update local state immediately for responsiveness
     set({
       exerciseFlow: {
         ...exerciseFlow,
         moodAfter: mood,
       },
     });
+
+    // Update database
+    try {
+      await setSessionMoodAfter(activeSession.id, mood);
+    } catch (error) {
+      console.error('Failed to save mood after:', error);
+    }
   },
 
   // Advance to next step
@@ -154,7 +164,7 @@ export const useExerciseStore = create<ExerciseState>((set, get) => ({
   },
 
   // Set response for a step
-  setStepResponse: (stepId, response) => {
+  setStepResponse: async (stepId, response) => {
     const { exerciseFlow, activeSession } = get();
     if (!exerciseFlow || !activeSession) return;
 
@@ -163,15 +173,20 @@ export const useExerciseStore = create<ExerciseState>((set, get) => ({
       [stepId]: response,
     };
 
-    // Update database
-    updateSessionResponses(activeSession.id, newResponses);
-
+    // Update local state immediately for responsiveness
     set({
       exerciseFlow: {
         ...exerciseFlow,
         responses: newResponses,
       },
     });
+
+    // Update database
+    try {
+      await updateSessionResponses(activeSession.id, newResponses);
+    } catch (error) {
+      console.error('Failed to save step response:', error);
+    }
   },
 
   // Complete the exercise

@@ -45,7 +45,8 @@ export function BreathingStep({ step, onComplete, accentColor }: BreathingStepPr
   const [secondsLeft, setSecondsLeft] = useState(4);
 
   const totalDuration = step.duration || 120; // default 2 minutes
-  const totalCycles = Math.floor(totalDuration / 16); // 16 seconds per full box cycle
+  // Ensure at least 1 cycle even if duration < 16
+  const totalCycles = Math.max(1, Math.floor(totalDuration / 16)); // 16 seconds per full box cycle
 
   const scale = useSharedValue(1);
   const opacity = useSharedValue(0.3);
@@ -112,6 +113,12 @@ export function BreathingStep({ step, onComplete, accentColor }: BreathingStepPr
         // Hold at contracted
         break;
     }
+
+    // Cleanup animations on unmount or when isRunning changes
+    return () => {
+      cancelAnimation(scale);
+      cancelAnimation(opacity);
+    };
   }, [phase, isRunning]);
 
   // Check if exercise is complete

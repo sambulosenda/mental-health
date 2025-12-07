@@ -20,6 +20,17 @@ function generateId(): string {
   });
 }
 
+// Safely parse JSON with fallback
+function safeJsonParse(json: string | null, fallback: Record<string, unknown> = {}): Record<string, unknown> {
+  if (!json) return fallback;
+  try {
+    return JSON.parse(json);
+  } catch (error) {
+    console.error('Failed to parse exercise responses JSON:', error);
+    return fallback;
+  }
+}
+
 // Convert database row to app type
 function toExerciseSession(row: ExerciseSessionRow): ExerciseSession {
   return {
@@ -28,7 +39,7 @@ function toExerciseSession(row: ExerciseSessionRow): ExerciseSession {
     status: row.status as ExerciseSessionStatus,
     startedAt: row.startedAt,
     completedAt: row.completedAt ?? undefined,
-    responses: row.responses ? JSON.parse(row.responses) : {},
+    responses: safeJsonParse(row.responses) as Record<string, string | string[]>,
     moodBefore: row.moodBefore as MoodValue | undefined,
     moodAfter: row.moodAfter as MoodValue | undefined,
   };
