@@ -1,23 +1,19 @@
-import { eq, desc } from 'drizzle-orm';
+import type {
+  ExerciseSession,
+  ExerciseSessionStatus,
+  MoodValue,
+} from '@/src/types/exercise';
+import { desc, eq } from 'drizzle-orm';
 import { db } from '../client';
 import {
   exerciseSessions,
   type ExerciseSessionRow,
   type NewExerciseSession,
 } from '../schema';
-import type {
-  ExerciseSession,
-  ExerciseSessionStatus,
-  MoodValue,
-} from '@/src/types/exercise';
 
-// Generate UUID
+// Generate UUID using Web Crypto API
 function generateId(): string {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
-    const r = (Math.random() * 16) | 0;
-    const v = c === 'x' ? r : (r & 0x3) | 0x8;
-    return v.toString(16);
-  });
+  return crypto.randomUUID();
 }
 
 // Safely parse JSON with fallback
@@ -58,7 +54,20 @@ export async function createExerciseSession(
   };
 
   await db.insert(exerciseSessions).values(entry);
-  return toExerciseSession(entry as ExerciseSessionRow);
+
+  // Build full row shape with defaults for nullable fields
+  const row: ExerciseSessionRow = {
+    id: entry.id,
+    templateId: entry.templateId,
+    status: entry.status,
+    startedAt: entry.startedAt,
+    completedAt: null,
+    responses: null,
+    moodBefore: null,
+    moodAfter: null,
+  };
+
+  return toExerciseSession(row);
 }
 
 // Update session responses

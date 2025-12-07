@@ -1,11 +1,11 @@
-import { View } from 'react-native';
-import Animated, { FadeIn, FadeInUp } from 'react-native-reanimated';
-import { Ionicons } from '@expo/vector-icons';
-import { Text, Button } from '@/src/components/ui';
+import { MoodAnimation } from '@/src/components/mood/MoodAnimation';
+import { Button, Text } from '@/src/components/ui';
 import { colors, darkColors, moodLabels } from '@/src/constants/theme';
 import { useTheme } from '@/src/contexts/ThemeContext';
-import { MoodAnimation } from '@/src/components/mood/MoodAnimation';
 import type { MoodValue } from '@/src/types/exercise';
+import { Ionicons } from '@expo/vector-icons';
+import { View } from 'react-native';
+import Animated, { FadeIn, FadeInUp } from 'react-native-reanimated';
 
 interface ExerciseCompleteProps {
   exerciseName: string;
@@ -78,7 +78,7 @@ export function ExerciseComplete({
             {/* Arrow */}
             <View className="items-center">
               <Ionicons
-                name={moodDelta && moodDelta > 0 ? 'arrow-forward' : 'arrow-forward'}
+                name="arrow-forward"
                 size={24}
                 color={themeColors.textMuted}
               />

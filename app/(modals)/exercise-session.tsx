@@ -1,19 +1,19 @@
-import { useEffect, useCallback } from 'react';
-import { View, Alert, ActivityIndicator } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter, useLocalSearchParams } from 'expo-router';
-import { useExerciseStore } from '@/src/stores';
 import {
+  ExerciseComplete,
+  ExerciseErrorBoundary,
   ExerciseHeader,
   ExerciseStepRenderer,
   MoodStepRenderer,
-  ExerciseComplete,
-  ExerciseErrorBoundary,
 } from '@/src/components/exercises';
 import { Button } from '@/src/components/ui';
 import { colors, darkColors } from '@/src/constants/theme';
 import { useTheme } from '@/src/contexts/ThemeContext';
+import { useExerciseStore } from '@/src/stores';
 import type { MoodValue } from '@/src/types/exercise';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useCallback, useEffect } from 'react';
+import { ActivityIndicator, Alert, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 function ExerciseSessionContent() {
   const router = useRouter();
@@ -38,11 +38,7 @@ function ExerciseSessionContent() {
     if (templateId && !exerciseFlow) {
       startExercise(templateId);
     }
-
-    return () => {
-      // Don't reset on unmount - let the store handle state
-    };
-  }, [templateId]);
+  }, [templateId, exerciseFlow, startExercise]);
 
   const handleClose = useCallback(() => {
     if (exerciseFlow && exerciseFlow.currentStepIndex > 0) {
@@ -55,15 +51,23 @@ function ExerciseSessionContent() {
             text: 'Leave',
             style: 'destructive',
             onPress: async () => {
-              await abandonExercise();
+              try {
+                await abandonExercise();
+              } catch (error) {
+                console.error('Failed to abandon exercise:', error);
+              }
               router.back();
             },
           },
         ]
       );
     } else {
-      abandonExercise();
-      router.back();
+      abandonExercise()
+        .then(() => router.back())
+        .catch((error) => {
+          console.error('Failed to abandon exercise:', error);
+          router.back();
+        });
     }
   }, [exerciseFlow, abandonExercise, router]);
 

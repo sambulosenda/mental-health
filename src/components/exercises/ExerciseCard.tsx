@@ -1,10 +1,10 @@
-import { View, Pressable } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import * as Haptics from 'expo-haptics';
 import { Text } from '@/src/components/ui';
 import { colors, darkColors } from '@/src/constants/theme';
 import { useTheme } from '@/src/contexts/ThemeContext';
 import type { ExerciseTemplate } from '@/src/types/exercise';
+import { Ionicons } from '@expo/vector-icons';
+import * as Haptics from 'expo-haptics';
+import { Pressable, View } from 'react-native';
 
 interface ExerciseCardProps {
   template: ExerciseTemplate;
@@ -87,7 +87,7 @@ export function ExerciseCard({ template, onPress, compact }: ExerciseCardProps) 
             style={{ backgroundColor: `${accentColor}15` }}
           >
             <Text variant="caption" style={{ color: accentColor, fontSize: 10 }}>
-              {TYPE_LABELS[template.type]}
+              {TYPE_LABELS[template.type] || template.type.toUpperCase()}
             </Text>
           </View>
         </View>

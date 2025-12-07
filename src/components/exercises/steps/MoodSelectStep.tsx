@@ -1,8 +1,8 @@
-import { View } from 'react-native';
-import Animated, { FadeIn } from 'react-native-reanimated';
-import { Text } from '@/src/components/ui';
+
 import { MoodSliderSelector } from '@/src/components/mood/MoodSliderSelector';
+import { Text } from '@/src/components/ui';
 import type { MoodValue } from '@/src/types/exercise';
+import Animated, { FadeIn } from 'react-native-reanimated';
 
 interface MoodSelectStepProps {
   title: string;
