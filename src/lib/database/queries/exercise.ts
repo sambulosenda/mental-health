@@ -220,15 +220,20 @@ export async function getExerciseStats(): Promise<{
     .from(exerciseSessions)
     .where(eq(exerciseSessions.status, 'completed'));
 
-  const completed = rows.filter(
-    (r) => r.moodBefore !== null && r.moodAfter !== null
+  // Filter to only include rows with valid mood values (non-null AND in 1-5 range)
+  const withValidMoods = rows.filter(
+    (r) =>
+      r.moodBefore !== null &&
+      r.moodAfter !== null &&
+      isValidMoodValue(r.moodBefore) &&
+      isValidMoodValue(r.moodAfter)
   );
 
-  const totalCompleted = rows.length;
+  const totalCompleted = withValidMoods.length;
   let averageMoodDelta: number | null = null;
 
-  if (completed.length > 0) {
-    const deltas = completed.map(
+  if (withValidMoods.length > 0) {
+    const deltas = withValidMoods.map(
       (r) => (r.moodAfter as number) - (r.moodBefore as number)
     );
     averageMoodDelta = deltas.reduce((a, b) => a + b, 0) / deltas.length;

@@ -114,7 +114,11 @@ function ExerciseSessionContent() {
           <Text variant="body" color="textSecondary" center className="mb-6">
             {error}
           </Text>
-          <Button onPress={async () => { await abandonExercise(); reset(); router.back(); }}>
+          <Button onPress={async () => {
+            try { await abandonExercise(); } catch { /* ignore - session may not exist */ }
+            reset();
+            router.back();
+          }}>
             Go Back
           </Button>
         </View>

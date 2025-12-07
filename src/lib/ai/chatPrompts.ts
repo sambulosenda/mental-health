@@ -194,7 +194,8 @@ export function buildUserContext(
         }
       }
 
-      parts.push(`Exercises: completed ${completed.length} total, uses ${topExercises.join(', ')}${moodImpact}${exerciseInsights}`);
+      const favoritesStr = topExercises.length > 0 ? `, uses ${topExercises.join(', ')}` : '';
+      parts.push(`Exercises: completed ${completed.length} total${favoritesStr}${moodImpact}${exerciseInsights}`);
     }
   }
 
@@ -279,7 +280,8 @@ export function buildPrivacySafeContext(
         }
       }
 
-      parts.push(`Exercises: ${completed.length} completed, favorites: ${topExercises.join(', ')}${moodImpact}`);
+      const favoritesStr = topExercises.length > 0 ? `, favorites: ${topExercises.join(', ')}` : '';
+      parts.push(`Exercises: ${completed.length} completed${favoritesStr}${moodImpact}`);
     }
   }
 
