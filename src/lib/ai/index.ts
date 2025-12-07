@@ -2,7 +2,8 @@ import { useState, useCallback, useEffect } from 'react';
 import type { MoodEntry, DailyMoodSummary } from '@/src/types/mood';
 import type { JournalEntry } from '@/src/types/journal';
 import type { Insight } from '@/src/components/insights/InsightCard';
-import { buildWellnessPrompt } from './prompts';
+import { buildPrivacySafeInsightsPrompt } from './prompts';
+import { callGroqAPI, hasGroqApiKey } from './groq';
 
 export type AIState = 'idle' | 'loading' | 'generating' | 'ready' | 'error';
 
@@ -117,24 +118,22 @@ function parseInsightsFromResponse(response: string): Insight[] {
 }
 
 export function useAIInsights(options: UseAIInsightsOptions): UseAIInsightsReturn {
-  const { moodEntries, moodSummaries, journalEntries } = options;
+  const { moodEntries, moodSummaries } = options;
 
   const [state, setState] = useState<AIState>('idle');
   const [insights, setInsights] = useState<Insight[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [isModelReady, setIsModelReady] = useState(false);
 
-  // In development, mark as ready immediately (using fallback)
+  // Check readiness on mount
   useEffect(() => {
-    if (__DEV__) {
-      setIsModelReady(true);
-      setState('ready');
-    }
+    setIsModelReady(true);
+    setState('ready');
   }, []);
 
   const generateInsights = useCallback(async () => {
     if (!isModelReady) {
-      setError('AI model is still loading. Please wait.');
+      setError('AI is still loading. Please wait.');
       return;
     }
 
@@ -146,40 +145,43 @@ export function useAIInsights(options: UseAIInsightsOptions): UseAIInsightsRetur
     setState('generating');
     setError(null);
 
+    // Check for API key
+    const hasKey = hasGroqApiKey();
+
+    if (!hasKey) {
+      // No API key - use fallback insights
+      const fallbackInsights = getFallbackInsights(moodEntries);
+      setInsights(fallbackInsights);
+      setState('ready');
+      return;
+    }
+
     try {
-      // In development mode, use fallback insights to avoid simulator crashes
-      if (__DEV__) {
-        // Simulate a brief delay for more natural feel
-        await new Promise(resolve => setTimeout(resolve, 800 + Math.random() * 400));
+      // Build privacy-safe prompt (no personal content)
+      const prompt = buildPrivacySafeInsightsPrompt(moodEntries, moodSummaries);
 
-        const fallbackInsights = getFallbackInsights(moodEntries);
-        setInsights(fallbackInsights);
-        setState('ready');
-        return;
-      }
+      const response = await callGroqAPI(
+        [{ role: 'user', content: prompt }],
+        { maxTokens: 512, temperature: 0.7 }
+      );
 
-      // Production: try to use actual LLM
-      // Note: Dynamic import to prevent crash if ExecuTorch fails to initialize
-      try {
-        const { useLLM, LLAMA3_2_1B } = await import('react-native-executorch');
-        // This approach won't work since useLLM is a hook
-        // For production, would need a different architecture
-        // Fall back for now
-        const fallbackInsights = getFallbackInsights(moodEntries);
-        setInsights(fallbackInsights);
-        setState('ready');
-      } catch {
-        const fallbackInsights = getFallbackInsights(moodEntries);
-        setInsights(fallbackInsights);
-        setState('ready');
+      // Parse the response
+      const parsedInsights = parseInsightsFromResponse(response);
+
+      if (parsedInsights.length > 0) {
+        setInsights(parsedInsights);
+      } else {
+        // Fallback if parsing failed
+        setInsights(getFallbackInsights(moodEntries));
       }
+      setState('ready');
     } catch (err) {
       console.warn('AI insights generation failed, using fallback:', err);
       const fallbackInsights = getFallbackInsights(moodEntries);
       setInsights(fallbackInsights);
       setState('ready');
     }
-  }, [isModelReady, moodEntries, moodSummaries, journalEntries]);
+  }, [isModelReady, moodEntries, moodSummaries]);
 
   return {
     state,
