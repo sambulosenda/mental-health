@@ -5,6 +5,7 @@ import { Stack, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { KeyboardProvider } from 'react-native-keyboard-controller';
 import { initializeDatabase } from '@/src/lib/database';
 import { useSettingsStore } from '@/src/stores';
 import { BiometricLock } from '@/src/components/BiometricLock';
@@ -55,8 +56,9 @@ function RootLayoutContent() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <SafeAreaProvider>
-        <BiometricLock>
+      <KeyboardProvider>
+        <SafeAreaProvider>
+          <BiometricLock>
           <StatusBar style={isDark ? 'light' : 'dark'} />
           <Stack
             screenOptions={{
@@ -91,7 +93,8 @@ function RootLayoutContent() {
             />
           </Stack>
         </BiometricLock>
-      </SafeAreaProvider>
+        </SafeAreaProvider>
+      </KeyboardProvider>
     </GestureHandlerRootView>
   );
 }

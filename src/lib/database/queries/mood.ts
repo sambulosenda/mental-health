@@ -1,4 +1,5 @@
 import { eq, desc, gte, lte, and } from 'drizzle-orm';
+import * as Crypto from 'expo-crypto';
 import { db } from '../client';
 import { moodEntries, type MoodEntryRow, type NewMoodEntry } from '../schema';
 import type { MoodEntry } from '@/src/types/mood';
@@ -16,13 +17,8 @@ function toMoodEntry(row: MoodEntryRow): MoodEntry {
   };
 }
 
-// Generate UUID
 function generateId(): string {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
-    const r = (Math.random() * 16) | 0;
-    const v = c === 'x' ? r : (r & 0x3) | 0x8;
-    return v.toString(16);
-  });
+  return Crypto.randomUUID();
 }
 
 // Create a new mood entry

@@ -1,4 +1,5 @@
 import { eq, desc, like, or } from 'drizzle-orm';
+import * as Crypto from 'expo-crypto';
 import { db } from '../client';
 import { journalEntries, prompts, type JournalEntryRow, type NewJournalEntry, type PromptRow } from '../schema';
 import type { JournalEntry, JournalPrompt } from '@/src/types/journal';
@@ -26,13 +27,8 @@ function toPrompt(row: PromptRow): JournalPrompt {
   };
 }
 
-// Generate UUID
 function generateId(): string {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
-    const r = (Math.random() * 16) | 0;
-    const v = c === 'x' ? r : (r & 0x3) | 0x8;
-    return v.toString(16);
-  });
+  return Crypto.randomUUID();
 }
 
 // Create a new journal entry

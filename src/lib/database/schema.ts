@@ -71,3 +71,18 @@ export type ChatConversationRow = typeof chatConversations.$inferSelect;
 export type NewChatConversation = typeof chatConversations.$inferInsert;
 export type ChatMessageRow = typeof chatMessages.$inferSelect;
 export type NewChatMessage = typeof chatMessages.$inferInsert;
+
+// Exercise sessions table
+export const exerciseSessions = sqliteTable('exercise_sessions', {
+  id: text('id').primaryKey(),
+  templateId: text('template_id').notNull(),
+  status: text('status').notNull(), // 'in_progress' | 'completed' | 'abandoned'
+  startedAt: integer('started_at', { mode: 'timestamp' }).notNull(),
+  completedAt: integer('completed_at', { mode: 'timestamp' }),
+  responses: text('responses'), // JSON
+  moodBefore: integer('mood_before'),
+  moodAfter: integer('mood_after'),
+});
+
+export type ExerciseSessionRow = typeof exerciseSessions.$inferSelect;
+export type NewExerciseSession = typeof exerciseSessions.$inferInsert;

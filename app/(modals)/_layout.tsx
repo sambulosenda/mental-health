@@ -12,6 +12,13 @@ export default function ModalsLayout() {
     >
       <Stack.Screen name="journal-entry" />
       <Stack.Screen name="chat" />
+      <Stack.Screen
+        name="exercise-session"
+        options={{
+          presentation: 'fullScreenModal',
+          gestureEnabled: false, // Prevent accidental swipe dismiss during exercises
+        }}
+      />
     </Stack>
   );
 }
