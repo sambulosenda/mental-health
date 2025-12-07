@@ -2,6 +2,7 @@
 import { MoodSliderSelector } from '@/src/components/mood/MoodSliderSelector';
 import { Text } from '@/src/components/ui';
 import type { MoodValue } from '@/src/types/exercise';
+import { View } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
 
 interface MoodSelectStepProps {

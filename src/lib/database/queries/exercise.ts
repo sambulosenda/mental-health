@@ -4,6 +4,7 @@ import type {
   MoodValue,
 } from '@/src/types/exercise';
 import { desc, eq } from 'drizzle-orm';
+import * as Crypto from 'expo-crypto';
 import { db } from '../client';
 import {
   exerciseSessions,
@@ -11,9 +12,8 @@ import {
   type NewExerciseSession,
 } from '../schema';
 
-// Generate UUID using Web Crypto API
 function generateId(): string {
-  return crypto.randomUUID();
+  return Crypto.randomUUID();
 }
 
 // Safely parse JSON with fallback

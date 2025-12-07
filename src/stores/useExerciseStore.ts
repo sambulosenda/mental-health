@@ -59,16 +59,21 @@ export const useExerciseStore = create<ExerciseState>((set, get) => ({
 
   // Start a new exercise
   startExercise: async (templateId) => {
+    console.log('[ExerciseStore] startExercise called with:', templateId);
     const template = get().templates.find((t) => t.id === templateId);
     if (!template) {
+      console.log('[ExerciseStore] Template not found:', templateId);
       set({ error: 'Exercise template not found' });
       return;
     }
+    console.log('[ExerciseStore] Found template:', template.name);
 
     set({ isLoading: true, error: null });
 
     try {
+      console.log('[ExerciseStore] Creating session in database...');
       const session = await createExerciseSession(templateId);
+      console.log('[ExerciseStore] Session created:', session.id);
       set({
         activeSession: session,
         exerciseFlow: {
@@ -80,7 +85,9 @@ export const useExerciseStore = create<ExerciseState>((set, get) => ({
         },
         isLoading: false,
       });
+      console.log('[ExerciseStore] Exercise flow set successfully');
     } catch (error) {
+      console.log('[ExerciseStore] Error starting exercise:', error);
       const message = error instanceof Error ? error.message : 'Failed to start exercise';
       set({ error: message, isLoading: false });
     }

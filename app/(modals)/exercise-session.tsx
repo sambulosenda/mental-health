@@ -5,7 +5,7 @@ import {
   ExerciseStepRenderer,
   MoodStepRenderer,
 } from '@/src/components/exercises';
-import { Button } from '@/src/components/ui';
+import { Button, Text } from '@/src/components/ui';
 import { colors, darkColors } from '@/src/constants/theme';
 import { useTheme } from '@/src/contexts/ThemeContext';
 import { useExerciseStore } from '@/src/stores';
@@ -23,6 +23,8 @@ function ExerciseSessionContent() {
 
   const {
     exerciseFlow,
+    isLoading,
+    error,
     startExercise,
     setMoodBefore,
     setMoodAfter,
@@ -35,10 +37,11 @@ function ExerciseSessionContent() {
   } = useExerciseStore();
 
   useEffect(() => {
-    if (templateId && !exerciseFlow) {
+    if (templateId && !exerciseFlow && !isLoading && !error) {
+      console.log('[Exercise] Starting exercise with templateId:', templateId);
       startExercise(templateId);
     }
-  }, [templateId, exerciseFlow, startExercise]);
+  }, [templateId, exerciseFlow, isLoading, error, startExercise]);
 
   const handleClose = useCallback(() => {
     if (exerciseFlow && exerciseFlow.currentStepIndex > 0) {
@@ -75,6 +78,24 @@ function ExerciseSessionContent() {
     await completeExercise();
     router.back();
   }, [completeExercise, router]);
+
+  if (error) {
+    return (
+      <SafeAreaView className={`flex-1 ${isDark ? 'bg-background-dark' : 'bg-background'}`}>
+        <View className="flex-1 items-center justify-center px-6">
+          <Text variant="h3" color="error" center className="mb-4">
+            Something went wrong
+          </Text>
+          <Text variant="body" color="textSecondary" center className="mb-6">
+            {error}
+          </Text>
+          <Button onPress={() => { reset(); router.back(); }}>
+            Go Back
+          </Button>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   if (!exerciseFlow) {
     return (
