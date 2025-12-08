@@ -213,12 +213,12 @@ export default function InsightsScreen() {
                   </View>
                   <View className="items-center flex-1">
                     <View
-                      className="w-8 h-8 rounded-full items-center justify-center mb-1"
+                      className="w-10 h-10 rounded-full items-center justify-center mb-1"
                       style={{ backgroundColor: topExercise?.color ? `${topExercise.color}20` : themeColors.primaryLight }}
                     >
                       <Ionicons
                         name={(topExercise?.icon as any) || 'fitness-outline'}
-                        size={16}
+                        size={18}
                         color={topExercise?.color || themeColors.primary}
                       />
                     </View>

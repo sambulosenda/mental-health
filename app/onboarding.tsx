@@ -121,7 +121,11 @@ export default function OnboardingScreen() {
     >
       <View className="h-[50px] flex-row justify-end px-6">
         {!isLastSlide && (
-          <Pressable onPress={handleSkip} className="p-2">
+          <Pressable
+            onPress={handleSkip}
+            className="py-3 px-4"
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          >
             <Text variant="captionMedium" color="textSecondary">
               Skip
             </Text>

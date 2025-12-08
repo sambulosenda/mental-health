@@ -13,7 +13,7 @@ import {
 } from '@/src/components/chat';
 import { Text } from '@/src/components/ui';
 import { useTheme } from '@/src/contexts/ThemeContext';
-import { colors, darkColors } from '@/src/constants/theme';
+import { colors, darkColors, spacing } from '@/src/constants/theme';
 import {
   getCheckinPrompt,
   inferMoodFromConversation,
@@ -221,7 +221,7 @@ export default function ChatScreen() {
             <ChatBubble message={item} index={index} />
           )}
           contentContainerStyle={{
-            padding: 16,
+            padding: spacing.md,
             flexGrow: 1,
             justifyContent: messages.length === 0 ? 'center' : 'flex-end',
           }}
