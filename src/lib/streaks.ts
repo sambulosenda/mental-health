@@ -1,5 +1,5 @@
 import { getMoodEntriesForDate, getMoodEntriesForLastDays } from './database/queries/mood';
-import { getAllJournalEntries, getJournalEntriesForLastDays } from './database/queries/journal';
+import { getJournalEntriesForLastDays } from './database/queries/journal';
 import { getRecentExerciseSessions } from './database/queries/exercise';
 import type { ReminderType } from '@/src/types/settings';
 
@@ -85,14 +85,13 @@ export async function calculateStreaks(): Promise<StreakInfo> {
 
 // Check if user has completed action today
 export async function hasCompletedToday(type: ReminderType): Promise<boolean> {
-  const today = normalizeToDay(new Date());
-
   switch (type) {
     case 'mood': {
       const entries = await getMoodEntriesForDate(new Date());
       return entries.length > 0;
     }
     case 'exercise': {
+      const today = normalizeToDay(new Date());
       const sessions = await getRecentExerciseSessions(20);
       return sessions.some(
         (s) =>
@@ -101,7 +100,8 @@ export async function hasCompletedToday(type: ReminderType): Promise<boolean> {
       );
     }
     case 'journal': {
-      const entries = await getAllJournalEntries();
+      const today = normalizeToDay(new Date());
+      const entries = await getJournalEntriesForLastDays(1);
       return entries.some(
         (e) => normalizeToDay(e.createdAt).getTime() === today.getTime()
       );
