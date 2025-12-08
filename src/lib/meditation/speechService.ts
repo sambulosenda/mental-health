@@ -103,6 +103,7 @@ export async function createMeditationSpeaker(
   let pauseTimeoutId: ReturnType<typeof setTimeout> | null = null;
   let pauseRejectFn: (() => void) | null = null;
   let shouldStop = false;
+  let isExecutingSegment = false;
 
   const getState = (): SpeechState => ({
     isPlaying,
@@ -124,19 +125,23 @@ export async function createMeditationSpeaker(
   };
 
   const speakSegment = async (index: number): Promise<void> => {
-    if (shouldStop || index >= segments.length) {
-      if (!shouldStop && index >= segments.length) {
-        isPlaying = false;
-        callbacks.onComplete?.();
-      }
-      return;
-    }
-
-    const segment = segments[index];
-    currentIndex = index;
-    callbacks.onSegmentStart?.(index, segment.text);
+    if (isExecutingSegment) return;
 
     try {
+      isExecutingSegment = true;
+
+      if (shouldStop || index >= segments.length) {
+        if (!shouldStop && index >= segments.length) {
+          isPlaying = false;
+          callbacks.onComplete?.();
+        }
+        return;
+      }
+
+      const segment = segments[index];
+      currentIndex = index;
+      callbacks.onSegmentStart?.(index, segment.text);
+
       // Speak the text
       await speakText(segment.text, voiceConfig);
 
@@ -166,12 +171,17 @@ export async function createMeditationSpeaker(
 
       if (shouldStop) return;
 
+      // Allow next segment to execute
+      isExecutingSegment = false;
+
       // Move to next segment
       await speakSegment(index + 1);
     } catch (error) {
       if (!shouldStop) {
         callbacks.onError?.(error instanceof Error ? error : new Error(String(error)));
       }
+    } finally {
+      isExecutingSegment = false;
     }
   };
 
@@ -193,7 +203,7 @@ export async function createMeditationSpeaker(
     },
 
     resume: () => {
-      if (!isPaused) return;
+      if (!isPaused || isExecutingSegment) return;
       isPaused = false;
       speakSegment(currentIndex);
     },
