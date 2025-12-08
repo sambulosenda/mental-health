@@ -72,7 +72,15 @@ export default function ProfileScreen() {
         return;
       }
     }
-    await setReminderEnabled(type, enabled);
+    try {
+      await setReminderEnabled(type, enabled);
+    } catch (error) {
+      Alert.alert(
+        'Reminder Error',
+        'Failed to schedule reminder. Please try again.',
+        [{ text: 'OK' }]
+      );
+    }
   };
 
   const handleBiometricToggle = async (enabled: boolean) => {

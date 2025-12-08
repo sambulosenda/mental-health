@@ -11,6 +11,7 @@ import {
   scheduleReminder,
   scheduleAllReminders,
   cancelReminder,
+  cancelAllReminders,
 } from '@/src/lib/notifications';
 
 interface SettingsState extends AppSettings {
@@ -29,7 +30,7 @@ interface SettingsState extends AppSettings {
   setOnboardingComplete: () => void;
   setInsightDepth: (depth: 'brief' | 'detailed') => void;
   setInsightTone: (tone: 'empathetic' | 'professional') => void;
-  resetSettings: () => void;
+  resetSettings: () => Promise<void>;
 }
 
 const defaultSettings: AppSettings = {
@@ -126,7 +127,10 @@ export const useSettingsStore = create<SettingsState>()(
       setOnboardingComplete: () => set({ hasCompletedOnboarding: true }),
       setInsightDepth: (depth) => set({ insightDepth: depth }),
       setInsightTone: (tone) => set({ insightTone: tone }),
-      resetSettings: () => set(defaultSettings),
+      resetSettings: async () => {
+        await cancelAllReminders();
+        set(defaultSettings);
+      },
     }),
     {
       name: 'daysi-settings',

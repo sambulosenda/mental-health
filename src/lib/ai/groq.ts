@@ -60,8 +60,6 @@ export function hasGroqApiKey(): boolean {
 export interface WordLimitOptions {
   maxWords: number;
   enforceLimit?: boolean;  // Post-process truncate if exceeded
-  retryOnViolation?: boolean;  // Retry API call if limit exceeded
-  maxRetries?: number;
 }
 
 // Call Groq API with optional word limit enforcement
@@ -93,70 +91,42 @@ export async function callGroqAPI(
     ? Math.min(maxTokens, Math.ceil(wordLimit.maxWords * 2.5))
     : maxTokens;
 
-  const maxRetries = wordLimit?.retryOnViolation ? (wordLimit.maxRetries ?? 2) : 0;
-  let lastResponse = '';
+  const response = await fetch(GROQ_API_URL, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model,
+      messages,
+      max_tokens: effectiveMaxTokens,
+      temperature,
+    }),
+  });
 
-  for (let attempt = 0; attempt <= maxRetries; attempt++) {
-    const response = await fetch(GROQ_API_URL, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model,
-        messages,
-        max_tokens: effectiveMaxTokens,
-        temperature,
-      }),
-    });
-
-    if (!response.ok) {
-      const error = await response.text();
-      if (response.status === 401) {
-        throw new Error('Invalid API key configuration.');
-      }
-      if (response.status === 429) {
-        throw new Error('Rate limit exceeded. Please wait a moment and try again.');
-      }
-      throw new Error(`Groq API error: ${error}`);
+  if (!response.ok) {
+    const error = await response.text();
+    if (response.status === 401) {
+      throw new Error('Invalid API key configuration.');
     }
-
-    const data: GroqResponse = await response.json();
-    const content = data.choices[0]?.message?.content;
-    if (!content) {
-      throw new Error('Groq API returned empty or malformed response');
+    if (response.status === 429) {
+      throw new Error('Rate limit exceeded. Please wait a moment and try again.');
     }
-    lastResponse = content;
-
-    // Word limit validation
-    if (wordLimit) {
-      const wordCount = countWords(lastResponse);
-
-      if (wordCount <= wordLimit.maxWords) {
-        return lastResponse;
-      }
-
-      // Retry if enabled and not exhausted
-      if (wordLimit.retryOnViolation && attempt < maxRetries) {
-        console.warn(`Response exceeded ${wordLimit.maxWords} words (${wordCount}), retrying...`);
-        continue;
-      }
-
-      // Enforce limit by truncation if enabled
-      if (wordLimit.enforceLimit) {
-        console.warn(`Truncating response from ${wordCount} to ${wordLimit.maxWords} words`);
-        return truncateToWordLimit(lastResponse, wordLimit.maxWords);
-      }
-    }
-
-    return lastResponse;
+    throw new Error(`Groq API error: ${error}`);
   }
 
-  // Fallback: truncate if we exhausted retries
-  if (wordLimit?.enforceLimit) {
-    return truncateToWordLimit(lastResponse, wordLimit.maxWords);
+  const data: GroqResponse = await response.json();
+  const content = data.choices[0]?.message?.content;
+  if (!content) {
+    throw new Error('Groq API returned empty or malformed response');
   }
 
-  return lastResponse;
+  // Word limit enforcement by truncation
+  if (wordLimit?.enforceLimit && !validateWordLimit(content, wordLimit.maxWords)) {
+    console.warn(`Truncating response from ${countWords(content)} to ${wordLimit.maxWords} words`);
+    return truncateToWordLimit(content, wordLimit.maxWords);
+  }
+
+  return content;
 }

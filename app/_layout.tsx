@@ -16,6 +16,12 @@ import { ThemeProvider, useTheme } from '@/src/contexts/ThemeContext';
 import { hasCompletedToday } from '@/src/lib/streaks';
 import type { ReminderType } from '@/src/types/settings';
 
+const VALID_REMINDER_TYPES: readonly ReminderType[] = ['mood', 'exercise', 'journal'];
+
+function isValidReminderType(value: unknown): value is ReminderType {
+  return typeof value === 'string' && VALID_REMINDER_TYPES.includes(value as ReminderType);
+}
+
 function RootLayoutContent() {
   const [isReady, setIsReady] = useState(false);
   const { hasCompletedOnboarding } = useSettingsStore();
@@ -53,8 +59,11 @@ function RootLayoutContent() {
 
         // If it's a follow-up notification, check if user already completed the action
         if (data?.isFollowUp && data?.action) {
-          const type = data.action as ReminderType;
-          const completed = await hasCompletedToday(type);
+          if (!isValidReminderType(data.action)) {
+            console.warn(`Invalid reminder type in notification: ${data.action}`);
+            return;
+          }
+          const completed = await hasCompletedToday(data.action);
           if (completed) {
             // Dismiss this notification since the action was already done
             await Notifications.dismissNotificationAsync(
@@ -69,10 +78,14 @@ function RootLayoutContent() {
     responseListener.current = Notifications.addNotificationResponseReceivedListener(
       (response) => {
         const data = response.notification.request.content.data;
-        const action = data?.action as ReminderType | undefined;
+        const action = data?.action;
 
         // Navigate to appropriate screen based on notification type
         if (action) {
+          if (!isValidReminderType(action)) {
+            console.warn(`Invalid reminder type in notification response: ${action}`);
+            return;
+          }
           switch (action) {
             case 'mood':
               router.push('/(tabs)/track');
