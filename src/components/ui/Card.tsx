@@ -53,26 +53,25 @@ export function Card({
   }[padding];
 
   const getVariantStyle = () => {
+    // Light mode card bg: #F9F9F9, dark mode uses surfaceElevated
+    const cardBg = isDark ? themeColors.surfaceElevated : '#F9F9F9';
+
     switch (variant) {
       case 'elevated':
         return {
-          backgroundColor: themeColors.surface,
-          borderWidth: 1,
-          borderColor: themeColors.border,
+          backgroundColor: cardBg,
         };
       case 'outlined':
         return {
-          backgroundColor: 'transparent',
-          borderWidth: 1,
-          borderColor: themeColors.border,
+          backgroundColor: cardBg,
         };
       case 'flat':
         return {
-          backgroundColor: themeColors.surfaceElevated,
+          backgroundColor: cardBg,
         };
       default:
         return {
-          backgroundColor: themeColors.surface,
+          backgroundColor: cardBg,
         };
     }
   };
