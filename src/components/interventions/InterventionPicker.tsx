@@ -1,5 +1,5 @@
 import { Text } from '@/src/components/ui';
-import { colors, darkColors } from '@/src/constants/theme';
+import { colors, darkColors, spacing } from '@/src/constants/theme';
 import { useTheme } from '@/src/contexts/ThemeContext';
 import { useInterventionRecommendations } from '@/src/hooks/useInterventionRecommendations';
 import type { InterventionRecommendation } from '@/src/lib/interventions/recommendations';
@@ -133,10 +133,10 @@ export function InterventionPicker({
         </View>
       )}
 
-      <ScrollView 
-        horizontal 
+      <ScrollView
+        horizontal
         showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ paddingHorizontal: 16, gap: 12 }}
+        contentContainerStyle={{ paddingHorizontal: spacing.md, gap: spacing.md }}
       >
         {recommendations.map((rec) => (
           <RecommendationCard

@@ -1,7 +1,7 @@
 import { Platform, View, StyleSheet } from 'react-native';
 import { Host, Gauge } from '@expo/ui/swift-ui';
 import Svg, { Circle } from 'react-native-svg';
-import { colors } from '@/src/constants/theme';
+import { colors, spacing } from '@/src/constants/theme';
 import { Text } from './Text';
 
 interface NativeGaugeProps {
@@ -104,6 +104,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
   },
   label: {
-    marginTop: 8,
+    marginTop: spacing.sm,
   },
 });

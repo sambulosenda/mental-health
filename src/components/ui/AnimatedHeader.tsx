@@ -174,8 +174,9 @@ export function AnimatedHeader({
                   await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                   rightAction.onPress();
                 }}
-                className="w-9 h-9 rounded-full items-center justify-center"
+                className="w-11 h-11 rounded-full items-center justify-center"
                 style={{ backgroundColor: themeColors.primaryLight }}
+                hitSlop={{ top: 4, bottom: 4, left: 4, right: 4 }}
               >
                 <Ionicons name={rightAction.icon} size={20} color={themeColors.primary} />
               </Pressable>

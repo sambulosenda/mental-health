@@ -6,6 +6,7 @@ import {
 } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { useTheme } from '@/src/contexts/ThemeContext';
+import { colors, darkColors } from '@/src/constants/theme';
 import { Text } from './Text';
 
 type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger';
@@ -42,8 +43,11 @@ export function Button({
 
   const isDisabled = disabled || loading;
 
+  const themeColors = isDark ? darkColors : colors;
+
+  // HIG: minimum 44pt touch targets
   const sizeClass = {
-    sm: 'h-9 px-4',
+    sm: 'h-11 px-4', // 44pt minimum
     md: 'h-12 px-6',
     lg: 'h-14 px-8',
   }[size];
@@ -70,13 +74,13 @@ export function Button({
       {loading ? (
         <ActivityIndicator
           size="small"
-          color={variant === 'primary' ? '#FFFFFF' : '#6B8E8E'}
+          color={variant === 'primary' || variant === 'danger' ? themeColors.textInverse : themeColors.primary}
         />
       ) : (
         <Text
           variant={size === 'sm' ? 'captionMedium' : 'bodyMedium'}
           style={{
-            color: variant === 'primary' || variant === 'danger' ? '#FFFFFF' : '#6B8E8E',
+            color: variant === 'primary' || variant === 'danger' ? themeColors.textInverse : themeColors.primary,
             opacity: isDisabled ? 0.7 : 1,
           }}
         >
