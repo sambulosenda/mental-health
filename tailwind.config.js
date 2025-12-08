@@ -30,11 +30,11 @@ module.exports = {
           4: '#2D5A3D',
           5: '#1B4332',
         },
-        // Light mode backgrounds - warm cream
-        background: '#FAF6EF',
+        // Light mode backgrounds - clean white
+        background: '#FFFFFF',
         surface: {
-          DEFAULT: '#FFFEFB',
-          elevated: '#F0EBE3',
+          DEFAULT: '#FFFFFF',
+          elevated: '#F5F5F5',
         },
         // Dark mode backgrounds - warm dark
         'background-dark': '#1A1A18',

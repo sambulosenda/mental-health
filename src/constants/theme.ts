@@ -24,10 +24,10 @@ export const colors = {
     5: '#1B4332',
   } as Record<number, string>,
 
-  // Backgrounds - warm cream tones
-  background: '#FAF6EF',
-  surface: '#FFFEFB',
-  surfaceElevated: '#F0EBE3',
+  // Backgrounds - clean white
+  background: '#FFFFFF',
+  surface: '#FFFFFF',
+  surfaceElevated: '#F5F5F5',
 
   // Text (WCAG AA contrast ratios met - 4.5:1 minimum)
   textPrimary: '#1B4332',
