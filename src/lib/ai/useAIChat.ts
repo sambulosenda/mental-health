@@ -3,7 +3,7 @@ import type { ChatMessage } from '@/src/types/chat';
 import type { MoodEntry } from '@/src/types/mood';
 import type { JournalEntry } from '@/src/types/journal';
 import type { ExerciseSession } from '@/src/types/exercise';
-import { callGroqAPI, hasGroqApiKey, type ChatMessage as GroqMessage, type WordLimitOptions } from './groq';
+import { callGroqAPI, hasGroqApiKey, type ChatMessage as GroqMessage } from './groq';
 import { CHAT_COMPANION_SYSTEM_PROMPT, CHECKIN_SYSTEM_PROMPT, buildPrivacySafeContext } from './chatPrompts';
 
 export type ChatAIState = 'idle' | 'loading' | 'ready' | 'generating' | 'error';
@@ -102,16 +102,9 @@ export function useAIChat(options: UseAIChatOptions = {}): UseAIChatReturn {
           })),
         ];
 
-        // Word limits: chat=20 words, check-in=15 words
-        const wordLimitConfig: WordLimitOptions = {
-          maxWords: isCheckin ? 15 : 20,
-          enforceLimit: true,      // Always truncate if exceeded
-        };
-
         const response = await callGroqAPI(groqMessages, {
-          maxTokens: 80,  // Conservative: ~20 words ≈ 50 tokens, with buffer
+          maxTokens: 200,  // Allow longer, warmer responses (1-3 sentences)
           temperature: 0.7,
-          wordLimit: wordLimitConfig,
         });
 
         responseRef.current = response;
