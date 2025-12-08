@@ -38,7 +38,6 @@ export function MeditationTimerStep({ step, onComplete, accentColor }: Meditatio
   const [isComplete, setIsComplete] = useState(false);
 
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const lastBellRef = useRef<number>(totalDuration);
 
   // Breathing animation
   const breathScale = useSharedValue(1);
@@ -63,14 +62,14 @@ export function MeditationTimerStep({ step, onComplete, accentColor }: Meditatio
       -1,
       false
     );
-  }, [showBreathingGuide]);
+  }, [showBreathingGuide, breathScale, breathOpacity]);
 
   const stopBreathAnimation = useCallback(() => {
     cancelAnimation(breathScale);
     cancelAnimation(breathOpacity);
     breathScale.value = withTiming(1);
     breathOpacity.value = withTiming(0.3);
-  }, []);
+  }, [breathScale, breathOpacity]);
 
   const formatTime = (seconds: number): string => {
     const mins = Math.floor(seconds / 60);

@@ -39,6 +39,7 @@ export function TimedSpeechStep({ step, onComplete, accentColor }: TimedSpeechSt
   const [isInPause, setIsInPause] = useState(false);
   const [showBreathCue, setShowBreathCue] = useState(false);
   const [isComplete, setIsComplete] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const controllerRef = useRef<SpeechController | null>(null);
 
@@ -66,14 +67,14 @@ export function TimedSpeechStep({ step, onComplete, accentColor }: TimedSpeechSt
       -1,
       false
     );
-  }, []);
+  }, [breathScale, breathOpacity]);
 
   const stopBreathAnimation = useCallback(() => {
     cancelAnimation(breathScale);
     cancelAnimation(breathOpacity);
     breathScale.value = withTiming(1);
     breathOpacity.value = withTiming(0.3);
-  }, []);
+  }, [breathScale, breathOpacity]);
 
   const initializeSpeaker = useCallback(async () => {
     if (segments.length === 0) return;
@@ -107,9 +108,11 @@ export function TimedSpeechStep({ step, onComplete, accentColor }: TimedSpeechSt
           stopBreathAnimation();
           playBell('end');
         },
-        onError: (error) => {
-          console.error('Speech error:', error);
+        onError: (err) => {
+          console.error('Speech error:', err);
           setIsPlaying(false);
+          setError('Voice guidance unavailable. You can still continue manually.');
+          stopBreathAnimation();
         },
       }
     );
@@ -237,10 +240,26 @@ export function TimedSpeechStep({ step, onComplete, accentColor }: TimedSpeechSt
           : `${totalSegments} segments`}
       </Text>
 
+      {/* Error message */}
+      {error && (
+        <View className="bg-amber-100 dark:bg-amber-900/30 px-4 py-2 rounded-lg mb-4">
+          <Text variant="caption" color="textSecondary" center>
+            {error}
+          </Text>
+        </View>
+      )}
+
       {/* Controls */}
-      {!isPlaying && !isComplete && (
+      {!isPlaying && !isComplete && !error && (
         <Button onPress={handleStart} style={{ backgroundColor: color }}>
           Begin
+        </Button>
+      )}
+
+      {/* Show skip button when there's an error */}
+      {error && !isComplete && (
+        <Button onPress={onComplete} style={{ backgroundColor: color }}>
+          Skip to Continue
         </Button>
       )}
 

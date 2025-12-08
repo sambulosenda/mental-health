@@ -88,6 +88,7 @@ export async function createMeditationSpeaker(
   let isPlaying = false;
   let isPaused = false;
   let pauseTimeoutId: ReturnType<typeof setTimeout> | null = null;
+  let pauseRejectFn: (() => void) | null = null;
   let shouldStop = false;
 
   const getState = (): SpeechState => ({
@@ -101,6 +102,11 @@ export async function createMeditationSpeaker(
     if (pauseTimeoutId) {
       clearTimeout(pauseTimeoutId);
       pauseTimeoutId = null;
+    }
+    // Reject pending pause promise to prevent hanging
+    if (pauseRejectFn) {
+      pauseRejectFn();
+      pauseRejectFn = null;
     }
   };
 
@@ -129,13 +135,20 @@ export async function createMeditationSpeaker(
       if (segment.pauseAfter > 0) {
         callbacks.onPauseStart?.(segment.pauseAfter, segment.breathCue || false);
 
-        await new Promise<void>((resolve) => {
-          pauseTimeoutId = setTimeout(() => {
-            pauseTimeoutId = null;
-            callbacks.onPauseEnd?.();
-            resolve();
-          }, segment.pauseAfter * 1000);
-        });
+        try {
+          await new Promise<void>((resolve, reject) => {
+            pauseRejectFn = reject;
+            pauseTimeoutId = setTimeout(() => {
+              pauseTimeoutId = null;
+              pauseRejectFn = null;
+              callbacks.onPauseEnd?.();
+              resolve();
+            }, segment.pauseAfter * 1000);
+          });
+        } catch {
+          // Pause was interrupted (stop/pause called), exit gracefully
+          return;
+        }
       }
 
       if (shouldStop) return;
