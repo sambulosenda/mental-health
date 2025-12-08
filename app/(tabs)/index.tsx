@@ -91,8 +91,9 @@ export default function HomeScreen() {
               </View>
               <Pressable
                 onPress={() => router.navigate('/(tabs)/track')}
-                className="w-10 h-10 rounded-full items-center justify-center"
+                className="w-11 h-11 rounded-full items-center justify-center"
                 style={{ backgroundColor: themeColors.primaryLight }}
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
               >
                 <Ionicons name="add" size={24} color={themeColors.primary} />
               </Pressable>
@@ -129,7 +130,7 @@ export default function HomeScreen() {
             <Card onPress={() => router.push('/chat?type=checkin')}>
               <View className="flex-row items-center">
                 <View
-                  className="w-10 h-10 rounded-full items-center justify-center mr-3"
+                  className="w-11 h-11 rounded-full items-center justify-center mr-3"
                   style={{ backgroundColor: themeColors.primaryLight }}
                 >
                   <Ionicons name="chatbubble-ellipses-outline" size={20} color={themeColors.primary} />
@@ -155,10 +156,10 @@ export default function HomeScreen() {
             <Card onPress={() => router.push('/chat?type=chat')}>
               <View className="flex-row items-center">
                 <View
-                  className="w-10 h-10 rounded-full items-center justify-center mr-3"
-                  style={{ backgroundColor: '#E8B4B420' }}
+                  className="w-11 h-11 rounded-full items-center justify-center mr-3"
+                  style={{ backgroundColor: themeColors.warningLight }}
                 >
-                  <Ionicons name="chatbubbles-outline" size={20} color="#D4A079" />
+                  <Ionicons name="chatbubbles-outline" size={20} color={themeColors.warning} />
                 </View>
                 <View className="flex-1">
                   <Text variant="bodyMedium" color="textPrimary">
@@ -180,7 +181,11 @@ export default function HomeScreen() {
             <Text variant="h3" color="textPrimary">
               Self-Assessments
             </Text>
-            <Pressable onPress={() => router.navigate('/(tabs)/insights')}>
+            <Pressable
+              onPress={() => router.navigate('/(tabs)/insights')}
+              hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+              className="py-2 px-3 -my-2 -mx-3"
+            >
               <Text variant="captionMedium" color="primary">
                 View History
               </Text>
@@ -203,7 +208,7 @@ export default function HomeScreen() {
         </View>
 
         {/* Suggested Exercises */}
-        <View className="mb-6 -mx-4">
+        <View className="mb-6" style={{ marginHorizontal: -spacing.lg }}>
           <InterventionPicker
             onSelectExercise={(templateId) => router.push(`/exercise-session?templateId=${templateId}`)}
             title="Suggested for You"

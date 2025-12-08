@@ -29,10 +29,10 @@ export const colors = {
   surface: '#FFFFFF',
   surfaceElevated: '#F5F5F5',
 
-  // Text (WCAG AA contrast ratios met)
+  // Text (WCAG AA contrast ratios met - 4.5:1 minimum)
   textPrimary: '#2C3E3E',
   textSecondary: '#5A6B6B',
-  textMuted: '#8A9A9A',
+  textMuted: '#6B7A7A', // Darkened from #8A9A9A for 4.5:1 contrast
   textInverse: '#FFFFFF',
 
   // Semantic
@@ -78,10 +78,10 @@ export const darkColors = {
   surface: '#1E1E1E',
   surfaceElevated: '#2A2A2A',
 
-  // Dark text
+  // Dark text (WCAG AA contrast ratios met - 4.5:1 minimum)
   textPrimary: '#FAFAFA',
   textSecondary: '#B0B0B0',
-  textMuted: '#707070',
+  textMuted: '#9A9A9A', // Lightened from #707070 for 4.5:1 contrast on dark
   textInverse: '#1E1E1E',
 
   // Semantic - slightly adjusted for dark
