@@ -109,6 +109,26 @@ export async function initializeDatabase(): Promise<void> {
     ON exercise_sessions(template_id, started_at);
   `);
 
+  // Create assessment_sessions table (GAD-7, PHQ-9)
+  await expo.execAsync(`
+    CREATE TABLE IF NOT EXISTS assessment_sessions (
+      id TEXT PRIMARY KEY,
+      type TEXT NOT NULL,
+      status TEXT NOT NULL,
+      started_at INTEGER NOT NULL,
+      completed_at INTEGER,
+      responses TEXT,
+      total_score INTEGER,
+      severity TEXT
+    );
+  `);
+
+  // Index for efficient assessment queries
+  await expo.execAsync(`
+    CREATE INDEX IF NOT EXISTS idx_assessment_sessions_type
+    ON assessment_sessions(type, started_at);
+  `);
+
   // Seed default prompts if empty
   const result = await expo.getFirstAsync<{ count: number }>('SELECT COUNT(*) as count FROM prompts');
   if (result?.count === 0) {
