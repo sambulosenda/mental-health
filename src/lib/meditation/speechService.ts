@@ -40,6 +40,13 @@ export async function getPreferredVoice(language: string = 'en-US'): Promise<str
   }
 }
 
+export class SpeechStoppedError extends Error {
+  constructor() {
+    super('speech stopped');
+    this.name = 'SpeechStoppedError';
+  }
+}
+
 export async function speakText(
   text: string,
   config: VoiceConfig = {},
@@ -59,8 +66,14 @@ export async function speakText(
         resolve();
       },
       onError: (error) => {
-        onError?.(new Error(String(error)));
-        reject(error);
+        const err = new Error(String(error));
+        onError?.(err);
+        reject(err);
+      },
+      onStopped: () => {
+        const err = new SpeechStoppedError();
+        onError?.(err);
+        reject(err);
       },
     });
   });

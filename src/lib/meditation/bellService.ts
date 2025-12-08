@@ -17,6 +17,9 @@ export function playBell(type: BellType = 'interval'): void {
       setTimeout(() => {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       }, 300);
+      setTimeout(() => {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      }, 600);
       break;
     case 'interval':
     default:
