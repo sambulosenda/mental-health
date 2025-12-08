@@ -6,7 +6,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 import { useTheme } from '@/src/contexts/ThemeContext';
-import { colors, darkColors, shadows, spacing, borderRadius } from '@/src/constants/theme';
+import { colors, darkColors, spacing, borderRadius } from '@/src/constants/theme';
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
@@ -59,11 +59,10 @@ export function Card({
           backgroundColor: themeColors.surface,
           borderWidth: 1,
           borderColor: themeColors.border,
-          ...(isDark ? {} : shadows.md),
         };
       case 'outlined':
         return {
-          backgroundColor: themeColors.surface,
+          backgroundColor: 'transparent',
           borderWidth: 1,
           borderColor: themeColors.border,
         };
