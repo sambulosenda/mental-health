@@ -133,7 +133,11 @@ export function InterventionPicker({
         </View>
       )}
 
-      <View className="flex-row px-4 gap-3">
+      <ScrollView 
+        horizontal 
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={{ paddingHorizontal: 16, gap: 12 }}
+      >
         {recommendations.map((rec, index) => {
           console.log('[InterventionPicker] Rendering card', index, rec.template.name);
           return (
@@ -145,7 +149,7 @@ export function InterventionPicker({
             />
           );
         })}
-      </View>
+      </ScrollView>
     </View>
   );
 }
