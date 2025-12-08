@@ -34,16 +34,18 @@ export function AssessmentTrendChart({
   const chartData = useMemo(() => {
     if (history.length === 0) return [];
 
-    return history
+    // Filter valid sessions and sort oldest-first before assigning indexes
+    const validSessions = history
       .filter((s) => s.completedAt && s.totalScore !== undefined)
-      .map((session, index) => ({
-        index: index + 1,
-        score: session.totalScore!,
-        date: session.completedAt!,
-        severity: session.severity,
-        label: format(session.completedAt!, 'MMM d'),
-      }))
-      .reverse(); // Oldest first for chart
+      .sort((a, b) => a.completedAt!.getTime() - b.completedAt!.getTime()); // Oldest first
+
+    return validSessions.map((session, index) => ({
+      index: index + 1,
+      score: session.totalScore!,
+      date: session.completedAt!,
+      severity: session.severity,
+      label: format(session.completedAt!, 'MMM d'),
+    }));
   }, [history]);
 
   const latestSession = history[0];
