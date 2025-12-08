@@ -177,7 +177,7 @@ export async function createMeditationSpeaker(
       // Move to next segment
       await speakSegment(index + 1);
     } catch (error) {
-      if (!shouldStop) {
+      if (!shouldStop && !(error instanceof SpeechStoppedError)) {
         callbacks.onError?.(error instanceof Error ? error : new Error(String(error)));
       }
     } finally {
@@ -200,6 +200,7 @@ export async function createMeditationSpeaker(
       isPaused = true;
       Speech.stop();
       clearPauseTimeout();
+      isExecutingSegment = false;
     },
 
     resume: () => {
@@ -220,6 +221,7 @@ export async function createMeditationSpeaker(
     skipToNext: () => {
       Speech.stop();
       clearPauseTimeout();
+      isExecutingSegment = false;
       if (currentIndex < segments.length - 1) {
         speakSegment(currentIndex + 1);
       }

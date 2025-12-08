@@ -121,9 +121,21 @@ export function TimedSpeechStep({ step, onComplete, accentColor }: TimedSpeechSt
   }, [segments, step.voiceConfig, startBreathAnimation, stopBreathAnimation]);
 
   useEffect(() => {
-    initializeSpeaker();
+    let mounted = true;
+
+    const init = async () => {
+      await initializeSpeaker();
+      // If unmounted during init, stop the orphaned speaker
+      if (!mounted && controllerRef.current) {
+        controllerRef.current.stop();
+        controllerRef.current = null;
+      }
+    };
+
+    init();
 
     return () => {
+      mounted = false;
       controllerRef.current?.stop();
     };
   }, [initializeSpeaker]);
@@ -132,11 +144,16 @@ export function TimedSpeechStep({ step, onComplete, accentColor }: TimedSpeechSt
     if (!controllerRef.current) {
       await initializeSpeaker();
     }
+    // Check controller exists after initialization attempt
+    if (!controllerRef.current) {
+      setError('Voice guidance unavailable. You can still continue manually.');
+      return;
+    }
     setIsPlaying(true);
     setIsPaused(false);
     playBell('start');
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    controllerRef.current?.play();
+    controllerRef.current.play();
   };
 
   const handlePause = () => {
