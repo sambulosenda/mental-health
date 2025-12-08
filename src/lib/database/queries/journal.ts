@@ -1,4 +1,4 @@
-import { eq, desc, like, or } from 'drizzle-orm';
+import { eq, desc, like, or, gte } from 'drizzle-orm';
 import * as Crypto from 'expo-crypto';
 import { db } from '../client';
 import { journalEntries, prompts, type JournalEntryRow, type NewJournalEntry, type PromptRow } from '../schema';
@@ -83,6 +83,20 @@ export async function getAllJournalEntries(): Promise<JournalEntry[]> {
   const rows = await db
     .select()
     .from(journalEntries)
+    .orderBy(desc(journalEntries.createdAt));
+  return rows.map(toJournalEntry);
+}
+
+// Get journal entries for the last N days
+export async function getJournalEntriesForLastDays(days: number): Promise<JournalEntry[]> {
+  const startDate = new Date();
+  startDate.setDate(startDate.getDate() - days);
+  startDate.setHours(0, 0, 0, 0);
+
+  const rows = await db
+    .select()
+    .from(journalEntries)
+    .where(gte(journalEntries.createdAt, startDate))
     .orderBy(desc(journalEntries.createdAt));
   return rows.map(toJournalEntry);
 }
