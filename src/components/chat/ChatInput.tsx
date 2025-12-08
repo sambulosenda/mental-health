@@ -86,7 +86,7 @@ export function ChatInput({ onSend, disabled, placeholder = 'Type a message...' 
         <Ionicons
           name="send"
           size={20}
-          color={canSend ? '#FFFFFF' : themeColors.textMuted}
+          color={canSend ? themeColors.textInverse : themeColors.textMuted}
         />
       </Pressable>
     </View>

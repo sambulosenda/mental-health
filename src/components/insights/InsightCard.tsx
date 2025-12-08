@@ -21,11 +21,11 @@ interface InsightCardProps {
 }
 
 const typeConfig: Record<InsightType, { icon: keyof typeof Ionicons.glyphMap; color: string; bgColor: string; darkBgColor: string }> = {
-  pattern: { icon: 'analytics', color: colors.primary, bgColor: colors.primaryLight, darkBgColor: '#4A6B6B40' },
-  trigger: { icon: 'flash', color: colors.warning, bgColor: colors.warningLight, darkBgColor: '#D4A97940' },
-  suggestion: { icon: 'bulb', color: colors.success, bgColor: colors.successLight, darkBgColor: '#79B47F40' },
-  streak: { icon: 'flame', color: '#FF6B6B', bgColor: '#FFE4E4', darkBgColor: '#FF6B6B40' },
-  milestone: { icon: 'trophy', color: '#FFD93D', bgColor: '#FFF8E1', darkBgColor: '#FFD93D40' },
+  pattern: { icon: 'analytics', color: colors.primary, bgColor: colors.primaryLight, darkBgColor: `${colors.primary}40` },
+  trigger: { icon: 'flash', color: colors.warning, bgColor: colors.warningLight, darkBgColor: `${colors.warning}40` },
+  suggestion: { icon: 'bulb', color: colors.success, bgColor: colors.successLight, darkBgColor: `${colors.success}40` },
+  streak: { icon: 'flame', color: colors.error, bgColor: colors.errorLight, darkBgColor: `${colors.error}40` },
+  milestone: { icon: 'trophy', color: colors.warning, bgColor: colors.warningLight, darkBgColor: `${colors.warning}40` },
 };
 
 export function InsightCard({ insight }: InsightCardProps) {

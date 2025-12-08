@@ -35,7 +35,7 @@ export function ChatBubble({ message, index }: ChatBubbleProps) {
       >
         <Text
           variant="body"
-          style={{ color: isUser ? '#FFFFFF' : themeColors.textPrimary }}
+          style={{ color: isUser ? themeColors.textInverse : themeColors.textPrimary }}
         >
           {message.content}
         </Text>

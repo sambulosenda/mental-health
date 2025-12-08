@@ -91,7 +91,7 @@ export default function TrackScreen() {
           >
             <Text
               variant="bodyMedium"
-              style={{ color: canSave ? '#FFFFFF' : themeColors.textMuted }}
+              style={{ color: canSave ? themeColors.textInverse : themeColors.textMuted }}
             >
               {isLoading ? 'Saving...' : 'Done'}
             </Text>

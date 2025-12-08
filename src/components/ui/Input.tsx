@@ -4,7 +4,7 @@ import {
   View,
 } from 'react-native';
 import { useState } from 'react';
-import { typography } from '@/src/constants/theme';
+import { typography, colors, darkColors } from '@/src/constants/theme';
 import { useTheme } from '@/src/contexts/ThemeContext';
 import { Text } from './Text';
 
@@ -26,6 +26,7 @@ export function Input({
   ...props
 }: InputProps) {
   const { isDark } = useTheme();
+  const themeColors = isDark ? darkColors : colors;
   const [isFocused, setIsFocused] = useState(false);
 
   const handleFocus = (e: any) => {
@@ -61,10 +62,10 @@ export function Input({
         className={`rounded-md border-[1.5px] px-4 py-3 ${baseClass} ${focusedClass} ${errorClass}`}
         style={[
           typography.body,
-          { color: isDark ? '#FAFAFA' : '#2C3E3E' },
+          { color: themeColors.textPrimary },
           style,
         ]}
-        placeholderTextColor={isDark ? '#707070' : '#8A9A9A'}
+        placeholderTextColor={themeColors.textMuted}
         onFocus={handleFocus}
         onBlur={handleBlur}
         accessibilityLabel={label}

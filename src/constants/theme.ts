@@ -1,101 +1,101 @@
-// DaySi Design System - Calming, minimal aesthetic
+// DaySi Design System - Forest Green & Warm Cream
 
 export const colors = {
-  // Primary palette - soft teal
-  primary: '#6B8E8E',
-  primaryLight: '#A8C5C5',
-  primaryDark: '#4A6B6B',
+  // Primary palette - deep forest green
+  primary: '#1B4332',
+  primaryLight: '#2D6A4F',
+  primaryDark: '#0D2818',
 
-  // Mood colors (WCAG AA compliant)
+  // Mood colors - all green tones (WCAG AA compliant)
   mood: {
-    1: '#E8B4B4', // Distressed - soft coral
-    2: '#E8D4B4', // Low - warm sand
-    3: '#E8E4B4', // Neutral - pale yellow
-    4: '#C4E8B4', // Good - soft green
-    5: '#B4D4E8', // Great - calm blue
+    1: '#D8E2DC', // Struggling - pale sage
+    2: '#B7E4C7', // Low - light mint
+    3: '#95D5B2', // Okay - soft green
+    4: '#74C69D', // Good - fresh green
+    5: '#52B788', // Great - vibrant forest
   } as Record<number, string>,
 
   // Mood text colors (darker versions for contrast)
   moodText: {
-    1: '#8B5A5A',
-    2: '#8B7A5A',
-    3: '#7B7A4A',
-    4: '#5A7B5A',
-    5: '#5A6A7B',
+    1: '#5C7065',
+    2: '#4A7C59',
+    3: '#3D6B4F',
+    4: '#2D5A3D',
+    5: '#1B4332',
   } as Record<number, string>,
 
-  // Backgrounds
-  background: '#FAFAFA',
-  surface: '#FFFFFF',
-  surfaceElevated: '#F5F5F5',
+  // Backgrounds - warm cream tones
+  background: '#FAF6EF',
+  surface: '#FFFEFB',
+  surfaceElevated: '#F0EBE3',
 
   // Text (WCAG AA contrast ratios met - 4.5:1 minimum)
-  textPrimary: '#2C3E3E',
-  textSecondary: '#5A6B6B',
-  textMuted: '#6B7A7A', // Darkened from #8A9A9A for 4.5:1 contrast
-  textInverse: '#FFFFFF',
+  textPrimary: '#1B4332',
+  textSecondary: '#40694D',
+  textMuted: '#6B8068',
+  textInverse: '#FFFEFB',
 
   // Semantic
-  error: '#D47979',
+  error: '#BC4749',
   errorLight: '#F5E0E0',
-  success: '#79B47F',
-  successLight: '#E0F5E2',
-  warning: '#D4A979',
+  success: '#52B788',
+  successLight: '#D8E2DC',
+  warning: '#DDA15E',
   warningLight: '#F5EDE0',
 
-  // Borders & dividers
-  border: '#E5E8E8',
-  borderLight: '#F0F2F2',
-  divider: '#E8EBEB',
+  // Borders & dividers - warm tones
+  border: '#D8D4CB',
+  borderLight: '#E8E4DB',
+  divider: '#E0DCD3',
 } as const;
 
-// Dark mode colors
+// Dark mode colors - warm dark with forest green accents
 export const darkColors = {
-  // Primary palette - same as light
-  primary: '#6B8E8E',
-  primaryLight: '#A8C5C5',
-  primaryDark: '#4A6B6B',
+  // Primary palette - brighter for dark mode visibility
+  primary: '#40916C',
+  primaryLight: '#52B788',
+  primaryDark: '#1B4332',
 
   // Mood colors - same as light (for consistency)
   mood: {
-    1: '#E8B4B4',
-    2: '#E8D4B4',
-    3: '#E8E4B4',
-    4: '#C4E8B4',
-    5: '#B4D4E8',
+    1: '#D8E2DC',
+    2: '#B7E4C7',
+    3: '#95D5B2',
+    4: '#74C69D',
+    5: '#52B788',
   } as Record<number, string>,
 
   moodText: {
-    1: '#8B5A5A',
-    2: '#8B7A5A',
-    3: '#7B7A4A',
-    4: '#5A7B5A',
-    5: '#5A6A7B',
+    1: '#5C7065',
+    2: '#4A7C59',
+    3: '#3D6B4F',
+    4: '#2D5A3D',
+    5: '#1B4332',
   } as Record<number, string>,
 
-  // Dark backgrounds
-  background: '#121212',
-  surface: '#1E1E1E',
-  surfaceElevated: '#2A2A2A',
+  // Dark backgrounds - warm dark tones
+  background: '#1A1A18',
+  surface: '#252521',
+  surfaceElevated: '#2F2F2A',
 
   // Dark text (WCAG AA contrast ratios met - 4.5:1 minimum)
-  textPrimary: '#FAFAFA',
-  textSecondary: '#B0B0B0',
-  textMuted: '#9A9A9A', // Lightened from #707070 for 4.5:1 contrast on dark
-  textInverse: '#1E1E1E',
+  textPrimary: '#FAF6EF',
+  textSecondary: '#B8B4A8',
+  textMuted: '#8A8680',
+  textInverse: '#1A1A18',
 
-  // Semantic - slightly adjusted for dark
+  // Semantic - adjusted for dark mode
   error: '#E57373',
   errorLight: '#3D2020',
-  success: '#81C784',
+  success: '#52B788',
   successLight: '#1D3D1D',
   warning: '#FFB74D',
   warningLight: '#3D3020',
 
-  // Dark borders
-  border: '#3A3A3A',
-  borderLight: '#2A2A2A',
-  divider: '#2A2A2A',
+  // Dark borders - warm dark tones
+  border: '#3A3A35',
+  borderLight: '#2A2A26',
+  divider: '#2A2A26',
 } as const;
 
 // Helper to get colors based on theme

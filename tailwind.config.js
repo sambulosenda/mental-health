@@ -9,72 +9,72 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // Primary palette
+        // Primary palette - forest green
         primary: {
-          DEFAULT: '#6B8E8E',
-          light: '#A8C5C5',
-          dark: '#4A6B6B',
+          DEFAULT: '#1B4332',
+          light: '#2D6A4F',
+          dark: '#0D2818',
         },
-        // Mood colors
+        // Mood colors - all green tones
         mood: {
-          1: '#E8B4B4',
-          2: '#E8D4B4',
-          3: '#E8E4B4',
-          4: '#C4E8B4',
-          5: '#B4D4E8',
+          1: '#D8E2DC',
+          2: '#B7E4C7',
+          3: '#95D5B2',
+          4: '#74C69D',
+          5: '#52B788',
         },
         'mood-text': {
-          1: '#8B5A5A',
-          2: '#8B7A5A',
-          3: '#7B7A4A',
-          4: '#5A7B5A',
-          5: '#5A6A7B',
+          1: '#5C7065',
+          2: '#4A7C59',
+          3: '#3D6B4F',
+          4: '#2D5A3D',
+          5: '#1B4332',
         },
-        // Light mode backgrounds
-        background: '#FAFAFA',
+        // Light mode backgrounds - warm cream
+        background: '#FAF6EF',
         surface: {
-          DEFAULT: '#FFFFFF',
-          elevated: '#F5F5F5',
+          DEFAULT: '#FFFEFB',
+          elevated: '#F0EBE3',
         },
-        // Dark mode backgrounds
-        'background-dark': '#121212',
+        // Dark mode backgrounds - warm dark
+        'background-dark': '#1A1A18',
         'surface-dark': {
-          DEFAULT: '#1E1E1E',
-          elevated: '#2A2A2A',
+          DEFAULT: '#252521',
+          elevated: '#2F2F2A',
         },
         // Text colors
-        'text-primary': '#2C3E3E',
-        'text-secondary': '#5A6B6B',
-        'text-muted': '#8A9A9A',
-        'text-inverse': '#FFFFFF',
+        'text-primary': '#1B4332',
+        'text-secondary': '#40694D',
+        'text-muted': '#6B8068',
+        'text-inverse': '#FFFEFB',
         // Dark mode text
-        'text-primary-dark': '#FAFAFA',
-        'text-secondary-dark': '#B0B0B0',
-        'text-muted-dark': '#707070',
+        'text-primary-dark': '#FAF6EF',
+        'text-secondary-dark': '#B8B4A8',
+        'text-muted-dark': '#8A8680',
         // Semantic
         error: {
-          DEFAULT: '#D47979',
+          DEFAULT: '#BC4749',
           light: '#F5E0E0',
         },
         success: {
-          DEFAULT: '#79B47F',
-          light: '#E0F5E2',
+          DEFAULT: '#52B788',
+          light: '#D8E2DC',
         },
         warning: {
-          DEFAULT: '#D4A979',
+          DEFAULT: '#DDA15E',
           light: '#F5EDE0',
         },
-        // Borders
+        // Borders - warm tones
         border: {
-          DEFAULT: '#E5E8E8',
-          light: '#F0F2F2',
+          DEFAULT: '#D8D4CB',
+          light: '#E8E4DB',
         },
         'border-dark': {
-          DEFAULT: '#3A3A3A',
-          light: '#2A2A2A',
+          DEFAULT: '#3A3A35',
+          light: '#2A2A26',
         },
-        divider: '#E8EBEB',
-        'divider-dark': '#2A2A2A',
+        divider: '#E0DCD3',
+        'divider-dark': '#2A2A26',
       },
       spacing: {
         xs: '4px',
