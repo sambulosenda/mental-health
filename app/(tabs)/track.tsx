@@ -2,21 +2,20 @@ import { useState } from 'react';
 import { View, TextInput, KeyboardAvoidingView, Platform, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import Animated, {
   useSharedValue,
   useAnimatedScrollHandler,
-  FadeInDown,
+  FadeIn,
 } from 'react-native-reanimated';
 import { Text, AnimatedHeader } from '@/src/components/ui';
-import { MoodSliderSelector, ActivityTags } from '@/src/components/mood';
+import { MoodGradientSlider, ActivityTags } from '@/src/components/mood';
 import { PostCheckInSuggestion } from '@/src/components/interventions/PostCheckInSuggestion';
 import { useMoodStore } from '@/src/stores';
-import { colors, darkColors, spacing, typography } from '@/src/constants/theme';
+import { colors, darkColors, spacing, typography, borderRadius } from '@/src/constants/theme';
 import { useTheme } from '@/src/contexts/ThemeContext';
 
-const HEADER_EXPANDED_HEIGHT = 120;
+const HEADER_EXPANDED_HEIGHT = 80;
 
 export default function TrackScreen() {
   const router = useRouter();
@@ -80,14 +79,13 @@ export default function TrackScreen() {
       <AnimatedHeader
         scrollY={scrollY}
         title="Check In"
-        subtitle="Take a moment to reflect"
         rightAction={
           <Pressable
             onPress={handleSave}
             disabled={!canSave || isLoading}
-            className="px-4 py-2 rounded-full"
+            className="px-5 py-2.5 rounded-full"
             style={{
-              backgroundColor: canSave ? themeColors.primary : themeColors.border,
+              backgroundColor: canSave ? themeColors.primary : 'transparent',
               opacity: canSave ? 1 : 0.5,
             }}
           >
@@ -108,17 +106,17 @@ export default function TrackScreen() {
           className="flex-1"
           contentContainerStyle={{
             paddingHorizontal: spacing.lg,
-            paddingBottom: spacing.xl,
-            paddingTop: HEADER_EXPANDED_HEIGHT,
+            paddingBottom: spacing.xxl + 60,
+            paddingTop: HEADER_EXPANDED_HEIGHT + spacing.lg,
           }}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
           onScroll={scrollHandler}
           scrollEventThrottle={16}
         >
-          {/* Mood Selection */}
-          <View className="mb-8">
-            <MoodSliderSelector
+          {/* Mood Gradient Slider */}
+          <View style={{ marginBottom: spacing.xxl }}>
+            <MoodGradientSlider
               selectedMood={draftMood}
               onSelectMood={setDraftMood}
             />
@@ -127,11 +125,16 @@ export default function TrackScreen() {
           {/* Activities */}
           {showActivities && (
             <Animated.View
-              entering={FadeInDown.duration(400).springify()}
-              className="mb-8"
+              entering={FadeIn.duration(400).delay(100)}
+              style={{ marginBottom: spacing.xl }}
             >
-              <Text variant="h3" color="textPrimary" className="mb-4">
-                Activities
+              <Text
+                variant="label"
+                color="textMuted"
+                className="mb-4"
+                style={{ letterSpacing: 1.2, textTransform: 'uppercase' }}
+              >
+                What have you been up to?
               </Text>
               <ActivityTags
                 selectedActivities={draftActivities}
@@ -143,53 +146,51 @@ export default function TrackScreen() {
           {/* Note */}
           {showNote && (
             <Animated.View
-              entering={FadeInDown.duration(400).springify()}
-              className="mb-6"
+              entering={FadeIn.duration(400).delay(200)}
             >
-              <View className="flex-row items-center justify-between mb-4">
-                <Text variant="h3" color="textPrimary">
-                  Add a note
-                </Text>
-                <Text variant="caption" color="textMuted">
-                  Optional
-                </Text>
-              </View>
+              <Text
+                variant="label"
+                color="textMuted"
+                className="mb-4"
+                style={{ letterSpacing: 1.2, textTransform: 'uppercase' }}
+              >
+                Anything else?
+              </Text>
               <View
-                className="rounded-xl border-[1.5px] overflow-hidden"
                 style={{
-                  backgroundColor: themeColors.surfaceElevated,
-                  borderColor: themeColors.border,
+                  backgroundColor: isDark
+                    ? themeColors.surfaceElevated
+                    : `${themeColors.surfaceElevated}99`,
+                  borderRadius: borderRadius.xl,
+                  padding: spacing.lg,
+                  minHeight: 140,
                 }}
               >
                 <TextInput
-                  className="p-4 min-h-[120px]"
-                  style={[typography.body, { color: themeColors.textPrimary }]}
-                  placeholder="What's on your mind? How are you really feeling?"
+                  style={[
+                    typography.body,
+                    {
+                      color: themeColors.textPrimary,
+                      flex: 1,
+                      textAlignVertical: 'top',
+                    },
+                  ]}
+                  placeholder="Write anything..."
                   placeholderTextColor={themeColors.textMuted}
                   value={draftNote}
                   onChangeText={setDraftNote}
                   multiline
-                  numberOfLines={4}
-                  textAlignVertical="top"
                   maxLength={500}
                 />
-                <View
-                  className="flex-row items-center justify-between px-4 py-2 border-t"
-                  style={{ borderTopColor: themeColors.borderLight }}
-                >
-                  <View className="flex-row items-center gap-3">
-                    <Pressable>
-                      <Ionicons
-                        name="mic-outline"
-                        size={22}
-                        color={themeColors.textMuted}
-                      />
-                    </Pressable>
-                  </View>
-                  <Text variant="caption" color="textMuted">
+                {draftNote.length > 400 && (
+                  <Text
+                    variant="label"
+                    color="textMuted"
+                    style={{ textAlign: 'right', marginTop: spacing.sm }}
+                  >
                     {draftNote.length}/500
                   </Text>
-                </View>
+                )}
               </View>
             </Animated.View>
           )}
