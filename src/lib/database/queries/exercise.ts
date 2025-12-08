@@ -241,3 +241,48 @@ export async function getExerciseStats(): Promise<{
 
   return { totalCompleted, averageMoodDelta };
 }
+
+// Get exercise effectiveness by template (for personalized recommendations)
+export async function getExerciseEffectiveness(): Promise<
+  { templateId: string; avgMoodDelta: number; completionCount: number }[]
+> {
+  const rows = await db
+    .select()
+    .from(exerciseSessions)
+    .where(eq(exerciseSessions.status, 'completed'));
+
+  // Group by templateId and calculate average mood delta
+  const byTemplate = new Map<
+    string,
+    { totalDelta: number; count: number }
+  >();
+
+  for (const row of rows) {
+    // Only include sessions with valid before/after moods
+    if (
+      row.moodBefore === null ||
+      row.moodAfter === null ||
+      !isValidMoodValue(row.moodBefore) ||
+      !isValidMoodValue(row.moodAfter)
+    ) {
+      continue;
+    }
+
+    const delta = row.moodAfter - row.moodBefore;
+    const existing = byTemplate.get(row.templateId);
+
+    if (existing) {
+      existing.totalDelta += delta;
+      existing.count += 1;
+    } else {
+      byTemplate.set(row.templateId, { totalDelta: delta, count: 1 });
+    }
+  }
+
+  // Convert to array with averages
+  return Array.from(byTemplate.entries()).map(([templateId, data]) => ({
+    templateId,
+    avgMoodDelta: data.totalDelta / data.count,
+    completionCount: data.count,
+  }));
+}

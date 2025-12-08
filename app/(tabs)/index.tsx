@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { View, Pressable, ScrollView } from 'react-native';
+import { View, Pressable } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -7,8 +7,8 @@ import Animated, { useSharedValue, useAnimatedScrollHandler } from 'react-native
 import { format } from 'date-fns';
 import { Text, Card, Button, AnimatedHeader, AnimatedListItem, NativeGauge, NativeBottomSheet } from '@/src/components/ui';
 import { MoodCard, MoodAnimation } from '@/src/components/mood';
-import { ExerciseCard } from '@/src/components/exercises';
-import { useMoodStore, useExerciseStore } from '@/src/stores';
+import { InterventionPicker } from '@/src/components/interventions/InterventionPicker';
+import { useMoodStore } from '@/src/stores';
 import { colors, darkColors, spacing, moodLabels, activityTags } from '@/src/constants/theme';
 import { useTheme } from '@/src/contexts/ThemeContext';
 import type { MoodEntry } from '@/src/types/mood';
@@ -21,7 +21,6 @@ export default function HomeScreen() {
   const { isDark } = useTheme();
   const themeColors = isDark ? darkColors : colors;
   const { todayEntries, entries, loadTodayEntries, loadEntries } = useMoodStore();
-  const { templates } = useExerciseStore();
   const [selectedEntry, setSelectedEntry] = useState<MoodEntry | null>(null);
   const [showDetails, setShowDetails] = useState(false);
 
@@ -158,25 +157,12 @@ export default function HomeScreen() {
           </View>
         </View>
 
-        {/* Quick Exercises */}
-        <View className="mb-6">
-          <Text variant="h3" color="textPrimary" className="mb-4">
-            Quick Exercises
-          </Text>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{ gap: 12 }}
-          >
-            {templates.map((template) => (
-              <ExerciseCard
-                key={template.id}
-                template={template}
-                onPress={() => router.push(`/exercise-session?templateId=${template.id}`)}
-                compact
-              />
-            ))}
-          </ScrollView>
+        {/* Suggested Exercises */}
+        <View className="mb-6 -mx-4">
+          <InterventionPicker
+            onSelectExercise={(templateId) => router.push(`/exercise-session?templateId=${templateId}`)}
+            title="Suggested for You"
+          />
         </View>
 
         {(weeklyAverage !== null || uniqueDaysTracked > 0) && (

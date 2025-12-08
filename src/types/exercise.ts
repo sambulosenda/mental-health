@@ -8,7 +8,10 @@ export type ExerciseCategory =
   | 'grounding'
   | 'gratitude'
   | 'mindfulness'
-  | 'values';
+  | 'values'
+  | 'worry'
+  | 'self_compassion'
+  | 'goals';
 
 // Step types for different exercise interactions
 export type ExerciseStepType =
