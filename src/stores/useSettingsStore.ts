@@ -137,7 +137,7 @@ export const useSettingsStore = create<SettingsState>()(
       version: 2,
       storage: createJSONStorage(() => AsyncStorage),
       migrate: (persistedState: unknown, version: number) => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+         
         const state = persistedState as any;
 
         if (version < 2) {

@@ -120,13 +120,13 @@ export function ExerciseComplete({
 
           {moodDelta !== null && moodDelta === 0 && (
             <Text variant="body" color="textSecondary" center className="mt-4">
-              Every exercise counts, even when the change isn't immediate.
+              {"Every exercise counts, even when the change isn't immediate."}
             </Text>
           )}
 
           {moodDelta !== null && moodDelta < 0 && (
             <Text variant="body" color="textSecondary" center className="mt-4">
-              It's okay to feel this way. Processing emotions takes time.
+              {"It's okay to feel this way. Processing emotions takes time."}
             </Text>
           )}
         </Animated.View>

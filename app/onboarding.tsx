@@ -12,7 +12,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSharedValue } from 'react-native-reanimated';
 import { Text, Button } from '@/src/components/ui';
 import { useSettingsStore } from '@/src/stores';
-import { colors, darkColors, spacing } from '@/src/constants/theme';
+import { colors, darkColors } from '@/src/constants/theme';
 import { useTheme } from '@/src/contexts/ThemeContext';
 
 const { width } = Dimensions.get('window');

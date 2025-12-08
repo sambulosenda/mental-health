@@ -43,9 +43,6 @@ export function AssessmentComplete({
   const severityConfig = SEVERITY_CONFIG[severity];
   const description = SEVERITY_DESCRIPTIONS[severity][template.id];
 
-  // Calculate percentage for the gauge
-  const percentage = (totalScore / template.scoringInfo.maxScore) * 100;
-
   return (
     <View className="flex-1 px-6 items-center justify-center">
       {/* Success Icon */}

@@ -3,7 +3,7 @@ import { View, ActivityIndicator, Alert, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import Animated, { FadeIn, FadeOut, SlideInRight, SlideOutLeft } from 'react-native-reanimated';
+import Animated, { FadeIn, SlideInRight, SlideOutLeft } from 'react-native-reanimated';
 import { Button, Text } from '@/src/components/ui';
 import { LikertQuestion, AssessmentComplete } from '@/src/components/assessments';
 import { colors, darkColors } from '@/src/constants/theme';
@@ -151,7 +151,7 @@ export default function AssessmentSessionScreen() {
           </View>
 
           <Text variant="h2" color="textPrimary" center className="mb-4">
-            We're Here for You
+            {"We're Here for You"}
           </Text>
 
           <Text variant="body" color="textSecondary" center className="mb-8">

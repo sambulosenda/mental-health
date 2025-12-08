@@ -1,4 +1,12 @@
 // Re-export types
+// ============================================================================
+// Backward-compatible exports (delegate to service singleton)
+// These maintain the existing API while using the new service internally
+// ============================================================================
+
+import { getNotificationService } from './expo-notification.service';
+import type { ReminderType, ReminderConfig, SmartRemindersSettings } from '@/src/types/settings';
+
 export type { NotificationService, ScheduleResult, NotificationData } from './types';
 export { NotificationActions } from './types';
 
@@ -8,14 +16,6 @@ export {
   getNotificationService,
   parseTimeString,
 } from './expo-notification.service';
-
-// ============================================================================
-// Backward-compatible exports (delegate to service singleton)
-// These maintain the existing API while using the new service internally
-// ============================================================================
-
-import { getNotificationService } from './expo-notification.service';
-import type { ReminderType, ReminderConfig, SmartRemindersSettings } from '@/src/types/settings';
 
 /** @deprecated Use getNotificationService().requestPermissions() instead */
 export async function requestNotificationPermissions(): Promise<boolean> {

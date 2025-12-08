@@ -74,7 +74,7 @@ export default function ProfileScreen() {
     }
     try {
       await setReminderEnabled(type, enabled);
-    } catch (error) {
+    } catch {
       Alert.alert(
         'Reminder Error',
         'Failed to schedule reminder. Please try again.',
@@ -107,7 +107,7 @@ export default function ProfileScreen() {
             setIsExporting(true);
             try {
               await exportMoodToCSV(moodEntries);
-            } catch (error) {
+            } catch {
               Alert.alert('Export Failed', 'Unable to export data. Please try again.');
             } finally {
               setIsExporting(false);
@@ -120,7 +120,7 @@ export default function ProfileScreen() {
             setIsExporting(true);
             try {
               await exportAllData({ moods: moodEntries, journals: journalEntries });
-            } catch (error) {
+            } catch {
               Alert.alert('Export Failed', 'Unable to export data. Please try again.');
             } finally {
               setIsExporting(false);
@@ -161,7 +161,7 @@ export default function ProfileScreen() {
                       await clearMoodEntries();
                       await clearJournalEntries();
                       Alert.alert('Deleted', 'All data has been deleted.');
-                    } catch (error) {
+                    } catch {
                       Alert.alert('Error', 'Failed to delete data. Please try again.');
                     } finally {
                       setIsDeleting(false);

@@ -1,5 +1,4 @@
 import { Platform, View, StyleSheet } from 'react-native';
-import { useState } from 'react';
 import { Host, Picker } from '@expo/ui/swift-ui';
 import { colors, borderRadius, spacing } from '@/src/constants/theme';
 import { Text } from './Text';

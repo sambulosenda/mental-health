@@ -30,13 +30,11 @@ export default function JournalScreen() {
     prompts,
     searchQuery,
     searchResults,
-    isLoading,
     loadEntries,
     loadPrompts,
     setSearchQuery,
     performSearch,
     clearSearch,
-    setDraftPrompt,
     removeEntry,
   } = useJournalStore();
 

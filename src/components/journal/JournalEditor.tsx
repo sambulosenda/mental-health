@@ -13,7 +13,7 @@ import Animated, { FadeIn, SlideInDown, SlideOutDown } from 'react-native-reanim
 import { Text } from '@/src/components/ui';
 import { MoodSelector, MoodAnimation } from '@/src/components/mood';
 import { VoiceButton } from './VoiceButton';
-import { colors, darkColors, typography, spacing } from '@/src/constants/theme';
+import { colors, darkColors, typography } from '@/src/constants/theme';
 import { useTheme } from '@/src/contexts/ThemeContext';
 import type { JournalPrompt } from '@/src/types/journal';
 

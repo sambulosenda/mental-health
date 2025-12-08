@@ -236,7 +236,7 @@ export function TimedSpeechStep({ step, onComplete, accentColor }: TimedSpeechSt
       {isPlaying && currentText && !isInPause && (
         <View className="px-4 mb-4" style={{ minHeight: 60 }}>
           <Text variant="body" color="textPrimary" center style={{ fontStyle: 'italic' }}>
-            "{currentText}"
+            {`"${currentText}"`}
           </Text>
         </View>
       )}

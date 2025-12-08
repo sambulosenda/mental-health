@@ -4,7 +4,6 @@ import Voice, {
   SpeechStartEvent,
   SpeechEndEvent,
 } from '@react-native-voice/voice';
-import { Platform } from 'react-native';
 
 export type VoiceState = 'idle' | 'listening' | 'processing' | 'error';
 
@@ -71,7 +70,7 @@ class VoiceService {
   async stopListening(): Promise<void> {
     try {
       await Voice.stop();
-    } catch (error) {
+    } catch {
       // Ignore stop errors
     }
   }
@@ -79,7 +78,7 @@ class VoiceService {
   async cancelListening(): Promise<void> {
     try {
       await Voice.cancel();
-    } catch (error) {
+    } catch {
       // Ignore cancel errors
     }
   }

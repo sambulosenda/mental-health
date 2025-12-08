@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { View, AppState, type AppStateStatus } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Text, Button } from '@/src/components/ui';
-import { colors, darkColors, spacing } from '@/src/constants/theme';
+import { colors, darkColors } from '@/src/constants/theme';
 import { authenticate, checkBiometricAvailability, getBiometricDisplayName } from '@/src/lib/biometrics';
 import { useSettingsStore } from '@/src/stores';
 import { useTheme } from '@/src/contexts/ThemeContext';

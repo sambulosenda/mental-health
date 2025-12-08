@@ -5,11 +5,8 @@ import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withTiming,
-  withSequence,
-  withRepeat,
   Easing,
   cancelAnimation,
-  runOnJS,
 } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { Text, Button } from '@/src/components/ui';

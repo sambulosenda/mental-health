@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { View, Pressable } from 'react-native';
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import Animated, { useSharedValue, useAnimatedScrollHandler } from 'react-native-reanimated';
@@ -19,7 +19,6 @@ const HEADER_EXPANDED_HEIGHT = 120;
 
 export default function HomeScreen() {
   const router = useRouter();
-  const insets = useSafeAreaInsets();
   const { isDark } = useTheme();
   const themeColors = isDark ? darkColors : colors;
   const { todayEntries, entries, loadTodayEntries, loadEntries } = useMoodStore();
@@ -105,7 +104,7 @@ export default function HomeScreen() {
         ) : (
           <Card className="mb-6" onPress={() => router.navigate('/(tabs)/track')}>
             <Text variant="captionMedium" color="primary" className="mb-1">
-              Today's Check-in
+              {"Today's Check-in"}
             </Text>
             <Text variant="h3" color="textPrimary">
               How are you feeling?
@@ -160,7 +159,7 @@ export default function HomeScreen() {
                     Talk it out
                   </Text>
                   <Text variant="caption" color="textSecondary">
-                    I'm here to listen
+                    {"I'm here to listen"}
                   </Text>
                 </View>
                 <Ionicons name="chevron-forward" size={20} color={themeColors.textMuted} />

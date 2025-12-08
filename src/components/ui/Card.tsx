@@ -1,4 +1,4 @@
-import { View, ViewProps, Pressable, StyleSheet } from 'react-native';
+import { View, ViewProps, Pressable } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,

@@ -17,8 +17,6 @@ export default function JournalEntryModal() {
     draftTitle,
     draftContent,
     draftMood,
-    draftPromptId,
-    editingId,
     isLoading,
     prompts,
     setDraftTitle,

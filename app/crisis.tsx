@@ -181,7 +181,7 @@ export default function CrisisScreen() {
                 You matter, and help is available
               </Text>
               <Text variant="caption" color="textSecondary">
-                If you're in immediate danger, please call emergency services (999/911/112)
+                {"If you're in immediate danger, please call emergency services (999/911/112)"}
               </Text>
             </View>
           </View>

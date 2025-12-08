@@ -1,7 +1,7 @@
 import type { MoodEntry, DailyMoodSummary } from '@/src/types/mood';
 import type { Insight } from '@/src/components/insights/InsightCard';
-import { activityTags, type ActivityTagId } from '@/src/constants/theme';
-import { format, getDay, differenceInDays, parseISO } from 'date-fns';
+import { activityTags } from '@/src/constants/theme';
+import { format, getDay, parseISO } from 'date-fns';
 
 interface PatternDetectionInput {
   entries: MoodEntry[];
@@ -246,7 +246,7 @@ function detectExtremes(summaries: DailyMoodSummary[]): Insight[] {
 
   const sorted = [...summaries].sort((a, b) => b.averageMood - a.averageMood);
   const best = sorted[0];
-  const worst = sorted[sorted.length - 1];
+  // const worst = sorted[sorted.length - 1]; // Reserved for future "worst day" insight
 
   const insights: Insight[] = [];
 

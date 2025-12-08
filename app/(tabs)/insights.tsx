@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { View, RefreshControl, ActivityIndicator } from 'react-native';
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import Animated, { useSharedValue, useAnimatedScrollHandler } from 'react-native-reanimated';
 import { Text, Card, Button, NativePicker, AnimatedHeader } from '@/src/components/ui';
@@ -22,7 +22,6 @@ const DAYS_MAP = { Week: 7, Month: 30, Year: 365 } as const;
 export default function InsightsScreen() {
   const { isDark } = useTheme();
   const themeColors = isDark ? darkColors : colors;
-  const insets = useSafeAreaInsets();
   const { entries, loadEntries, getDailySummaries } = useMoodStore();
 
   const scrollY = useSharedValue(0);

@@ -8,7 +8,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { Text } from '@/src/components/ui';
 import { MoodAnimation } from './MoodAnimation';
-import { colors, darkColors, spacing, borderRadius, moodLabels } from '@/src/constants/theme';
+import { colors, darkColors, spacing, moodLabels } from '@/src/constants/theme';
 import { useTheme } from '@/src/contexts/ThemeContext';
 
 interface MoodSelectorProps {
@@ -16,7 +16,7 @@ interface MoodSelectorProps {
   onSelectMood: (mood: 1 | 2 | 3 | 4 | 5) => void;
 }
 
-const MOODS: Array<{ value: 1 | 2 | 3 | 4 | 5 }> = [
+const MOODS: { value: 1 | 2 | 3 | 4 | 5 }[] = [
   { value: 1 },
   { value: 2 },
   { value: 3 },

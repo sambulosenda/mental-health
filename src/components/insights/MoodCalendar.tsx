@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { View, Pressable } from 'react-native';
 import { Text, Card } from '@/src/components/ui';
-import { colors, darkColors, spacing, moodLabels } from '@/src/constants/theme';
+import { colors, darkColors, moodLabels } from '@/src/constants/theme';
 import { useTheme } from '@/src/contexts/ThemeContext';
 import type { DailyMoodSummary } from '@/src/types/mood';
 import {

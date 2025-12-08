@@ -15,8 +15,6 @@ import { Text } from '@/src/components/ui';
 import { useTheme } from '@/src/contexts/ThemeContext';
 import { colors, darkColors } from '@/src/constants/theme';
 import {
-  CHAT_COMPANION_SYSTEM_PROMPT,
-  CHECKIN_SYSTEM_PROMPT,
   getCheckinPrompt,
   inferMoodFromConversation,
 } from '@/src/lib/ai/chatPrompts';
@@ -84,7 +82,6 @@ export default function ChatScreen() {
     const generateGreeting = async () => {
       setGenerating(true);
       try {
-        const systemPrompt = isCheckin ? CHECKIN_SYSTEM_PROMPT : CHAT_COMPANION_SYSTEM_PROMPT;
         const greetingPrompt = isCheckin
           ? getCheckinPrompt('greeting')
           : 'Greet the user warmly and ask how they are feeling today. Be brief (2 sentences max).';

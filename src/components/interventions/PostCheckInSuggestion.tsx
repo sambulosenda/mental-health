@@ -70,7 +70,7 @@ export function PostCheckInSuggestion({
             <View className="flex-row items-center gap-2">
               <Ionicons name="sparkles" size={20} color={themeColors.primary} />
               <Text variant="h3" color="textPrimary">
-                Based on how you're feeling
+                {"Based on how you're feeling"}
               </Text>
             </View>
             <Pressable onPress={handleDismiss} hitSlop={16}>

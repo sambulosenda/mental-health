@@ -1,7 +1,7 @@
 import { View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Text, Card } from '@/src/components/ui';
-import { colors, darkColors, spacing } from '@/src/constants/theme';
+import { colors, darkColors } from '@/src/constants/theme';
 import { useTheme } from '@/src/contexts/ThemeContext';
 
 export type InsightType = 'pattern' | 'trigger' | 'suggestion' | 'streak' | 'milestone';

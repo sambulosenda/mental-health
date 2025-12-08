@@ -1,10 +1,10 @@
 import { useState, useMemo } from 'react';
 import { View, Pressable } from 'react-native';
-import { CartesianChart, Line, useChartPressState } from 'victory-native';
+import { CartesianChart, Line } from 'victory-native';
 import { Text, Card } from '@/src/components/ui';
 import { colors, darkColors, spacing } from '@/src/constants/theme';
 import { useTheme } from '@/src/contexts/ThemeContext';
-import { GAD7_TEMPLATE, PHQ9_TEMPLATE, SEVERITY_CONFIG } from '@/src/constants/assessments';
+import { GAD7_TEMPLATE, PHQ9_TEMPLATE } from '@/src/constants/assessments';
 import { ScoreInterpretation } from '@/src/components/assessments';
 import type { AssessmentSession, AssessmentType } from '@/src/types/assessment';
 import { format } from 'date-fns';
