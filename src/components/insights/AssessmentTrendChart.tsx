@@ -48,8 +48,9 @@ export function AssessmentTrendChart({
     }));
   }, [history]);
 
-  const latestSession = history[0];
   const hasData = chartData.length > 0;
+  // Get latest valid session from chartData (already filtered for totalScore)
+  const latestValidSession = hasData ? chartData[chartData.length - 1] : null;
 
   const stats = useMemo(() => {
     if (chartData.length === 0) return null;
@@ -168,7 +169,7 @@ export function AssessmentTrendChart({
           </View>
 
           {/* Latest Result */}
-          {latestSession && (
+          {latestValidSession && (
             <View
               className="flex-row items-center justify-between mt-4 pt-4 border-t"
               style={{ borderTopColor: themeColors.border }}
@@ -179,7 +180,7 @@ export function AssessmentTrendChart({
                 </Text>
                 <View className="flex-row items-center gap-2">
                   <Text variant="h2" style={{ color: accentColor }}>
-                    {latestSession.totalScore}
+                    {latestValidSession.score}
                   </Text>
                   <Text variant="caption" color="textMuted">
                     / {template.scoringInfo.maxScore}
@@ -187,12 +188,12 @@ export function AssessmentTrendChart({
                 </View>
               </View>
 
-              {latestSession.severity && (
+              {latestValidSession.severity && (
                 <View className="items-end">
                   <Text variant="caption" color="textMuted" className="mb-1">
                     Severity
                   </Text>
-                  <ScoreInterpretation severity={latestSession.severity} compact />
+                  <ScoreInterpretation severity={latestValidSession.severity} compact />
                 </View>
               )}
 
