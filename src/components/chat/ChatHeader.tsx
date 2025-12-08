@@ -2,6 +2,7 @@ import { View, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
 import { Text } from '@/src/components/ui';
 import { useTheme } from '@/src/contexts/ThemeContext';
 import { colors, darkColors, spacing } from '@/src/constants/theme';
@@ -17,6 +18,7 @@ export function ChatHeader({ type, onClose, onEnd }: ChatHeaderProps) {
   const { isDark } = useTheme();
   const themeColors = isDark ? darkColors : colors;
   const insets = useSafeAreaInsets();
+  const router = useRouter();
 
   const handleClose = async () => {
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -29,8 +31,13 @@ export function ChatHeader({ type, onClose, onEnd }: ChatHeaderProps) {
     onEnd();
   };
 
-  const title = type === 'checkin' ? 'Quick Check-in' : 'Chat with Zen';
-  const subtitle = type === 'checkin' ? 'How are you feeling?' : 'Your wellness companion';
+  const handleCrisisPress = async () => {
+    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    router.push('/crisis');
+  };
+
+  const title = type === 'checkin' ? '2-min Check-in' : 'Talk it out';
+  const subtitle = type === 'checkin' ? 'Quick mood check' : 'I\'m here to listen';
 
   return (
     <View
@@ -64,18 +71,29 @@ export function ChatHeader({ type, onClose, onEnd }: ChatHeaderProps) {
         </Text>
       </View>
 
-      {onEnd ? (
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
         <Pressable
-          onPress={handleEnd}
+          onPress={handleCrisisPress}
           hitSlop={8}
-          accessibilityLabel="End conversation"
+          accessibilityLabel="Crisis support resources"
           accessibilityRole="button"
         >
-          <Ionicons name="checkmark-done" size={24} color={themeColors.primary} />
+          <Ionicons name="heart-outline" size={22} color={themeColors.textMuted} />
         </Pressable>
-      ) : (
-        <View style={{ width: 28 }} />
-      )}
+
+        {onEnd ? (
+          <Pressable
+            onPress={handleEnd}
+            hitSlop={8}
+            accessibilityLabel="End conversation"
+            accessibilityRole="button"
+          >
+            <Ionicons name="checkmark-done" size={24} color={themeColors.primary} />
+          </Pressable>
+        ) : (
+          <View style={{ width: 28 }} />
+        )}
+      </View>
     </View>
   );
 }

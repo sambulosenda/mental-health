@@ -1,7 +1,23 @@
+// Smart Reminders
+export type ReminderType = 'mood' | 'exercise' | 'journal';
+
+export interface ReminderConfig {
+  enabled: boolean;
+  time: string; // HH:mm format
+  followUpEnabled: boolean;
+  followUpTime: string; // HH:mm format
+}
+
+export interface SmartRemindersSettings {
+  mood: ReminderConfig;
+  exercise: ReminderConfig;
+  journal: ReminderConfig;
+  streakNotificationsEnabled: boolean;
+}
+
 export interface AppSettings {
-  // Notifications
-  reminderEnabled: boolean;
-  reminderTime: string; // HH:mm format
+  // Smart Reminders (replaces old reminderEnabled/reminderTime)
+  smartReminders: SmartRemindersSettings;
 
   // Privacy
   passcodeEnabled: boolean;
@@ -17,6 +33,13 @@ export interface AppSettings {
   insightDepth: 'brief' | 'detailed';
   insightTone: 'empathetic' | 'professional';
 }
+
+export const defaultSmartReminders: SmartRemindersSettings = {
+  mood: { enabled: false, time: '09:00', followUpEnabled: true, followUpTime: '14:00' },
+  exercise: { enabled: false, time: '10:00', followUpEnabled: false, followUpTime: '17:00' },
+  journal: { enabled: false, time: '20:00', followUpEnabled: false, followUpTime: '21:00' },
+  streakNotificationsEnabled: true,
+};
 
 export interface ExportOptions {
   format: 'csv' | 'json';

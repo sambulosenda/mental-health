@@ -127,10 +127,10 @@ export default function HomeScreen() {
                 </View>
                 <View className="flex-1">
                   <Text variant="bodyMedium" color="textPrimary">
-                    Quick Check-in
+                    2-min Check-in
                   </Text>
                   <Text variant="caption" color="textSecondary">
-                    Let Zen help you process how you're feeling
+                    Quick guided mood check
                   </Text>
                 </View>
                 <Ionicons name="chevron-forward" size={20} color={themeColors.textMuted} />
@@ -146,10 +146,10 @@ export default function HomeScreen() {
                 </View>
                 <View className="flex-1">
                   <Text variant="bodyMedium" color="textPrimary">
-                    Talk to Zen
+                    Talk it out
                   </Text>
                   <Text variant="caption" color="textSecondary">
-                    Have a supportive conversation
+                    I'm here to listen
                   </Text>
                 </View>
                 <Ionicons name="chevron-forward" size={20} color={themeColors.textMuted} />

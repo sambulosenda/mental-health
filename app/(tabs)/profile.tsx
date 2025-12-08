@@ -1,17 +1,12 @@
 import { useEffect, useState } from 'react';
-import { View, StyleSheet, Alert, Pressable } from 'react-native';
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
+import { View, StyleSheet, Alert } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Host, Switch } from '@expo/ui/swift-ui';
 import Animated, { useSharedValue, useAnimatedScrollHandler } from 'react-native-reanimated';
-import { Text, Card, Button, NativeTimePicker, ThemeToggleButton, AnimatedHeader } from '@/src/components/ui';
+import { Text, Card, Button, ThemeToggleButton, AnimatedHeader } from '@/src/components/ui';
+import { ReminderTypeCard } from '@/src/components/settings';
 import { useSettingsStore, useMoodStore, useJournalStore } from '@/src/stores';
-import {
-  scheduleDailyReminder,
-  cancelAllReminders,
-  parseTimeString,
-  requestNotificationPermissions,
-} from '@/src/lib/notifications';
+import { requestNotificationPermissions } from '@/src/lib/notifications';
 import {
   checkBiometricAvailability,
   getBiometricDisplayName,
@@ -25,18 +20,19 @@ const HEADER_EXPANDED_HEIGHT = 120;
 
 export default function ProfileScreen() {
   const {
-    reminderEnabled,
-    reminderTime,
+    smartReminders,
     biometricEnabled,
     setReminderEnabled,
     setReminderTime,
+    setFollowUpEnabled,
+    setFollowUpTime,
+    setStreakNotificationsEnabled,
     setBiometricEnabled,
   } = useSettingsStore();
 
   const { entries: moodEntries, loadEntries: loadMoodEntries, clearEntries: clearMoodEntries } = useMoodStore();
   const { entries: journalEntries, loadEntries: loadJournalEntries, clearEntries: clearJournalEntries } = useJournalStore();
-  const { mode, setMode, isDark } = useTheme();
-  const insets = useSafeAreaInsets();
+  const { mode, isDark } = useTheme();
 
   const themeColors = isDark ? darkColors : colors;
 
@@ -51,15 +47,6 @@ export default function ProfileScreen() {
   const [biometricName, setBiometricName] = useState('Biometric');
   const [isExporting, setIsExporting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [showTimePicker, setShowTimePicker] = useState(false);
-
-  // Convert reminderTime string to Date object
-  const getTimeAsDate = () => {
-    const [hour, minute] = reminderTime.split(':').map(Number);
-    const date = new Date();
-    date.setHours(hour, minute, 0, 0);
-    return date;
-  };
 
   useEffect(() => {
     checkBiometrics();
@@ -73,7 +60,7 @@ export default function ProfileScreen() {
     setBiometricName(getBiometricDisplayName(status.biometricType));
   };
 
-  const handleReminderToggle = async (enabled: boolean) => {
+  const handleReminderToggle = async (type: 'mood' | 'exercise' | 'journal', enabled: boolean) => {
     if (enabled) {
       const hasPermission = await requestNotificationPermissions();
       if (!hasPermission) {
@@ -84,12 +71,16 @@ export default function ProfileScreen() {
         );
         return;
       }
-      const { hour, minute } = parseTimeString(reminderTime);
-      await scheduleDailyReminder(hour, minute);
-    } else {
-      await cancelAllReminders();
     }
-    setReminderEnabled(enabled);
+    try {
+      await setReminderEnabled(type, enabled);
+    } catch (error) {
+      Alert.alert(
+        'Reminder Error',
+        'Failed to schedule reminder. Please try again.',
+        [{ text: 'OK' }]
+      );
+    }
   };
 
   const handleBiometricToggle = async (enabled: boolean) => {
@@ -98,21 +89,6 @@ export default function ProfileScreen() {
       if (!success) return;
     }
     setBiometricEnabled(enabled);
-  };
-
-  const handleTimeChange = () => {
-    setShowTimePicker(true);
-  };
-
-  const handleTimeSelected = async (date: Date) => {
-    const hour = date.getHours().toString().padStart(2, '0');
-    const minute = date.getMinutes().toString().padStart(2, '0');
-    const time = `${hour}:${minute}`;
-
-    setReminderTime(time);
-    if (reminderEnabled) {
-      await scheduleDailyReminder(date.getHours(), date.getMinutes());
-    }
   };
 
   const handleExport = async () => {
@@ -200,14 +176,6 @@ export default function ProfileScreen() {
     );
   };
 
-  const formatTime = (time: string) => {
-    const [hour, minute] = time.split(':');
-    const h = parseInt(hour, 10);
-    const ampm = h >= 12 ? 'PM' : 'AM';
-    const h12 = h % 12 || 12;
-    return `${h12}:${minute} ${ampm}`;
-  };
-
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: themeColors.background }]} edges={['top']}>
       <AnimatedHeader
@@ -228,40 +196,62 @@ export default function ProfileScreen() {
       >
         <View style={styles.section}>
           <Text variant="h3" color="textPrimary" style={styles.sectionTitle}>
-            Notifications
+            Reminders
           </Text>
-          <Card variant="outlined">
+
+          <ReminderTypeCard
+            label="Mood Check-in"
+            description="Daily reminder to log how you feel"
+            icon="happy-outline"
+            config={smartReminders.mood}
+            onToggle={(enabled) => handleReminderToggle('mood', enabled)}
+            onTimeChange={(time) => setReminderTime('mood', time)}
+            onFollowUpToggle={(enabled) => setFollowUpEnabled('mood', enabled)}
+            onFollowUpTimeChange={(time) => setFollowUpTime('mood', time)}
+          />
+
+          <ReminderTypeCard
+            label="Exercise Reminder"
+            description="Time for a quick mental exercise"
+            icon="fitness-outline"
+            config={smartReminders.exercise}
+            onToggle={(enabled) => handleReminderToggle('exercise', enabled)}
+            onTimeChange={(time) => setReminderTime('exercise', time)}
+            onFollowUpToggle={(enabled) => setFollowUpEnabled('exercise', enabled)}
+            onFollowUpTimeChange={(time) => setFollowUpTime('exercise', time)}
+          />
+
+          <ReminderTypeCard
+            label="Journal Reminder"
+            description="Reflect on your day"
+            icon="book-outline"
+            config={smartReminders.journal}
+            onToggle={(enabled) => handleReminderToggle('journal', enabled)}
+            onTimeChange={(time) => setReminderTime('journal', time)}
+            onFollowUpToggle={(enabled) => setFollowUpEnabled('journal', enabled)}
+            onFollowUpTimeChange={(time) => setFollowUpTime('journal', time)}
+          />
+
+          {/* Streak notifications toggle */}
+          <Card variant="outlined" style={styles.streakCard}>
             <View style={styles.settingRow}>
               <View style={styles.settingText}>
                 <Text variant="bodyMedium" color="textPrimary">
-                  Daily Reminders
+                  Streak Motivation
                 </Text>
                 <Text variant="caption" color="textSecondary">
-                  Get reminded to track your mood
+                  Include streak info in reminders
                 </Text>
               </View>
               <Host matchContents>
                 <Switch
-                  checked={reminderEnabled}
-                  onValueChange={handleReminderToggle}
-                  label="Daily Reminders"
+                  value={smartReminders.streakNotificationsEnabled}
+                  onValueChange={setStreakNotificationsEnabled}
+                  label="Streak notifications"
                   variant="switch"
                 />
               </Host>
             </View>
-            {reminderEnabled && (
-              <Pressable style={[styles.timeRow, { borderTopColor: themeColors.border }]} onPress={handleTimeChange}>
-                <View style={styles.settingText}>
-                  <Text variant="caption" color="textSecondary">
-                    Reminder Time
-                  </Text>
-                  <Text variant="bodyMedium" color="primary">
-                    {formatTime(reminderTime)}
-                  </Text>
-                </View>
-                <Ionicons name="chevron-forward" size={20} color={themeColors.textMuted} />
-              </Pressable>
-            )}
           </Card>
         </View>
 
@@ -300,15 +290,16 @@ export default function ProfileScreen() {
                     : `${biometricName} not available`}
                 </Text>
               </View>
-              <Host matchContents>
-                <Switch
-                  checked={biometricEnabled}
-                  onValueChange={handleBiometricToggle}
-                  disabled={!biometricAvailable}
-                  label={`${biometricName} Lock`}
-                  variant="switch"
-                />
-              </Host>
+              {biometricAvailable && (
+                <Host matchContents>
+                  <Switch
+                    value={biometricEnabled}
+                    onValueChange={handleBiometricToggle}
+                    label={`${biometricName} Lock`}
+                    variant="switch"
+                  />
+                </Host>
+              )}
             </View>
           </Card>
         </View>
@@ -373,13 +364,6 @@ export default function ProfileScreen() {
           </Card>
         </View>
       </Animated.ScrollView>
-
-      <NativeTimePicker
-        value={getTimeAsDate()}
-        onChange={handleTimeSelected}
-        visible={showTimePicker}
-        onClose={() => setShowTimePicker(false)}
-      />
     </SafeAreaView>
   );
 }
@@ -411,14 +395,8 @@ const styles = StyleSheet.create({
     flex: 1,
     marginRight: spacing.md,
   },
-  timeRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginTop: spacing.md,
-    paddingTop: spacing.md,
-    borderTopWidth: 1,
-    borderTopColor: colors.border,
+  streakCard: {
+    marginTop: spacing.xs,
   },
   statsRow: {
     flexDirection: 'row',

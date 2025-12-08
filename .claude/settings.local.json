@@ -10,7 +10,9 @@
       "Bash(npx expo export:*)",
       "Bash(git -C /Users/sambulosenda/Documents/zen-mobile-app add src/lib/database/client.ts src/lib/database/queries/chat.ts src/lib/database/schema.ts src/stores/useChatStore.ts)",
       "Bash(git -C /Users/sambulosenda/Documents/zen-mobile-app add -A)",
-      "Bash(git -C /Users/sambulosenda/Documents/zen-mobile-app commit -m \"chore: Minor fixes and cleanup\")"
+      "Bash(git -C /Users/sambulosenda/Documents/zen-mobile-app commit -m \"chore: Minor fixes and cleanup\")",
+      "Bash(find:*)",
+      "Bash(ls:*)"
     ],
     "deny": [],
     "ask": []
