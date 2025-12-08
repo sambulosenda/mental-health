@@ -8,7 +8,9 @@ import { format } from 'date-fns';
 import { Text, Card, Button, AnimatedHeader, AnimatedListItem, NativeGauge, NativeBottomSheet } from '@/src/components/ui';
 import { MoodCard, MoodAnimation } from '@/src/components/mood';
 import { InterventionPicker } from '@/src/components/interventions/InterventionPicker';
-import { useMoodStore } from '@/src/stores';
+import { AssessmentCard } from '@/src/components/assessments';
+import { useMoodStore, useAssessmentStore } from '@/src/stores';
+import { GAD7_TEMPLATE, PHQ9_TEMPLATE } from '@/src/constants/assessments';
 import { colors, darkColors, spacing, moodLabels, activityTags } from '@/src/constants/theme';
 import { useTheme } from '@/src/contexts/ThemeContext';
 import type { MoodEntry } from '@/src/types/mood';
@@ -21,12 +23,22 @@ export default function HomeScreen() {
   const { isDark } = useTheme();
   const themeColors = isDark ? darkColors : colors;
   const { todayEntries, entries, loadTodayEntries, loadEntries } = useMoodStore();
+  const {
+    lastGad7,
+    lastPhq9,
+    gad7IsDue,
+    phq9IsDue,
+    loadLastAssessments,
+    checkDueStatus,
+  } = useAssessmentStore();
   const [selectedEntry, setSelectedEntry] = useState<MoodEntry | null>(null);
   const [showDetails, setShowDetails] = useState(false);
 
   useEffect(() => {
     loadTodayEntries();
     loadEntries();
+    loadLastAssessments();
+    checkDueStatus();
   }, []);
 
   const handleMoodPress = (entry: MoodEntry) => {
@@ -154,6 +166,34 @@ export default function HomeScreen() {
                 <Ionicons name="chevron-forward" size={20} color={themeColors.textMuted} />
               </View>
             </Card>
+          </View>
+        </View>
+
+        {/* Self-Assessments */}
+        <View className="mb-6">
+          <View className="flex-row items-center justify-between mb-4">
+            <Text variant="h3" color="textPrimary">
+              Self-Assessments
+            </Text>
+            <Pressable onPress={() => router.navigate('/(tabs)/insights')}>
+              <Text variant="captionMedium" color="primary">
+                View History
+              </Text>
+            </Pressable>
+          </View>
+          <View className="flex-row gap-3">
+            <AssessmentCard
+              template={GAD7_TEMPLATE}
+              lastSession={lastGad7}
+              isDue={gad7IsDue}
+              onPress={() => router.push('/assessment-session?type=gad7')}
+            />
+            <AssessmentCard
+              template={PHQ9_TEMPLATE}
+              lastSession={lastPhq9}
+              isDue={phq9IsDue}
+              onPress={() => router.push('/assessment-session?type=phq9')}
+            />
           </View>
         </View>
 

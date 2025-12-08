@@ -19,6 +19,13 @@ export default function ModalsLayout() {
           gestureEnabled: false, // Prevent accidental swipe dismiss during exercises
         }}
       />
+      <Stack.Screen
+        name="assessment-session"
+        options={{
+          presentation: 'fullScreenModal',
+          gestureEnabled: false, // Prevent accidental swipe dismiss during assessments
+        }}
+      />
     </Stack>
   );
 }
