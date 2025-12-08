@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { View, TextInput, KeyboardAvoidingView, Platform, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -10,6 +11,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { Text, AnimatedHeader } from '@/src/components/ui';
 import { MoodSliderSelector, ActivityTags } from '@/src/components/mood';
+import { PostCheckInSuggestion } from '@/src/components/interventions/PostCheckInSuggestion';
 import { useMoodStore } from '@/src/stores';
 import { colors, darkColors, spacing, typography } from '@/src/constants/theme';
 import { useTheme } from '@/src/contexts/ThemeContext';
@@ -31,12 +33,35 @@ export default function TrackScreen() {
     saveMoodEntry,
   } = useMoodStore();
 
+  const [showSuggestion, setShowSuggestion] = useState(false);
+  const [savedMood, setSavedMood] = useState<number | null>(null);
+  const [savedActivities, setSavedActivities] = useState<string[]>([]);
+
   const handleSave = async () => {
     await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    // Store current values before saving (they get cleared after save)
+    const currentMood = draftMood;
+    const currentActivities = [...draftActivities];
+
     const entry = await saveMoodEntry();
-    if (entry) {
+
+    if (entry && currentMood !== null) {
+      setSavedMood(currentMood);
+      setSavedActivities(currentActivities);
+      setShowSuggestion(true);
+    } else {
       router.navigate('/(tabs)');
     }
+  };
+
+  const handleDismissSuggestion = () => {
+    setShowSuggestion(false);
+    router.navigate('/(tabs)');
+  };
+
+  const handleSelectExercise = (templateId: string) => {
+    setShowSuggestion(false);
+    router.push(`/exercise-session?templateId=${templateId}`);
   };
 
   const canSave = draftMood !== null;
@@ -170,6 +195,17 @@ export default function TrackScreen() {
           )}
         </Animated.ScrollView>
       </KeyboardAvoidingView>
+
+      {/* Post check-in suggestion modal */}
+      {savedMood !== null && (
+        <PostCheckInSuggestion
+          visible={showSuggestion}
+          onDismiss={handleDismissSuggestion}
+          onSelectExercise={handleSelectExercise}
+          mood={savedMood}
+          activities={savedActivities}
+        />
+      )}
     </SafeAreaView>
   );
 }
