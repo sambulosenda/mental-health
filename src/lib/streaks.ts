@@ -3,6 +3,8 @@ import { getJournalEntriesForLastDays } from './database/queries/journal';
 import { getRecentExerciseSessions } from './database/queries/exercise';
 import type { ReminderType } from '@/src/types/settings';
 
+const STREAK_WINDOW_DAYS = 30;
+
 export interface StreakInfo {
   mood: number;
   exercise: number;
@@ -54,13 +56,13 @@ function calculateConsecutiveDays(timestamps: Date[]): number {
 
 // Calculate streaks for all types
 export async function calculateStreaks(): Promise<StreakInfo> {
-  // Get entries for last 30 days (filtered at query level for performance)
-  const moodEntries = await getMoodEntriesForLastDays(30);
-  const journalEntries = await getJournalEntriesForLastDays(30);
+  // Get entries for last N days (filtered at query level for performance)
+  const moodEntries = await getMoodEntriesForLastDays(STREAK_WINDOW_DAYS);
+  const journalEntries = await getJournalEntriesForLastDays(STREAK_WINDOW_DAYS);
   const exerciseSessions = await getRecentExerciseSessions(100);
 
-  const thirtyDaysAgo = new Date();
-  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+  const windowStart = new Date();
+  windowStart.setDate(windowStart.getDate() - STREAK_WINDOW_DAYS);
 
   const moodStreak = calculateConsecutiveDays(
     moodEntries.map((e) => e.timestamp)
@@ -72,7 +74,7 @@ export async function calculateStreaks(): Promise<StreakInfo> {
 
   const exerciseStreak = calculateConsecutiveDays(
     exerciseSessions
-      .filter((s) => s.status === 'completed' && s.startedAt >= thirtyDaysAgo)
+      .filter((s) => s.status === 'completed' && s.startedAt >= windowStart)
       .map((s) => s.startedAt)
   );
 
@@ -85,13 +87,14 @@ export async function calculateStreaks(): Promise<StreakInfo> {
 
 // Check if user has completed action today
 export async function hasCompletedToday(type: ReminderType): Promise<boolean> {
+  const today = normalizeToDay(new Date());
+
   switch (type) {
     case 'mood': {
       const entries = await getMoodEntriesForDate(new Date());
       return entries.length > 0;
     }
     case 'exercise': {
-      const today = normalizeToDay(new Date());
       const sessions = await getRecentExerciseSessions(20);
       return sessions.some(
         (s) =>
@@ -100,11 +103,14 @@ export async function hasCompletedToday(type: ReminderType): Promise<boolean> {
       );
     }
     case 'journal': {
-      const today = normalizeToDay(new Date());
       const entries = await getJournalEntriesForLastDays(1);
       return entries.some(
         (e) => normalizeToDay(e.createdAt).getTime() === today.getTime()
       );
+    }
+    default: {
+      const _exhaustiveCheck: never = type;
+      throw new Error(`Unexpected reminder type: ${_exhaustiveCheck}`);
     }
   }
 }

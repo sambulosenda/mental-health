@@ -106,8 +106,6 @@ export function useAIChat(options: UseAIChatOptions = {}): UseAIChatReturn {
         const wordLimitConfig: WordLimitOptions = {
           maxWords: isCheckin ? 15 : 20,
           enforceLimit: true,      // Always truncate if exceeded
-          retryOnViolation: true,  // Retry once before truncating
-          maxRetries: 1,
         };
 
         const response = await callGroqAPI(groqMessages, {

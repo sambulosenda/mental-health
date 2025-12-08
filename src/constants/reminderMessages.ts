@@ -73,10 +73,10 @@ export function getRandomMessage(messages: ReminderMessage[]): ReminderMessage {
 // Helper to format streak message with actual numbers
 export function formatStreakMessage(message: ReminderMessage, streak: number): ReminderMessage {
   return {
-    title: message.title.replace('{streak}', String(streak)),
+    title: message.title.replaceAll('{streak}', String(streak)),
     body: message.body
-      .replace('{streak}', String(streak))
-      .replace('{nextStreak}', String(streak + 1)),
+      .replaceAll('{streak}', String(streak))
+      .replaceAll('{nextStreak}', String(streak + 1)),
   };
 }
 

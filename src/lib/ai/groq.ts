@@ -5,6 +5,9 @@ const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
 // Default model - LLaMA 3.3 70B is best for nuanced conversation
 const DEFAULT_MODEL = 'llama-3.3-70b-versatile';
 
+// Request timeout in milliseconds
+const API_TIMEOUT_MS = 30000;
+
 // Word limit enforcement utilities
 export function countWords(text: string): number {
   return text.trim().split(/\s+/).filter(w => w.length > 0).length;
@@ -91,19 +94,33 @@ export async function callGroqAPI(
     ? Math.min(maxTokens, Math.ceil(wordLimit.maxWords * 2.5))
     : maxTokens;
 
-  const response = await fetch(GROQ_API_URL, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${apiKey}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      model,
-      messages,
-      max_tokens: effectiveMaxTokens,
-      temperature,
-    }),
-  });
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), API_TIMEOUT_MS);
+
+  let response: Response;
+  try {
+    response = await fetch(GROQ_API_URL, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model,
+        messages,
+        max_tokens: effectiveMaxTokens,
+        temperature,
+      }),
+      signal: controller.signal,
+    });
+  } catch (error) {
+    if (error instanceof Error && error.name === 'AbortError') {
+      throw new Error('Request timed out. Please try again.');
+    }
+    throw error;
+  } finally {
+    clearTimeout(timeoutId);
+  }
 
   if (!response.ok) {
     const error = await response.text();
