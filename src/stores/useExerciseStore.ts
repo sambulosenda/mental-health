@@ -15,6 +15,7 @@ import {
   getRecentExerciseSessions,
 } from '@/src/lib/database';
 import { EXERCISE_TEMPLATES } from '@/src/constants/exercises';
+import { MEDITATION_TEMPLATES } from '@/src/constants/meditations';
 
 interface ExerciseState {
   // Templates (from constants)
@@ -48,9 +49,12 @@ interface ExerciseState {
   reset: () => void;
 }
 
+// Merge exercise and meditation templates
+const ALL_TEMPLATES = [...EXERCISE_TEMPLATES, ...MEDITATION_TEMPLATES];
+
 export const useExerciseStore = create<ExerciseState>((set, get) => ({
   // Initial state
-  templates: EXERCISE_TEMPLATES,
+  templates: ALL_TEMPLATES,
   activeSession: null,
   exerciseFlow: null,
   recentSessions: [],

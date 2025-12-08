@@ -1,5 +1,5 @@
 // Exercise therapy types
-export type ExerciseTherapyType = 'cbt' | 'act' | 'dbt';
+export type ExerciseTherapyType = 'cbt' | 'act' | 'dbt' | 'meditation';
 
 // Exercise categories
 export type ExerciseCategory =
@@ -11,7 +11,10 @@ export type ExerciseCategory =
   | 'values'
   | 'worry'
   | 'self_compassion'
-  | 'goals';
+  | 'goals'
+  | 'mindfulness_basics'
+  | 'sleep_relaxation'
+  | 'anxiety_stress';
 
 // Step types for different exercise interactions
 export type ExerciseStepType =
@@ -20,7 +23,24 @@ export type ExerciseStepType =
   | 'mood_select'      // Mood selection (1-5)
   | 'breathing'        // Animated breathing exercise
   | 'multi_input'      // Multiple text inputs (e.g., 5-4-3-2-1)
-  | 'reflection';      // Final reflection/summary
+  | 'reflection'       // Final reflection/summary
+  | 'timed_speech'     // TTS reads script with pauses
+  | 'meditation_timer' // Silent timer with interval bells
+  | 'guided_visual';   // Visual + TTS overlay
+
+// Speech segment for TTS meditation
+export interface SpeechSegment {
+  text: string;
+  pauseAfter: number;  // seconds of silence after speech
+  breathCue?: boolean; // show breath visual during pause
+}
+
+// Voice configuration for TTS
+export interface VoiceConfig {
+  pitch?: number;   // 0.5-2.0, default 1.0
+  rate?: number;    // 0.5-2.0, default 0.85 for calming pace
+  language?: string; // e.g., 'en-US'
+}
 
 // Individual step definition
 export interface ExerciseStep {
@@ -31,8 +51,14 @@ export interface ExerciseStep {
   placeholder?: string;          // For text inputs
   inputCount?: number;           // For multi_input (e.g., 5 for "5 things you see")
   inputLabels?: string[];        // Labels for each input
-  duration?: number;             // Duration in seconds (for breathing)
+  duration?: number;             // Duration in seconds (for breathing/meditation)
   required?: boolean;            // Whether step must be completed
+  // Meditation-specific properties
+  speechSegments?: SpeechSegment[];  // For timed_speech and guided_visual
+  voiceConfig?: VoiceConfig;         // TTS configuration
+  intervalBellSeconds?: number;      // Bell every N seconds (for meditation_timer)
+  showBreathingGuide?: boolean;      // Show breathing animation overlay
+  visualType?: 'breathing' | 'expanding_circle' | 'wave'; // For guided_visual
 }
 
 // Exercise template (definition)

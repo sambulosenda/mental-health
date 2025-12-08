@@ -1,5 +1,9 @@
 import { EXERCISE_TEMPLATES } from '@/src/constants/exercises';
+import { MEDITATION_TEMPLATES } from '@/src/constants/meditations';
 import type { ExerciseTemplate } from '@/src/types/exercise';
+
+// Combine all templates
+const ALL_TEMPLATES = [...EXERCISE_TEMPLATES, ...MEDITATION_TEMPLATES];
 
 export interface InterventionRecommendation {
   template: ExerciseTemplate;
@@ -14,26 +18,27 @@ export interface ExerciseEffectiveness {
   completionCount: number;
 }
 
-// Mood-based mapping rules
+// Mood-based mapping rules (includes meditations)
 const MOOD_EXERCISE_MAP: Record<string, string[]> = {
   // Low mood (1-2): Focus on self-compassion and calming
-  low: ['self-compassion', 'gratitude-list', 'box-breathing'],
+  low: ['self-compassion', 'calming-anxiety', 'body-scan-10min', 'gratitude-list'],
   // Struggling (2-3): Active coping techniques
-  struggling: ['grounding-54321', 'thought-record', 'worry-dump'],
+  struggling: ['grounding-54321', 'grounding-meditation', 'breath-awareness-5min', 'thought-record'],
   // Neutral (3-4): Momentum building
-  neutral: ['quick-goal', 'gratitude-list', 'worry-dump'],
+  neutral: ['quick-goal', 'breath-awareness-5min', 'silent-meditation', 'gratitude-list'],
   // Good (4-5): Maintain and build
-  good: ['gratitude-list', 'quick-goal', 'thought-record'],
+  good: ['gratitude-list', 'silent-meditation', 'quick-goal', 'thought-record'],
 };
 
 // Activity-based overrides (these take priority when matched)
 const ACTIVITY_EXERCISE_MAP: Record<string, string[]> = {
-  anxious: ['grounding-54321', 'box-breathing', 'worry-dump'],
-  stressed: ['box-breathing', 'worry-dump', 'grounding-54321'],
-  work: ['worry-dump', 'thought-record', 'quick-goal'],
-  sleep: ['box-breathing', 'gratitude-list'],
-  social: ['thought-record', 'self-compassion'],
-  sad: ['self-compassion', 'gratitude-list', 'box-breathing'],
+  anxious: ['calming-anxiety', 'grounding-meditation', 'grounding-54321', 'box-breathing'],
+  stressed: ['breath-awareness-5min', 'box-breathing', 'body-scan-10min', 'worry-dump'],
+  work: ['worry-dump', 'breath-awareness-5min', 'thought-record', 'quick-goal'],
+  sleep: ['sleep-relaxation', 'body-scan-10min', 'box-breathing'],
+  social: ['thought-record', 'self-compassion', 'calming-anxiety'],
+  sad: ['self-compassion', 'calming-anxiety', 'body-scan-10min', 'gratitude-list'],
+  tired: ['breath-awareness-5min', 'body-scan-10min', 'box-breathing'],
 };
 
 // Reasons for each exercise type
@@ -73,6 +78,37 @@ const EXERCISE_REASONS: Record<string, Record<string, string>> = {
     activity: 'Helps you take action',
     effectiveness: 'Boosts your motivation',
   },
+  // Meditation reasons
+  'breath-awareness-5min': {
+    mood: 'Calms and centers you',
+    activity: 'Reduces stress naturally',
+    effectiveness: 'A reliable calm practice',
+  },
+  'body-scan-10min': {
+    mood: 'Releases tension in your body',
+    activity: 'Deep relaxation',
+    effectiveness: 'Helps you feel at ease',
+  },
+  'silent-meditation': {
+    mood: 'Peaceful self-guided practice',
+    activity: 'Time for yourself',
+    effectiveness: 'Works well for you',
+  },
+  'sleep-relaxation': {
+    mood: 'Prepares you for rest',
+    activity: 'Helps you wind down',
+    effectiveness: 'Improves your sleep',
+  },
+  'calming-anxiety': {
+    mood: 'Soothes anxious feelings',
+    activity: 'Calms your nervous system',
+    effectiveness: 'Reliably reduces anxiety',
+  },
+  'grounding-meditation': {
+    mood: 'Brings you to the present',
+    activity: 'Reconnects you to now',
+    effectiveness: 'Effective grounding practice',
+  },
 };
 
 function getMoodCategory(mood: number): string {
@@ -83,7 +119,7 @@ function getMoodCategory(mood: number): string {
 }
 
 function getTemplateById(id: string): ExerciseTemplate | undefined {
-  return EXERCISE_TEMPLATES.find((t) => t.id === id);
+  return ALL_TEMPLATES.find((t) => t.id === id);
 }
 
 function getReason(

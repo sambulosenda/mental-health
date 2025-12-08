@@ -3,6 +3,8 @@ import { TextInputStep } from './steps/TextInputStep';
 import { MoodSelectStep } from './steps/MoodSelectStep';
 import { MultiInputStep } from './steps/MultiInputStep';
 import { BreathingStep } from './steps/BreathingStep';
+import { TimedSpeechStep } from './steps/TimedSpeechStep';
+import { MeditationTimerStep } from './steps/MeditationTimerStep';
 import type { ExerciseStep as ExerciseStepType, MoodValue } from '@/src/types/exercise';
 
 interface ExerciseStepProps {
@@ -55,6 +57,34 @@ export function ExerciseStepRenderer({
     case 'breathing':
       return (
         <BreathingStep
+          step={step}
+          onComplete={onBreathingComplete || (() => {})}
+          accentColor={accentColor}
+        />
+      );
+
+    case 'timed_speech':
+      return (
+        <TimedSpeechStep
+          step={step}
+          onComplete={onBreathingComplete || (() => {})}
+          accentColor={accentColor}
+        />
+      );
+
+    case 'meditation_timer':
+      return (
+        <MeditationTimerStep
+          step={step}
+          onComplete={onBreathingComplete || (() => {})}
+          accentColor={accentColor}
+        />
+      );
+
+    case 'guided_visual':
+      // For now, use TimedSpeechStep for guided_visual as well
+      return (
+        <TimedSpeechStep
           step={step}
           onComplete={onBreathingComplete || (() => {})}
           accentColor={accentColor}

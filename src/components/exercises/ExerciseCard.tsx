@@ -12,10 +12,11 @@ interface ExerciseCardProps {
   compact?: boolean;
 }
 
-const TYPE_LABELS = {
+const TYPE_LABELS: Record<string, string> = {
   cbt: 'CBT',
   act: 'ACT',
   dbt: 'DBT',
+  meditation: 'Meditation',
 };
 
 export function ExerciseCard({ template, onPress, compact }: ExerciseCardProps) {
