@@ -138,17 +138,14 @@ export function InterventionPicker({
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={{ paddingHorizontal: 16, gap: 12 }}
       >
-        {recommendations.map((rec, index) => {
-          console.log('[InterventionPicker] Rendering card', index, rec.template.name);
-          return (
-            <RecommendationCard
-              key={rec.template.id}
-              recommendation={rec}
-              onPress={() => onSelectExercise(rec.template.id)}
-              themeColors={themeColors}
-            />
-          );
-        })}
+        {recommendations.map((rec) => (
+          <RecommendationCard
+            key={rec.template.id}
+            recommendation={rec}
+            onPress={() => onSelectExercise(rec.template.id)}
+            themeColors={themeColors}
+          />
+        ))}
       </ScrollView>
     </View>
   );

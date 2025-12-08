@@ -43,18 +43,13 @@ export default function TrackScreen() {
     const currentMood = draftMood;
     const currentActivities = [...draftActivities];
 
-    console.log('[Track] Saving mood:', currentMood);
     const entry = await saveMoodEntry();
-    console.log('[Track] Entry saved:', entry, 'mood:', currentMood);
 
     if (entry && currentMood !== null) {
-      // Show suggestion modal
-      console.log('[Track] Showing suggestion modal');
       setSavedMood(currentMood);
       setSavedActivities(currentActivities);
       setShowSuggestion(true);
     } else {
-      console.log('[Track] Not showing modal - entry:', !!entry, 'mood:', currentMood);
       router.navigate('/(tabs)');
     }
   };

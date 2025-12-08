@@ -83,12 +83,7 @@ function getMoodCategory(mood: number): string {
 }
 
 function getTemplateById(id: string): ExerciseTemplate | undefined {
-  const template = EXERCISE_TEMPLATES.find((t) => t.id === id);
-  if (!template) {
-    console.warn('[Recommendations] Template not found:', id);
-    console.log('[Recommendations] Available templates:', EXERCISE_TEMPLATES.map(t => t.id));
-  }
-  return template;
+  return EXERCISE_TEMPLATES.find((t) => t.id === id);
 }
 
 function getReason(

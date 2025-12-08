@@ -30,9 +30,9 @@ export function useInterventionRecommendations(
   const [effectiveness, setEffectiveness] = useState<ExerciseEffectiveness[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Get latest mood entry from store
+  // Get latest mood entry from store (array is ordered newest first)
   const todayEntries = useMoodStore((s) => s.todayEntries);
-  const latestEntry = todayEntries.length > 0 ? todayEntries[todayEntries.length - 1] : null;
+  const latestEntry = todayEntries.length > 0 ? todayEntries[0] : null;
 
   // Use override values or fall back to latest entry
   const currentMood = overrideMood ?? latestEntry?.mood;
@@ -83,12 +83,12 @@ export function useInterventionRecommendations(
   }, [isLoading, calculateRecommendations]);
 
   // Manual refresh
+  // Note: calculateRecommendations is triggered by useEffect when isLoading becomes false
   const refresh = useCallback(async () => {
     setIsLoading(true);
     await loadEffectiveness();
-    calculateRecommendations();
     setIsLoading(false);
-  }, [loadEffectiveness, calculateRecommendations]);
+  }, [loadEffectiveness]);
 
   return {
     recommendations,
