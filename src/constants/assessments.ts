@@ -102,9 +102,9 @@ export const SEVERITY_CONFIG = {
   },
   severe: {
     label: 'Severe',
-    color: '#EF4444',
-    bgColor: '#FEE2E2',
-    darkBgColor: '#EF444430',
+    color: '#D97706',
+    bgColor: '#FEF3C7',
+    darkBgColor: '#D9770630',
   },
 } as const;
 

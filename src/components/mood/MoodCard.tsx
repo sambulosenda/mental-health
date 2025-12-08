@@ -53,13 +53,13 @@ export function MoodCard({ entry, compact = false, onPress, onEdit, onDelete, on
       <Pressable onPress={onPress} onLongPress={handleLongPress} delayLongPress={400}>
         <View className="flex-row items-center py-2">
           <View
-            className="w-8 h-8 rounded-full items-center justify-center"
+            className="w-10 h-10 rounded-full items-center justify-center"
             style={{ backgroundColor: colors.mood[entry.mood] }}
           >
-            <MoodAnimation mood={entry.mood} size={20} loop={false} />
+            <MoodAnimation mood={entry.mood} size={28} loop={false} />
           </View>
-          <View className="ml-2">
-            <Text variant="captionMedium" color="textPrimary">
+          <View className="ml-3">
+            <Text variant="bodyMedium" color="textPrimary">
               {moodLabels[entry.mood].label}
             </Text>
             <Text variant="caption" color="textMuted">

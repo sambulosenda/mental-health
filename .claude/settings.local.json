@@ -12,7 +12,11 @@
       "Bash(git -C /Users/sambulosenda/Documents/zen-mobile-app add -A)",
       "Bash(git -C /Users/sambulosenda/Documents/zen-mobile-app commit -m \"chore: Minor fixes and cleanup\")",
       "Bash(find:*)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "WebFetch(domain:youper.ai)",
+      "Bash(git -C /Users/sambulosenda/Documents/zen-mobile-app diff)",
+      "WebFetch(domain:www.youper.ai)",
+      "Bash(npx eslint:*)"
     ],
     "deny": [],
     "ask": []

@@ -32,7 +32,7 @@ export function AssessmentCard({
 
   const lastTakenText = lastSession?.completedAt
     ? `${formatDistanceToNow(lastSession.completedAt, { addSuffix: true })}`
-    : 'Never taken';
+    : 'Take your first →';
 
   return (
     <Pressable

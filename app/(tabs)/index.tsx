@@ -1,19 +1,18 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { View, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import Animated, { useSharedValue, useAnimatedScrollHandler } from 'react-native-reanimated';
-import { format } from 'date-fns';
-import { Text, Card, Button, AnimatedHeader, AnimatedListItem, NativeGauge, NativeBottomSheet } from '@/src/components/ui';
-import { MoodCard, MoodAnimation } from '@/src/components/mood';
+import { formatDistanceToNow } from 'date-fns';
+import { Text, Card, AnimatedHeader, NativeGauge } from '@/src/components/ui';
+import { MoodAnimation } from '@/src/components/mood';
 import { InterventionPicker } from '@/src/components/interventions/InterventionPicker';
 import { AssessmentCard } from '@/src/components/assessments';
 import { useMoodStore, useAssessmentStore } from '@/src/stores';
 import { GAD7_TEMPLATE, PHQ9_TEMPLATE } from '@/src/constants/assessments';
-import { colors, darkColors, spacing, moodLabels, activityTags } from '@/src/constants/theme';
+import { colors, darkColors, spacing, moodLabels } from '@/src/constants/theme';
 import { useTheme } from '@/src/contexts/ThemeContext';
-import type { MoodEntry } from '@/src/types/mood';
 
 const HEADER_EXPANDED_HEIGHT = 120;
 
@@ -30,9 +29,6 @@ export default function HomeScreen() {
     loadLastAssessments,
     checkDueStatus,
   } = useAssessmentStore();
-  const [selectedEntry, setSelectedEntry] = useState<MoodEntry | null>(null);
-  const [showDetails, setShowDetails] = useState(false);
-
   useEffect(() => {
     loadTodayEntries();
     loadEntries();
@@ -40,21 +36,8 @@ export default function HomeScreen() {
     checkDueStatus();
   }, []);
 
-  const handleMoodPress = (entry: MoodEntry) => {
-    setSelectedEntry(entry);
-    setShowDetails(true);
-  };
-
-  const today = new Date();
   const greeting = getGreeting();
-  const formattedDate = today.toLocaleDateString('en-US', {
-    weekday: 'long',
-    month: 'long',
-    day: 'numeric',
-  });
-
   const latestMood = todayEntries[0];
-  const recentEntries = entries.slice(0, 5);
 
   const scrollY = useSharedValue(0);
   const scrollHandler = useAnimatedScrollHandler({
@@ -78,46 +61,62 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView className={`flex-1 ${isDark ? 'bg-background-dark' : 'bg-background'}`} edges={['top']}>
-      <AnimatedHeader scrollY={scrollY} title={greeting} subtitle={formattedDate} showThemeToggle />
+      <AnimatedHeader scrollY={scrollY} title={greeting} showThemeToggle />
       <Animated.ScrollView
         className="flex-1"
-        contentContainerStyle={{ paddingHorizontal: spacing.lg, paddingBottom: spacing.xxl, paddingTop: HEADER_EXPANDED_HEIGHT }}
+        contentContainerStyle={{ paddingHorizontal: spacing.lg, paddingBottom: spacing.xxl + 40, paddingTop: HEADER_EXPANDED_HEIGHT }}
         showsVerticalScrollIndicator={false}
         onScroll={scrollHandler}
         scrollEventThrottle={16}
       >
         {latestMood ? (
           <Card className="mb-6">
-            <Text variant="captionMedium" color="primary" className="mb-2">
-              Latest Check-in
-            </Text>
-            <MoodCard entry={latestMood} compact />
-            <Button
-              variant="secondary"
-              size="sm"
-              onPress={() => router.navigate('/(tabs)/track')}
-              className="mt-4"
-            >
-              Log Another
-            </Button>
+            <View className="flex-row items-center">
+              <View
+                className="w-14 h-14 rounded-2xl items-center justify-center mr-4"
+                style={{ backgroundColor: colors.mood[latestMood.mood] }}
+              >
+                <MoodAnimation mood={latestMood.mood} size={36} loop={false} />
+              </View>
+              <View className="flex-1">
+                <Text variant="caption" color="textMuted" className="mb-0.5">
+                  Latest Check-in
+                </Text>
+                <Text variant="h3" color="textPrimary">
+                  {moodLabels[latestMood.mood].label}
+                </Text>
+                <Text variant="caption" color="textSecondary">
+                  {formatDistanceToNow(latestMood.timestamp, { addSuffix: true })}
+                </Text>
+              </View>
+              <Pressable
+                onPress={() => router.navigate('/(tabs)/track')}
+                className="w-10 h-10 rounded-full items-center justify-center"
+                style={{ backgroundColor: themeColors.primaryLight }}
+              >
+                <Ionicons name="add" size={24} color={themeColors.primary} />
+              </Pressable>
+            </View>
           </Card>
         ) : (
           <Card className="mb-6" onPress={() => router.navigate('/(tabs)/track')}>
-            <Text variant="captionMedium" color="primary" className="mb-1">
-              {"Today's Check-in"}
-            </Text>
-            <Text variant="h3" color="textPrimary">
-              How are you feeling?
-            </Text>
-            <Text variant="body" color="textSecondary" className="mt-2">
-              Tap to log your first mood of the day
-            </Text>
-            <Ionicons
-              name="add-circle"
-              size={32}
-              color={themeColors.primary}
-              style={{ position: 'absolute', right: 16, top: 16 }}
-            />
+            <View className="flex-row items-center">
+              <View
+                className="w-14 h-14 rounded-2xl items-center justify-center mr-4"
+                style={{ backgroundColor: themeColors.primaryLight }}
+              >
+                <Ionicons name="happy-outline" size={32} color={themeColors.primary} />
+              </View>
+              <View className="flex-1">
+                <Text variant="caption" color="textMuted" className="mb-0.5">
+                  {"Today's Check-in"}
+                </Text>
+                <Text variant="h3" color="textPrimary">
+                  How are you feeling?
+                </Text>
+              </View>
+              <Ionicons name="chevron-forward" size={24} color={themeColors.textMuted} />
+            </View>
           </Card>
         )}
 
@@ -136,9 +135,16 @@ export default function HomeScreen() {
                   <Ionicons name="chatbubble-ellipses-outline" size={20} color={themeColors.primary} />
                 </View>
                 <View className="flex-1">
-                  <Text variant="bodyMedium" color="textPrimary">
-                    2-min Check-in
-                  </Text>
+                  <View className="flex-row items-center gap-2">
+                    <Text variant="bodyMedium" color="textPrimary">
+                      2-min Check-in
+                    </Text>
+                    <View className="px-2 py-0.5 rounded-full" style={{ backgroundColor: themeColors.primaryLight }}>
+                      <Text variant="label" style={{ color: themeColors.primary, fontSize: 10 }}>
+                        Quick
+                      </Text>
+                    </View>
+                  </View>
                   <Text variant="caption" color="textSecondary">
                     Quick guided mood check
                   </Text>
@@ -150,9 +156,9 @@ export default function HomeScreen() {
               <View className="flex-row items-center">
                 <View
                   className="w-10 h-10 rounded-full items-center justify-center mr-3"
-                  style={{ backgroundColor: themeColors.primaryLight }}
+                  style={{ backgroundColor: '#E8B4B420' }}
                 >
-                  <Ionicons name="chatbubbles-outline" size={20} color={themeColors.primary} />
+                  <Ionicons name="chatbubbles-outline" size={20} color="#D4A079" />
                 </View>
                 <View className="flex-1">
                   <Text variant="bodyMedium" color="textPrimary">
@@ -242,103 +248,7 @@ export default function HomeScreen() {
           </View>
         )}
 
-        <View className="mb-6">
-          <View className="flex-row justify-between items-center mb-4">
-            <Text variant="h3" color="textPrimary">
-              Recent Activity
-            </Text>
-            {entries.length > 5 && (
-              <Pressable onPress={() => router.navigate('/(tabs)/insights')}>
-                <Text variant="captionMedium" color="primary">
-                  See All
-                </Text>
-              </Pressable>
-            )}
-          </View>
-          {recentEntries.length > 0 ? (
-            <View className="gap-4">
-              {recentEntries.map((entry, index) => (
-                <AnimatedListItem key={entry.id} index={index}>
-                  <MoodCard entry={entry} onPress={() => handleMoodPress(entry)} />
-                </AnimatedListItem>
-              ))}
-            </View>
-          ) : (
-            <Card variant="flat" className="p-8 items-center">
-              <Ionicons
-                name="happy-outline"
-                size={48}
-                color={themeColors.textMuted}
-                style={{ marginBottom: 16 }}
-              />
-              <Text variant="body" color="textMuted" center>
-                No entries yet.{'\n'}Start tracking your mood to see your activity here.
-              </Text>
-            </Card>
-          )}
-        </View>
       </Animated.ScrollView>
-
-      <NativeBottomSheet
-        isOpen={showDetails}
-        onClose={() => setShowDetails(false)}
-        title="Mood Details"
-      >
-        {selectedEntry && (
-          <View className="pt-2">
-            <View className="flex-row items-center mb-6">
-              <View
-                className="w-14 h-14 rounded-full items-center justify-center"
-                style={{ backgroundColor: colors.mood[selectedEntry.mood] }}
-              >
-                <MoodAnimation mood={selectedEntry.mood} size={32} />
-              </View>
-              <View className="ml-4 flex-1">
-                <Text variant="h3" color="textPrimary">
-                  {moodLabels[selectedEntry.mood].label}
-                </Text>
-                <Text variant="caption" color="textSecondary">
-                  {format(selectedEntry.timestamp, 'EEEE, MMMM d • h:mm a')}
-                </Text>
-              </View>
-            </View>
-
-            {selectedEntry.activities.length > 0 && (
-              <View className="mb-4">
-                <Text variant="captionMedium" color="textMuted" className="mb-1">
-                  Activities
-                </Text>
-                <View className="flex-row flex-wrap gap-1">
-                  {selectedEntry.activities.map((actId) => {
-                    const activity = activityTags.find((t) => t.id === actId);
-                    return activity ? (
-                      <View
-                        key={actId}
-                        className={`px-2 py-1 rounded-lg ${isDark ? 'bg-surface-dark-elevated' : 'bg-surface-elevated'}`}
-                      >
-                        <Text variant="caption" color="textSecondary">
-                          {activity.label}
-                        </Text>
-                      </View>
-                    ) : null;
-                  })}
-                </View>
-              </View>
-            )}
-
-            {selectedEntry.note && (
-              <View className="mb-4">
-                <Text variant="captionMedium" color="textMuted" className="mb-1">
-                  Note
-                </Text>
-                <Text variant="body" color="textSecondary">
-                  {selectedEntry.note}
-                </Text>
-              </View>
-            )}
-          </View>
-        )}
-      </NativeBottomSheet>
     </SafeAreaView>
   );
 }
