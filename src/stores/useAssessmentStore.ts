@@ -41,10 +41,11 @@ interface AssessmentState {
   // Loading/error states
   isLoading: boolean;
   error: string | null;
+  saveError: string | null; // Non-blocking error for background saves
 
   // Actions
   startAssessment: (type: AssessmentType) => Promise<void>;
-  setResponse: (questionId: string, value: LikertValue) => Promise<void>;
+  setResponse: (questionId: string, value: LikertValue) => Promise<boolean>; // Returns success
   advanceQuestion: () => void;
   goBackQuestion: () => void;
   completeAssessment: () => Promise<{ totalScore: number; severity: SeverityLevel } | null>;
@@ -74,6 +75,7 @@ export const useAssessmentStore = create<AssessmentState>((set, get) => ({
   phq9IsDue: true,
   isLoading: false,
   error: null,
+  saveError: null,
 
   // Start a new assessment
   startAssessment: async (type) => {
@@ -101,27 +103,42 @@ export const useAssessmentStore = create<AssessmentState>((set, get) => ({
   // Set response for a question
   setResponse: async (questionId, value) => {
     const { assessmentFlow, activeSession } = get();
-    if (!assessmentFlow || !activeSession) return;
+    if (!assessmentFlow || !activeSession) return false;
 
     const newResponses = {
       ...assessmentFlow.responses,
       [questionId]: value,
     };
 
-    // Update local state immediately
+    // Update local state immediately (optimistic update)
     set({
       assessmentFlow: {
         ...assessmentFlow,
         responses: newResponses,
       },
+      saveError: null, // Clear previous error
     });
 
-    // Update database
-    try {
-      await updateAssessmentResponses(activeSession.id, newResponses);
-    } catch (error) {
-      console.error('Failed to save assessment response:', error);
+    // Update database with retry
+    let retries = 2;
+    while (retries > 0) {
+      try {
+        await updateAssessmentResponses(activeSession.id, newResponses);
+        return true; // Success
+      } catch (error) {
+        retries--;
+        if (retries === 0) {
+          console.error('Failed to save assessment response after retries:', error);
+          set({
+            saveError: 'Failed to save response. Your answer is stored locally and will be saved when you complete.',
+          });
+          return false;
+        }
+        // Brief delay before retry
+        await new Promise((resolve) => setTimeout(resolve, 500));
+      }
     }
+    return false;
   },
 
   // Advance to next question
@@ -271,6 +288,7 @@ export const useAssessmentStore = create<AssessmentState>((set, get) => ({
       assessmentFlow: null,
       isLoading: false,
       error: null,
+      saveError: null,
     });
   },
 }));

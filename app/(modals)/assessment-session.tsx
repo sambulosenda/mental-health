@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { View, ActivityIndicator, Alert, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -23,10 +23,14 @@ export default function AssessmentSessionScreen() {
   } | null>(null);
   const [showSafetyModal, setShowSafetyModal] = useState(false);
 
+  // Track if PHQ-9 Q9 was EVER answered with >=1 (persists even if changed back to 0)
+  const q9EverPositive = useRef(false);
+
   const {
     assessmentFlow,
     isLoading,
     error,
+    saveError,
     startAssessment,
     setResponse,
     advanceQuestion,
@@ -65,13 +69,10 @@ export default function AssessmentSessionScreen() {
   }, [assessmentFlow, abandonAssessment, router]);
 
   const handleComplete = useCallback(async () => {
-    // Check for PHQ-9 Q9 safety concern
-    if (assessmentFlow?.template.id === 'phq9') {
-      const q9Response = assessmentFlow.responses['phq9_q9'];
-      if (q9Response !== undefined && q9Response >= 1) {
-        setShowSafetyModal(true);
-        return;
-      }
+    // Check for PHQ-9 Q9 safety concern - use ref to catch if EVER positive
+    if (assessmentFlow?.template.id === 'phq9' && q9EverPositive.current) {
+      setShowSafetyModal(true);
+      return;
     }
 
     const result = await completeAssessment();
@@ -235,6 +236,19 @@ export default function AssessmentSessionScreen() {
         </View>
       )}
 
+      {/* Save Error Warning (non-blocking) */}
+      {saveError && (
+        <View
+          className="mx-6 mb-4 px-3 py-2 rounded-lg flex-row items-center"
+          style={{ backgroundColor: `${colors.warning}20` }}
+        >
+          <Ionicons name="alert-circle" size={16} color={colors.warning} />
+          <Text variant="caption" style={{ color: colors.warning, marginLeft: 8, flex: 1 }}>
+            {saveError}
+          </Text>
+        </View>
+      )}
+
       {/* Content */}
       <View className="flex-1">
         {isIntroStep && (
@@ -297,7 +311,13 @@ export default function AssessmentSessionScreen() {
               questionNumber={currentQuestionIndex + 1}
               totalQuestions={totalQuestions}
               selectedValue={responses[currentQuestion.id]}
-              onSelect={(value: LikertValue) => setResponse(currentQuestion.id, value)}
+              onSelect={(value: LikertValue) => {
+                // Track if PHQ-9 Q9 is ever answered positively
+                if (currentQuestion.id === 'phq9_q9' && value >= 1) {
+                  q9EverPositive.current = true;
+                }
+                setResponse(currentQuestion.id, value);
+              }}
               accentColor={accentColor}
             />
           </Animated.View>

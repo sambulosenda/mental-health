@@ -140,8 +140,25 @@ export async function completeAssessmentSession(
   const now = new Date();
   const template = getTemplateById(type);
 
-  // Calculate total score
-  const totalScore = Object.values(responses).reduce<number>((sum, val) => sum + val, 0);
+  // Validate all questions are answered
+  const expectedQuestionIds = template.questions.map((q) => q.id);
+  const answeredQuestionIds = Object.keys(responses);
+  const missingQuestions = expectedQuestionIds.filter((id) => !answeredQuestionIds.includes(id));
+
+  if (missingQuestions.length > 0) {
+    throw new Error(`Incomplete assessment: missing answers for ${missingQuestions.length} question(s)`);
+  }
+
+  // Validate response values are valid Likert values (0-3)
+  for (const [questionId, value] of Object.entries(responses)) {
+    if (typeof value !== 'number' || value < 0 || value > 3) {
+      throw new Error(`Invalid response value for question ${questionId}: ${value}`);
+    }
+  }
+
+  // Calculate total score (capped at max)
+  const rawScore = Object.values(responses).reduce<number>((sum, val) => sum + val, 0);
+  const totalScore = Math.min(rawScore, template.scoringInfo.maxScore);
   const severity = calculateSeverity(totalScore, template);
 
   await db
