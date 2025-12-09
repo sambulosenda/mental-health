@@ -1,18 +1,25 @@
 import { useEffect, useCallback, useRef } from 'react';
-import { View, FlatList, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Platform, LayoutChangeEvent } from 'react-native';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+} from 'react-native-reanimated';
+import { KeyboardStickyView } from 'react-native-keyboard-controller';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useChatStore, useMoodStore, useJournalStore } from '@/src/stores';
 import { useAIChat } from '@/src/lib/ai/useAIChat';
 import {
   ChatBubble,
-  ChatInput,
+  FloatingChatInput,
   ChatHeader,
   TypingIndicator,
   CheckinSummary,
 } from '@/src/components/chat';
 import { Text } from '@/src/components/ui';
 import { useTheme } from '@/src/contexts/ThemeContext';
+import { ChatAnimationProvider } from '@/src/contexts/ChatAnimationContext';
+import { useChatScrollController } from '@/src/hooks/useChatScrollController';
 import { colors, darkColors, spacing } from '@/src/constants/theme';
 import {
   getCheckinPrompt,
@@ -20,15 +27,28 @@ import {
 } from '@/src/lib/ai/chatPrompts';
 import type { ConversationType, ChatMessage } from '@/src/types/chat';
 
-export default function ChatScreen() {
+function ChatScreenContent() {
   const router = useRouter();
   const params = useLocalSearchParams<{ type?: string }>();
   const { isDark } = useTheme();
   const themeColors = isDark ? darkColors : colors;
-  const flatListRef = useRef<FlatList>(null);
 
   const type: ConversationType = (params.type as ConversationType) || 'chat';
   const isCheckin = type === 'checkin';
+
+  // Scroll controller
+  const {
+    scrollViewRef,
+    scrollHandler,
+    scrollToBottom,
+    onContentSizeChange,
+    onContainerLayout,
+    setComposerHeight,
+    composerHeight,
+  } = useChatScrollController();
+
+  // Container height tracking
+  const containerRef = useRef<View>(null);
 
   // Stores
   const { entries: moodEntries } = useMoodStore();
@@ -69,10 +89,6 @@ export default function ChatScreen() {
     };
 
     initConversation();
-
-    return () => {
-      // Don't reset on unmount - let user resume if they come back
-    };
   }, []);
 
   // Generate initial greeting when model is ready
@@ -86,7 +102,6 @@ export default function ChatScreen() {
           ? getCheckinPrompt('greeting')
           : 'Greet the user warmly and ask how they are feeling today. Be brief (2 sentences max).';
 
-        // Create a temporary message for context
         const tempMessages: ChatMessage[] = [
           {
             id: 'temp',
@@ -119,15 +134,22 @@ export default function ChatScreen() {
       // Add user message
       await addUserMessage(content);
 
-      // Scroll to bottom
-      setTimeout(() => {
-        flatListRef.current?.scrollToEnd({ animated: true });
-      }, 100);
+      // Scroll to bottom after user message
+      setTimeout(() => scrollToBottom(true), 50);
 
       // Generate AI response
       setGenerating(true);
       try {
-        const allMessages = [...messages, { id: 'new', conversationId: activeConversation.id, role: 'user' as const, content, timestamp: new Date() }];
+        const allMessages = [
+          ...messages,
+          {
+            id: 'new',
+            conversationId: activeConversation.id,
+            role: 'user' as const,
+            content,
+            timestamp: new Date(),
+          },
+        ];
         const response = await generateResponse(allMessages);
 
         if (response) {
@@ -142,9 +164,7 @@ export default function ChatScreen() {
         console.error('Failed to generate response:', error);
       } finally {
         setGenerating(false);
-        setTimeout(() => {
-          flatListRef.current?.scrollToEnd({ animated: true });
-        }, 100);
+        setTimeout(() => scrollToBottom(true), 50);
       }
     },
     [activeConversation, messages, isGenerating, isCheckin, checkinFlow]
@@ -175,9 +195,25 @@ export default function ChatScreen() {
     router.back();
   }, []);
 
+  // Container layout handler
+  const handleContainerLayout = useCallback(
+    (event: LayoutChangeEvent) => {
+      onContainerLayout(event.nativeEvent.layout.height);
+    },
+    [onContainerLayout]
+  );
+
   // Determine if we should show the check-in summary
-  const showCheckinSummary = isCheckin && checkinFlow?.step === 'summary' && messages.length >= 6;
-  const suggestedMood = checkinFlow?.detectedMood || inferMoodFromConversation(messages);
+  const showCheckinSummary =
+    isCheckin && checkinFlow?.step === 'summary' && messages.length >= 6;
+  const suggestedMood =
+    checkinFlow?.detectedMood || inferMoodFromConversation(messages);
+
+  // Animated style for scroll content bottom padding (Android fallback)
+  const contentPaddingStyle = useAnimatedStyle(() => ({
+    paddingBottom:
+      Platform.OS === 'android' ? composerHeight.value + spacing.md : spacing.md,
+  }));
 
   // Model loading state
   if (aiState === 'loading') {
@@ -200,7 +236,7 @@ export default function ChatScreen() {
     <SafeAreaView
       className="flex-1"
       style={{ backgroundColor: themeColors.background }}
-      edges={['bottom']}
+      edges={['top']}
     >
       <ChatHeader
         type={type}
@@ -208,25 +244,35 @@ export default function ChatScreen() {
         onEnd={messages.length > 0 ? handleEnd : undefined}
       />
 
-      <KeyboardAvoidingView
+      {/* Main container */}
+      <View
+        ref={containerRef}
         className="flex-1"
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        keyboardVerticalOffset={0}
+        onLayout={handleContainerLayout}
       >
-        <FlatList
-          ref={flatListRef}
-          data={messages}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item, index }) => (
-            <ChatBubble message={item} index={index} />
-          )}
+        {/* Scrollable messages area */}
+        <Animated.ScrollView
+          ref={scrollViewRef}
+          onScroll={scrollHandler}
+          scrollEventThrottle={16}
+          onContentSizeChange={onContentSizeChange}
           contentContainerStyle={{
-            padding: spacing.md,
+            paddingHorizontal: spacing.md,
+            paddingTop: spacing.md,
             flexGrow: 1,
-            justifyContent: messages.length === 0 ? 'center' : 'flex-end',
+            justifyContent: messages.length === 0 ? 'center' : 'flex-start',
           }}
-          ListEmptyComponent={
-            !isGenerating ? (
+          contentInset={
+            Platform.OS === 'ios'
+              ? { bottom: composerHeight.value + spacing.md }
+              : undefined
+          }
+          contentInsetAdjustmentBehavior="automatic"
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="interactive"
+        >
+          <Animated.View style={contentPaddingStyle}>
+            {messages.length === 0 && !isGenerating ? (
               <View className="items-center py-8">
                 <Text variant="body" color="textMuted" center>
                   {isModelReady
@@ -234,33 +280,49 @@ export default function ChatScreen() {
                     : 'Preparing AI model...'}
                 </Text>
               </View>
-            ) : null
-          }
-          ListFooterComponent={isGenerating ? <TypingIndicator /> : null}
-          onContentSizeChange={() => {
-            flatListRef.current?.scrollToEnd({ animated: false });
-          }}
-        />
+            ) : (
+              messages.map((message, index) => (
+                <ChatBubble
+                  key={message.id}
+                  message={message}
+                  index={index}
+                  isFirstMessage={index === 0 && messages.length === 1}
+                />
+              ))
+            )}
+            {isGenerating && <TypingIndicator />}
+          </Animated.View>
+        </Animated.ScrollView>
 
-        {showCheckinSummary ? (
-          <CheckinSummary
-            suggestedMood={suggestedMood}
-            onLogMood={handleLogMood}
-            onSkip={handleSkipMood}
-            isLoading={isGenerating}
-          />
-        ) : (
-          <ChatInput
-            onSend={handleSend}
-            disabled={isGenerating || !isModelReady}
-            placeholder={
-              isCheckin
-                ? 'Share how you feel...'
-                : 'Type a message...'
-            }
-          />
-        )}
-      </KeyboardAvoidingView>
+        {/* Floating Composer */}
+        <KeyboardStickyView offset={{ closed: 0, opened: 0 }}>
+          {showCheckinSummary ? (
+            <CheckinSummary
+              suggestedMood={suggestedMood}
+              onLogMood={handleLogMood}
+              onSkip={handleSkipMood}
+              isLoading={isGenerating}
+            />
+          ) : (
+            <FloatingChatInput
+              onSend={handleSend}
+              disabled={isGenerating || !isModelReady}
+              placeholder={
+                isCheckin ? 'Share how you feel...' : 'Type a message...'
+              }
+              onHeightChange={setComposerHeight}
+            />
+          )}
+        </KeyboardStickyView>
+      </View>
     </SafeAreaView>
+  );
+}
+
+export default function ChatScreen() {
+  return (
+    <ChatAnimationProvider>
+      <ChatScreenContent />
+    </ChatAnimationProvider>
   );
 }
