@@ -1,10 +1,12 @@
 import { useState, useRef } from 'react';
-import { View, TextInput, Pressable, Keyboard, LayoutChangeEvent, Platform } from 'react-native';
+import { View, TextInput, Pressable, Platform, LayoutChangeEvent } from 'react-native';
+import { BlurView } from 'expo-blur';
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@/src/contexts/ThemeContext';
-import { colors, darkColors, typography, spacing, borderRadius, shadows } from '@/src/constants/theme';
+import { colors, darkColors, typography, spacing } from '@/src/constants/theme';
 
 interface FloatingChatInputProps {
   onSend: (message: string) => void;
@@ -18,11 +20,12 @@ const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 export function FloatingChatInput({
   onSend,
   disabled,
-  placeholder = 'Type a message...',
+  placeholder = 'Message',
   onHeightChange
 }: FloatingChatInputProps) {
   const { isDark } = useTheme();
   const themeColors = isDark ? darkColors : colors;
+  const insets = useSafeAreaInsets();
   const [text, setText] = useState('');
   const inputRef = useRef<TextInput>(null);
   const buttonScale = useSharedValue(1);
@@ -33,7 +36,6 @@ export function FloatingChatInput({
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     onSend(text.trim());
     setText('');
-    // Don't dismiss keyboard - keep it open like v0
   };
 
   const handleLayout = (event: LayoutChangeEvent) => {
@@ -42,7 +44,7 @@ export function FloatingChatInput({
   };
 
   const handlePressIn = () => {
-    buttonScale.value = withSpring(0.9, { damping: 15, stiffness: 400 });
+    buttonScale.value = withSpring(0.92, { damping: 15, stiffness: 400 });
   };
 
   const handlePressOut = () => {
@@ -59,28 +61,32 @@ export function FloatingChatInput({
     <View
       onLayout={handleLayout}
       style={{
-        marginHorizontal: spacing.md,
-        marginBottom: Platform.OS === 'ios' ? spacing.sm : spacing.md,
-        backgroundColor: themeColors.surface,
-        borderRadius: borderRadius.xl,
-        ...shadows.md,
+        paddingHorizontal: spacing.md,
+        paddingTop: spacing.sm,
+        paddingBottom: Math.max(insets.bottom, spacing.sm),
       }}
     >
-      <View
+      {/* Glass-effect container */}
+      <BlurView
+        intensity={isDark ? 40 : 60}
+        tint={isDark ? 'dark' : 'light'}
         style={{
-          flexDirection: 'row',
-          alignItems: 'flex-end',
-          gap: spacing.sm,
-          padding: spacing.sm,
+          borderRadius: 24,
+          overflow: 'hidden',
+          borderWidth: 0.5,
+          borderColor: isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.08)',
         }}
       >
         <View
           style={{
-            flex: 1,
-            backgroundColor: themeColors.surfaceElevated,
-            borderRadius: borderRadius.lg,
+            flexDirection: 'row',
+            alignItems: 'flex-end',
+            paddingHorizontal: 6,
+            paddingVertical: 6,
+            backgroundColor: isDark ? 'rgba(45,45,45,0.7)' : 'rgba(255,255,255,0.85)',
           }}
         >
+          {/* Text Input */}
           <TextInput
             ref={inputRef}
             value={text}
@@ -88,49 +94,53 @@ export function FloatingChatInput({
             placeholder={placeholder}
             placeholderTextColor={themeColors.textMuted}
             multiline
-            maxLength={500}
+            maxLength={1000}
             editable={!disabled}
             style={[
               typography.body,
               {
+                flex: 1,
                 color: themeColors.textPrimary,
-                paddingHorizontal: spacing.md,
-                paddingVertical: spacing.sm,
+                paddingHorizontal: 12,
+                paddingVertical: Platform.OS === 'ios' ? 8 : 6,
                 maxHeight: 120,
-                minHeight: 40,
+                minHeight: 36,
               },
             ]}
             onSubmitEditing={handleSend}
             blurOnSubmit={false}
           />
+
+          {/* Send Button */}
+          <AnimatedPressable
+            onPress={handleSend}
+            onPressIn={handlePressIn}
+            onPressOut={handlePressOut}
+            disabled={!canSend}
+            style={[
+              buttonAnimatedStyle,
+              {
+                width: 32,
+                height: 32,
+                borderRadius: 16,
+                backgroundColor: canSend ? themeColors.primary : 'transparent',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginBottom: 2,
+              },
+            ]}
+            accessibilityLabel="Send message"
+            accessibilityRole="button"
+          >
+            <Ionicons
+              name="arrow-up"
+              size={20}
+              color={canSend ? '#FFFFFF' : themeColors.textMuted}
+              style={{ opacity: canSend ? 1 : 0.4 }}
+            />
+          </AnimatedPressable>
         </View>
-        <AnimatedPressable
-          onPress={handleSend}
-          onPressIn={handlePressIn}
-          onPressOut={handlePressOut}
-          disabled={!canSend}
-          style={[
-            buttonAnimatedStyle,
-            {
-              width: 40,
-              height: 40,
-              borderRadius: 20,
-              backgroundColor: canSend ? themeColors.primary : themeColors.surfaceElevated,
-              alignItems: 'center',
-              justifyContent: 'center',
-              opacity: canSend ? 1 : 0.5,
-            },
-          ]}
-          accessibilityLabel="Send message"
-          accessibilityRole="button"
-        >
-          <Ionicons
-            name="arrow-up"
-            size={20}
-            color={canSend ? themeColors.textInverse : themeColors.textMuted}
-          />
-        </AnimatedPressable>
-      </View>
+      </BlurView>
     </View>
   );
 }

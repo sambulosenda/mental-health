@@ -1,5 +1,5 @@
 import { useEffect, useCallback, useRef, useState } from 'react';
-import { View, Platform, LayoutChangeEvent, ScrollView } from 'react-native';
+import { View, Platform, ScrollView } from 'react-native';
 import { KeyboardStickyView } from 'react-native-keyboard-controller';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -63,7 +63,7 @@ function ChatScreenContent() {
   const scrollToBottom = useCallback((animated = true) => {
     setTimeout(() => {
       scrollViewRef.current?.scrollToEnd({ animated });
-    }, 50);
+    }, 100);
   }, []);
 
   // Initialize conversation
@@ -122,11 +122,9 @@ function ChatScreenContent() {
     async (content: string) => {
       if (!activeConversation || isGenerating) return;
 
-      // Add user message
       await addUserMessage(content);
       scrollToBottom();
 
-      // Generate AI response
       setGenerating(true);
       try {
         const allMessages = [
@@ -144,7 +142,6 @@ function ChatScreenContent() {
         if (response) {
           await addAssistantMessage(response);
 
-          // Advance check-in flow if applicable
           if (isCheckin && checkinFlow) {
             advanceCheckinStep();
           }
@@ -159,19 +156,16 @@ function ChatScreenContent() {
     [activeConversation, messages, isGenerating, isCheckin, checkinFlow]
   );
 
-  // Handle close
   const handleClose = useCallback(() => {
     reset();
     router.back();
   }, []);
 
-  // Handle end conversation
   const handleEnd = useCallback(async () => {
     await endActiveConversation();
     router.back();
   }, []);
 
-  // Handle check-in completion
   const handleLogMood = useCallback(async () => {
     setGenerating(true);
     await completeCheckin(true);
@@ -184,13 +178,12 @@ function ChatScreenContent() {
     router.back();
   }, []);
 
-  // Determine if we should show the check-in summary
   const showCheckinSummary =
     isCheckin && checkinFlow?.step === 'summary' && messages.length >= 6;
   const suggestedMood =
     checkinFlow?.detectedMood || inferMoodFromConversation(messages);
 
-  // Model loading state
+  // Loading state
   if (aiState === 'loading') {
     return (
       <SafeAreaView
@@ -198,10 +191,7 @@ function ChatScreenContent() {
         style={{ backgroundColor: themeColors.background }}
       >
         <Text variant="body" color="textSecondary" center>
-          Loading AI model...
-        </Text>
-        <Text variant="caption" color="textMuted" center className="mt-2">
-          This may take a moment on first use
+          Loading...
         </Text>
       </SafeAreaView>
     );
@@ -219,34 +209,27 @@ function ChatScreenContent() {
         onEnd={messages.length > 0 ? handleEnd : undefined}
       />
 
-      {/* Main container */}
       <View className="flex-1">
-        {/* Scrollable messages area */}
         <ScrollView
           ref={scrollViewRef}
           contentContainerStyle={{
-            paddingHorizontal: spacing.md,
+            paddingHorizontal: spacing.sm,
             paddingTop: spacing.md,
-            // On Android, use padding since contentInset isn't supported
             paddingBottom: Platform.OS === 'android' ? composerHeight + spacing.lg : spacing.md,
           }}
-          // On iOS, contentInset creates space for the floating composer
           contentInset={
             Platform.OS === 'ios'
               ? { bottom: composerHeight }
               : undefined
           }
-          contentInsetAdjustmentBehavior="automatic"
           keyboardShouldPersistTaps="handled"
           keyboardDismissMode="interactive"
           showsVerticalScrollIndicator={false}
         >
           {messages.length === 0 && !isGenerating ? (
-            <View className="items-center py-8">
+            <View className="items-center py-12">
               <Text variant="body" color="textMuted" center>
-                {isModelReady
-                  ? 'Starting conversation...'
-                  : 'Preparing AI model...'}
+                {isModelReady ? 'Starting...' : 'Loading...'}
               </Text>
             </View>
           ) : (
@@ -262,7 +245,6 @@ function ChatScreenContent() {
           {isGenerating && <TypingIndicator />}
         </ScrollView>
 
-        {/* Floating Composer */}
         <KeyboardStickyView offset={{ closed: 0, opened: 0 }}>
           {showCheckinSummary ? (
             <CheckinSummary
@@ -275,9 +257,7 @@ function ChatScreenContent() {
             <FloatingChatInput
               onSend={handleSend}
               disabled={isGenerating || !isModelReady}
-              placeholder={
-                isCheckin ? 'Share how you feel...' : 'Type a message...'
-              }
+              placeholder="Message"
               onHeightChange={setComposerHeight}
             />
           )}

@@ -10,7 +10,7 @@ import Animated, {
 import { Text } from '@/src/components/ui';
 import { useTheme } from '@/src/contexts/ThemeContext';
 import { useChatAnimation } from '@/src/contexts/ChatAnimationContext';
-import { colors, darkColors, borderRadius, spacing } from '@/src/constants/theme';
+import { colors, darkColors, spacing } from '@/src/constants/theme';
 import type { ChatMessage } from '@/src/types/chat';
 
 interface ChatBubbleProps {
@@ -29,44 +29,32 @@ export function ChatBubble({ message, index, isFirstMessage = false }: ChatBubbl
 
   // Animation shared values
   const opacity = useSharedValue(0);
-  const translateY = useSharedValue(isUser ? 20 : 10);
-  const scale = useSharedValue(isFirstMessage && isUser ? 0.95 : 1);
+  const translateY = useSharedValue(isUser ? 16 : 8);
 
   useEffect(() => {
-    // Register this message for animation coordination
     registerMessage(message.id, message.role);
 
     const runAnimation = async () => {
-      // Assistant messages wait for previous user message to animate first
+      // Assistant messages wait for previous user message
       if (!isUser) {
         await waitForPreviousUserMessage(message.id);
-        // Small delay after user animation completes
-        await new Promise((resolve) => setTimeout(resolve, 100));
+        await new Promise((resolve) => setTimeout(resolve, 80));
       }
 
       // Animate in
       opacity.value = withTiming(1, {
-        duration: 250,
+        duration: 200,
         easing: Easing.out(Easing.cubic),
       });
 
       translateY.value = withSpring(0, {
         damping: 20,
         stiffness: 300,
-        mass: 0.8,
       });
 
-      if (isFirstMessage && isUser) {
-        scale.value = withSpring(1, {
-          damping: 15,
-          stiffness: 200,
-        });
-      }
-
-      // Notify completion after animation duration
       setTimeout(() => {
         notifyAnimationComplete(message.id);
-      }, 300);
+      }, 250);
     };
 
     runAnimation();
@@ -74,11 +62,21 @@ export function ChatBubble({ message, index, isFirstMessage = false }: ChatBubbl
 
   const animatedStyle = useAnimatedStyle(() => ({
     opacity: opacity.value,
-    transform: [
-      { translateY: translateY.value },
-      { scale: scale.value },
-    ],
+    transform: [{ translateY: translateY.value }],
   }));
+
+  // iMessage-style bubbles
+  const userBubbleStyle = {
+    backgroundColor: themeColors.primary,
+    borderRadius: 18,
+    borderBottomRightRadius: 4,
+  };
+
+  const assistantBubbleStyle = {
+    backgroundColor: isDark ? 'rgba(60,60,60,0.8)' : 'rgba(240,240,240,1)',
+    borderRadius: 18,
+    borderBottomLeftRadius: 4,
+  };
 
   return (
     <Animated.View
@@ -87,26 +85,27 @@ export function ChatBubble({ message, index, isFirstMessage = false }: ChatBubbl
         {
           flexDirection: 'row',
           justifyContent: isUser ? 'flex-end' : 'flex-start',
-          marginBottom: spacing.sm,
+          marginBottom: spacing.xs,
+          paddingHorizontal: 4,
         },
       ]}
     >
       <View
-        style={{
-          maxWidth: '80%',
-          backgroundColor: isUser ? themeColors.primary : themeColors.surfaceElevated,
-          borderRadius: borderRadius.lg,
-          borderBottomRightRadius: isUser ? 4 : borderRadius.lg,
-          borderBottomLeftRadius: isUser ? borderRadius.lg : 4,
-          paddingHorizontal: spacing.md,
-          paddingVertical: spacing.sm,
-          borderWidth: isUser ? 0 : 1,
-          borderColor: themeColors.border,
-        }}
+        style={[
+          isUser ? userBubbleStyle : assistantBubbleStyle,
+          {
+            maxWidth: '78%',
+            paddingHorizontal: 14,
+            paddingVertical: 10,
+          },
+        ]}
       >
         <Text
           variant="body"
-          style={{ color: isUser ? themeColors.textInverse : themeColors.textPrimary }}
+          style={{
+            color: isUser ? '#FFFFFF' : themeColors.textPrimary,
+            lineHeight: 22,
+          }}
         >
           {message.content}
         </Text>
