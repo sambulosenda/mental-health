@@ -43,7 +43,7 @@ function RecommendationCard({
       onPress={handlePress}
       className="rounded-2xl p-3 flex-1"
       style={{
-        backgroundColor: themeColors.surface,
+        backgroundColor: themeColors.surfaceElevated,
         minWidth: 100,
       }}
     >

@@ -38,7 +38,7 @@ export function AssessmentCard({
     <Pressable
       onPress={handlePress}
       className="rounded-2xl p-4 flex-1"
-      style={{ backgroundColor: themeColors.surface }}
+      style={{ backgroundColor: themeColors.surfaceElevated }}
     >
       {/* Header with icon and due badge */}
       <View className="flex-row items-start justify-between mb-3">

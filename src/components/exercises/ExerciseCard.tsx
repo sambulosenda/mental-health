@@ -35,7 +35,7 @@ export function ExerciseCard({ template, onPress, compact }: ExerciseCardProps) 
         onPress={handlePress}
         className="rounded-2xl p-4"
         style={{
-          backgroundColor: themeColors.surface,
+          backgroundColor: themeColors.surfaceElevated,
           width: 160,
         }}
       >
@@ -65,7 +65,7 @@ export function ExerciseCard({ template, onPress, compact }: ExerciseCardProps) 
     <Pressable
       onPress={handlePress}
       className="rounded-2xl p-4 flex-row items-center"
-      style={{ backgroundColor: themeColors.surface }}
+      style={{ backgroundColor: themeColors.surfaceElevated }}
     >
       <View
         className="w-12 h-12 rounded-full items-center justify-center mr-4"
