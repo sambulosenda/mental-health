@@ -1,9 +1,5 @@
-import { useEffect, useCallback, useRef } from 'react';
-import { View, Platform, LayoutChangeEvent } from 'react-native';
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-} from 'react-native-reanimated';
+import { useEffect, useCallback, useRef, useState } from 'react';
+import { View, Platform, LayoutChangeEvent, ScrollView } from 'react-native';
 import { KeyboardStickyView } from 'react-native-keyboard-controller';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -19,7 +15,6 @@ import {
 import { Text } from '@/src/components/ui';
 import { useTheme } from '@/src/contexts/ThemeContext';
 import { ChatAnimationProvider } from '@/src/contexts/ChatAnimationContext';
-import { useChatScrollController } from '@/src/hooks/useChatScrollController';
 import { colors, darkColors, spacing } from '@/src/constants/theme';
 import {
   getCheckinPrompt,
@@ -32,23 +27,11 @@ function ChatScreenContent() {
   const params = useLocalSearchParams<{ type?: string }>();
   const { isDark } = useTheme();
   const themeColors = isDark ? darkColors : colors;
+  const scrollViewRef = useRef<ScrollView>(null);
+  const [composerHeight, setComposerHeight] = useState(80);
 
   const type: ConversationType = (params.type as ConversationType) || 'chat';
   const isCheckin = type === 'checkin';
-
-  // Scroll controller
-  const {
-    scrollViewRef,
-    scrollHandler,
-    scrollToBottom,
-    onContentSizeChange,
-    onContainerLayout,
-    setComposerHeight,
-    composerHeight,
-  } = useChatScrollController();
-
-  // Container height tracking
-  const containerRef = useRef<View>(null);
 
   // Stores
   const { entries: moodEntries } = useMoodStore();
@@ -75,6 +58,13 @@ function ChatScreenContent() {
     moodEntries: moodEntries.slice(0, 7),
     journalEntries: journalEntries.slice(0, 3),
   });
+
+  // Scroll to bottom helper
+  const scrollToBottom = useCallback((animated = true) => {
+    setTimeout(() => {
+      scrollViewRef.current?.scrollToEnd({ animated });
+    }, 50);
+  }, []);
 
   // Initialize conversation
   useEffect(() => {
@@ -115,6 +105,7 @@ function ChatScreenContent() {
         const response = await generateResponse(tempMessages);
         if (response) {
           await addAssistantMessage(response);
+          scrollToBottom();
         }
       } catch (error) {
         console.error('Failed to generate greeting:', error);
@@ -133,9 +124,7 @@ function ChatScreenContent() {
 
       // Add user message
       await addUserMessage(content);
-
-      // Scroll to bottom after user message
-      setTimeout(() => scrollToBottom(true), 50);
+      scrollToBottom();
 
       // Generate AI response
       setGenerating(true);
@@ -159,12 +148,12 @@ function ChatScreenContent() {
           if (isCheckin && checkinFlow) {
             advanceCheckinStep();
           }
+          scrollToBottom();
         }
       } catch (error) {
         console.error('Failed to generate response:', error);
       } finally {
         setGenerating(false);
-        setTimeout(() => scrollToBottom(true), 50);
       }
     },
     [activeConversation, messages, isGenerating, isCheckin, checkinFlow]
@@ -195,25 +184,11 @@ function ChatScreenContent() {
     router.back();
   }, []);
 
-  // Container layout handler
-  const handleContainerLayout = useCallback(
-    (event: LayoutChangeEvent) => {
-      onContainerLayout(event.nativeEvent.layout.height);
-    },
-    [onContainerLayout]
-  );
-
   // Determine if we should show the check-in summary
   const showCheckinSummary =
     isCheckin && checkinFlow?.step === 'summary' && messages.length >= 6;
   const suggestedMood =
     checkinFlow?.detectedMood || inferMoodFromConversation(messages);
-
-  // Animated style for scroll content bottom padding (Android fallback)
-  const contentPaddingStyle = useAnimatedStyle(() => ({
-    paddingBottom:
-      Platform.OS === 'android' ? composerHeight.value + spacing.md : spacing.md,
-  }));
 
   // Model loading state
   if (aiState === 'loading') {
@@ -245,54 +220,47 @@ function ChatScreenContent() {
       />
 
       {/* Main container */}
-      <View
-        ref={containerRef}
-        className="flex-1"
-        onLayout={handleContainerLayout}
-      >
+      <View className="flex-1">
         {/* Scrollable messages area */}
-        <Animated.ScrollView
+        <ScrollView
           ref={scrollViewRef}
-          onScroll={scrollHandler}
-          scrollEventThrottle={16}
-          onContentSizeChange={onContentSizeChange}
           contentContainerStyle={{
             paddingHorizontal: spacing.md,
             paddingTop: spacing.md,
-            flexGrow: 1,
-            justifyContent: messages.length === 0 ? 'center' : 'flex-start',
+            // On Android, use padding since contentInset isn't supported
+            paddingBottom: Platform.OS === 'android' ? composerHeight + spacing.lg : spacing.md,
           }}
+          // On iOS, contentInset creates space for the floating composer
           contentInset={
             Platform.OS === 'ios'
-              ? { bottom: composerHeight.value + spacing.md }
+              ? { bottom: composerHeight }
               : undefined
           }
           contentInsetAdjustmentBehavior="automatic"
           keyboardShouldPersistTaps="handled"
           keyboardDismissMode="interactive"
+          showsVerticalScrollIndicator={false}
         >
-          <Animated.View style={contentPaddingStyle}>
-            {messages.length === 0 && !isGenerating ? (
-              <View className="items-center py-8">
-                <Text variant="body" color="textMuted" center>
-                  {isModelReady
-                    ? 'Starting conversation...'
-                    : 'Preparing AI model...'}
-                </Text>
-              </View>
-            ) : (
-              messages.map((message, index) => (
-                <ChatBubble
-                  key={message.id}
-                  message={message}
-                  index={index}
-                  isFirstMessage={index === 0 && messages.length === 1}
-                />
-              ))
-            )}
-            {isGenerating && <TypingIndicator />}
-          </Animated.View>
-        </Animated.ScrollView>
+          {messages.length === 0 && !isGenerating ? (
+            <View className="items-center py-8">
+              <Text variant="body" color="textMuted" center>
+                {isModelReady
+                  ? 'Starting conversation...'
+                  : 'Preparing AI model...'}
+              </Text>
+            </View>
+          ) : (
+            messages.map((message, index) => (
+              <ChatBubble
+                key={message.id}
+                message={message}
+                index={index}
+                isFirstMessage={index === 0 && messages.length === 1}
+              />
+            ))
+          )}
+          {isGenerating && <TypingIndicator />}
+        </ScrollView>
 
         {/* Floating Composer */}
         <KeyboardStickyView offset={{ closed: 0, opened: 0 }}>
