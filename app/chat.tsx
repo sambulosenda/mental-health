@@ -1,8 +1,8 @@
 import { useEffect, useCallback, useRef, useState } from 'react';
-import { View, Platform, ScrollView } from 'react-native';
+import { View, ScrollView } from 'react-native';
 import { KeyboardStickyView } from 'react-native-keyboard-controller';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useChatStore, useMoodStore, useJournalStore } from '@/src/stores';
 import { useAIChat } from '@/src/lib/ai/useAIChat';
 import {
@@ -27,6 +27,7 @@ function ChatScreenContent() {
   const params = useLocalSearchParams<{ type?: string }>();
   const { isDark } = useTheme();
   const themeColors = isDark ? darkColors : colors;
+  const insets = useSafeAreaInsets();
   const scrollViewRef = useRef<ScrollView>(null);
   const [composerHeight, setComposerHeight] = useState(80);
 
@@ -197,6 +198,10 @@ function ChatScreenContent() {
     );
   }
 
+  // Calculate bottom padding for scroll content
+  // This ensures content is visible above the floating composer
+  const bottomPadding = composerHeight + insets.bottom + spacing.sm;
+
   return (
     <SafeAreaView
       className="flex-1"
@@ -215,16 +220,13 @@ function ChatScreenContent() {
           contentContainerStyle={{
             paddingHorizontal: spacing.sm,
             paddingTop: spacing.md,
-            paddingBottom: Platform.OS === 'android' ? composerHeight + spacing.lg : spacing.md,
+            paddingBottom: bottomPadding,
           }}
-          contentInset={
-            Platform.OS === 'ios'
-              ? { bottom: composerHeight }
-              : undefined
-          }
           keyboardShouldPersistTaps="handled"
           keyboardDismissMode="interactive"
           showsVerticalScrollIndicator={false}
+          // iOS 15+ native keyboard avoidance
+          automaticallyAdjustKeyboardInsets={true}
         >
           {messages.length === 0 && !isGenerating ? (
             <View className="items-center py-12">
@@ -245,7 +247,13 @@ function ChatScreenContent() {
           {isGenerating && <TypingIndicator />}
         </ScrollView>
 
-        <KeyboardStickyView offset={{ closed: 0, opened: 0 }}>
+        {/* Floating composer sticks above keyboard */}
+        <KeyboardStickyView
+          offset={{
+            closed: 0,
+            opened: 0,
+          }}
+        >
           {showCheckinSummary ? (
             <CheckinSummary
               suggestedMood={suggestedMood}
