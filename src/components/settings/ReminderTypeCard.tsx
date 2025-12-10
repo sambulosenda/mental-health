@@ -64,7 +64,7 @@ export function ReminderTypeCard({
           className="w-10 h-10 rounded-full items-center justify-center mr-3"
           style={{ backgroundColor: themeColors.primaryLight }}
         >
-          <Ionicons name={icon} size={20} color={themeColors.primary} />
+          <Ionicons name={icon} size={20} color={themeColors.textInverse} />
         </View>
         <View className="flex-1 mr-3">
           <Text variant="bodyMedium" color="textPrimary">

@@ -79,7 +79,7 @@ export function BiometricLock({ children }: BiometricLockProps) {
           className="w-[100px] h-[100px] rounded-full justify-center items-center mb-8"
           style={{ backgroundColor: themeColors.primaryLight }}
         >
-          <Ionicons name="lock-closed" size={48} color={themeColors.primary} />
+          <Ionicons name="lock-closed" size={48} color={themeColors.textInverse} />
         </View>
         <Text variant="h2" color="textPrimary" center className="mb-2">
           DaySi is Locked

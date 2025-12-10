@@ -95,7 +95,7 @@ export default function HomeScreen() {
                 style={{ backgroundColor: themeColors.primaryLight }}
                 hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
               >
-                <Ionicons name="add" size={24} color={themeColors.primary} />
+                <Ionicons name="add" size={24} color={themeColors.textInverse} />
               </Pressable>
             </View>
           </Card>
@@ -106,7 +106,7 @@ export default function HomeScreen() {
                 className="w-14 h-14 rounded-2xl items-center justify-center mr-4"
                 style={{ backgroundColor: themeColors.primaryLight }}
               >
-                <Ionicons name="happy-outline" size={32} color={themeColors.primary} />
+                <Ionicons name="happy-outline" size={32} color={themeColors.textInverse} />
               </View>
               <View className="flex-1">
                 <Text variant="caption" color="textMuted" className="mb-0.5">
@@ -133,7 +133,7 @@ export default function HomeScreen() {
                   className="w-11 h-11 rounded-full items-center justify-center mr-3"
                   style={{ backgroundColor: themeColors.primaryLight }}
                 >
-                  <Ionicons name="chatbubble-ellipses-outline" size={20} color={themeColors.primary} />
+                  <Ionicons name="chatbubble-ellipses-outline" size={20} color={themeColors.textInverse} />
                 </View>
                 <View className="flex-1">
                   <View className="flex-row items-center gap-2">
@@ -141,7 +141,7 @@ export default function HomeScreen() {
                       2-min Check-in
                     </Text>
                     <View className="px-2 py-0.5 rounded-full" style={{ backgroundColor: themeColors.primaryLight }}>
-                      <Text variant="label" style={{ color: themeColors.primary, fontSize: 10 }}>
+                      <Text variant="label" style={{ color: themeColors.textInverse, fontSize: 10 }}>
                         Quick
                       </Text>
                     </View>

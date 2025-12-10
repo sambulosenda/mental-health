@@ -20,12 +20,12 @@ interface InsightCardProps {
   insight: Insight;
 }
 
-const typeConfig: Record<InsightType, { icon: keyof typeof Ionicons.glyphMap; color: string; bgColor: string; darkBgColor: string }> = {
-  pattern: { icon: 'analytics', color: colors.primary, bgColor: colors.primaryLight, darkBgColor: `${colors.primary}40` },
-  trigger: { icon: 'flash', color: colors.warning, bgColor: colors.warningLight, darkBgColor: `${colors.warning}40` },
-  suggestion: { icon: 'bulb', color: colors.success, bgColor: colors.successLight, darkBgColor: `${colors.success}40` },
-  streak: { icon: 'flame', color: colors.error, bgColor: colors.errorLight, darkBgColor: `${colors.error}40` },
-  milestone: { icon: 'trophy', color: colors.warning, bgColor: colors.warningLight, darkBgColor: `${colors.warning}40` },
+const typeConfig: Record<InsightType, { icon: keyof typeof Ionicons.glyphMap; color: string; darkColor: string; bgColor: string; darkBgColor: string }> = {
+  pattern: { icon: 'analytics', color: colors.textInverse, darkColor: darkColors.textInverse, bgColor: colors.primaryLight, darkBgColor: `${colors.primary}40` },
+  trigger: { icon: 'flash', color: colors.warning, darkColor: darkColors.warning, bgColor: colors.warningLight, darkBgColor: `${colors.warning}40` },
+  suggestion: { icon: 'bulb', color: colors.success, darkColor: darkColors.success, bgColor: colors.successLight, darkBgColor: `${colors.success}40` },
+  streak: { icon: 'flame', color: colors.error, darkColor: darkColors.error, bgColor: colors.errorLight, darkBgColor: `${colors.error}40` },
+  milestone: { icon: 'trophy', color: colors.warning, darkColor: darkColors.warning, bgColor: colors.warningLight, darkBgColor: `${colors.warning}40` },
 };
 
 export function InsightCard({ insight }: InsightCardProps) {
@@ -40,7 +40,7 @@ export function InsightCard({ insight }: InsightCardProps) {
         className="w-11 h-11 rounded-xl justify-center items-center mr-4"
         style={{ backgroundColor: isDark ? config.darkBgColor : config.bgColor }}
       >
-        <Ionicons name={icon} size={24} color={config.color} />
+        <Ionicons name={icon} size={24} color={isDark ? config.darkColor : config.color} />
       </View>
       <View className="flex-1">
         <Text variant="captionMedium" color="textPrimary">
