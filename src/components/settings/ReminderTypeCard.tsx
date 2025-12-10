@@ -57,7 +57,7 @@ export function ReminderTypeCard({
   };
 
   return (
-    <Card variant="outlined" className="mb-2">
+    <Card variant="flat" className="mb-2">
       {/* Main toggle row */}
       <View className="flex-row items-center">
         <View
@@ -89,8 +89,7 @@ export function ReminderTypeCard({
         <Animated.View
           entering={FadeInDown.duration(200)}
           exiting={FadeOutUp.duration(200)}
-          className="mt-3 pt-3 border-t"
-          style={{ borderTopColor: themeColors.border }}
+          className="mt-3 pt-3"
         >
           {/* Time selector */}
           <Pressable

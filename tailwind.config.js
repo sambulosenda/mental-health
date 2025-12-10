@@ -30,17 +30,17 @@ module.exports = {
           4: '#2D5A3D',
           5: '#1B4332',
         },
-        // Light mode backgrounds - clean white
-        background: '#FFFFFF',
+        // Light mode backgrounds - Apple News style
+        background: '#F2F2F7',
         surface: {
           DEFAULT: '#FFFFFF',
-          elevated: '#F5F5F5',
+          elevated: '#FFFFFF',
         },
-        // Dark mode backgrounds - warm dark
-        'background-dark': '#1A1A18',
+        // Dark mode backgrounds - Apple News style
+        'background-dark': '#000000',
         'surface-dark': {
-          DEFAULT: '#252521',
-          elevated: '#2F2F2A',
+          DEFAULT: '#1C1C1E',
+          elevated: '#1C1C1E',
         },
         // Text colors
         'text-primary': '#1B4332',

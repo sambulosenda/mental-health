@@ -53,14 +53,21 @@ export function Card({
   }[padding];
 
   const getVariantStyle = () => {
+    const baseStyle = {
+      backgroundColor: themeColors.surfaceElevated,
+    };
+
     switch (variant) {
-      case 'elevated':
       case 'outlined':
+        return {
+          ...baseStyle,
+          borderWidth: 1,
+          borderColor: themeColors.border,
+        };
+      case 'elevated':
       case 'flat':
       default:
-        return {
-          backgroundColor: themeColors.surfaceElevated,
-        };
+        return baseStyle;
     }
   };
 

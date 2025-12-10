@@ -2,7 +2,8 @@ import { Platform, View, StyleSheet, Modal, Pressable } from 'react-native';
 import { useState, useEffect, useRef } from 'react';
 import { Host, DateTimePicker } from '@expo/ui/swift-ui';
 import DateTimePickerRN from '@react-native-community/datetimepicker';
-import { colors, spacing, borderRadius } from '@/src/constants/theme';
+import { colors, darkColors, spacing, borderRadius } from '@/src/constants/theme';
+import { useTheme } from '@/src/contexts/ThemeContext';
 import { Text } from './Text';
 
 interface NativeTimePickerProps {
@@ -18,6 +19,8 @@ export function NativeTimePicker({
   visible,
   onClose,
 }: NativeTimePickerProps) {
+  const { isDark } = useTheme();
+  const themeColors = isDark ? darkColors : colors;
   const tempDateRef = useRef(value);
 
   useEffect(() => {
@@ -47,8 +50,8 @@ export function NativeTimePicker({
         onRequestClose={onClose}
       >
         <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
+          <View style={[styles.modalContent, { backgroundColor: themeColors.surface }]}>
+            <View style={[styles.modalHeader, { borderBottomColor: themeColors.border }]}>
               <Pressable onPress={onClose}>
                 <Text variant="body" color="textSecondary">Cancel</Text>
               </Pressable>
@@ -116,7 +119,6 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   modalContent: {
-    backgroundColor: colors.surface,
     borderTopLeftRadius: borderRadius.xl,
     borderTopRightRadius: borderRadius.xl,
     paddingBottom: spacing.xl,
@@ -127,7 +129,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: colors.border,
   },
   pickerWrapper: {
     alignItems: 'center',

@@ -16,7 +16,8 @@
       "WebFetch(domain:youper.ai)",
       "Bash(git -C /Users/sambulosenda/Documents/zen-mobile-app diff)",
       "WebFetch(domain:www.youper.ai)",
-      "Bash(npx eslint:*)"
+      "Bash(npx eslint:*)",
+      "Bash(git -C /Users/sambulosenda/Documents/zen-mobile-app status)"
     ],
     "deny": [],
     "ask": []

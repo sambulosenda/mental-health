@@ -233,7 +233,7 @@ export default function ProfileScreen() {
           />
 
           {/* Streak notifications toggle */}
-          <Card variant="outlined" style={styles.streakCard}>
+          <Card variant="flat" style={styles.streakCard}>
             <View style={styles.settingRow}>
               <View style={styles.settingText}>
                 <Text variant="bodyMedium" color="textPrimary">
@@ -259,7 +259,7 @@ export default function ProfileScreen() {
           <Text variant="h3" color="textPrimary" style={styles.sectionTitle}>
             Appearance
           </Text>
-          <Card variant="outlined">
+          <Card variant="flat">
             <View style={styles.settingRow}>
               <View style={styles.settingText}>
                 <Text variant="bodyMedium" color="textPrimary">
@@ -278,7 +278,7 @@ export default function ProfileScreen() {
           <Text variant="h3" color="textPrimary" style={styles.sectionTitle}>
             Privacy & Security
           </Text>
-          <Card variant="outlined">
+          <Card variant="flat">
             <View style={styles.settingRow}>
               <View style={styles.settingText}>
                 <Text variant="bodyMedium" color="textPrimary">
@@ -371,7 +371,6 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
   },
   scroll: {
     flex: 1,

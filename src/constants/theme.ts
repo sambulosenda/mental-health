@@ -24,10 +24,10 @@ export const colors = {
     5: '#1B4332',
   } as Record<number, string>,
 
-  // Backgrounds - clean white
-  background: '#FFFFFF',
+  // Backgrounds - Apple News style (gray bg, white cards)
+  background: '#F2F2F7',
   surface: '#FFFFFF',
-  surfaceElevated: '#F5F5F5',
+  surfaceElevated: '#FFFFFF',
 
   // Text (WCAG AA contrast ratios met - 4.5:1 minimum)
   textPrimary: '#1B4332',
@@ -73,10 +73,10 @@ export const darkColors = {
     5: '#1B4332',
   } as Record<number, string>,
 
-  // Dark backgrounds - warm dark tones
-  background: '#1A1A18',
-  surface: '#252521',
-  surfaceElevated: '#2F2F2A',
+  // Dark backgrounds - Apple News style (pure black bg, dark cards)
+  background: '#000000',
+  surface: '#1C1C1E',
+  surfaceElevated: '#1C1C1E',
 
   // Dark text (WCAG AA contrast ratios met - 4.5:1 minimum)
   textPrimary: '#FAF6EF',

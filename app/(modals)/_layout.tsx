@@ -1,12 +1,16 @@
 import { Stack } from 'expo-router';
-import { colors } from '@/src/constants/theme';
+import { colors, darkColors } from '@/src/constants/theme';
+import { useTheme } from '@/src/contexts/ThemeContext';
 
 export default function ModalsLayout() {
+  const { isDark } = useTheme();
+  const themeColors = isDark ? darkColors : colors;
+
   return (
     <Stack
       screenOptions={{
         headerShown: false,
-        contentStyle: { backgroundColor: colors.background },
+        contentStyle: { backgroundColor: themeColors.background },
         presentation: 'modal',
       }}
     >
