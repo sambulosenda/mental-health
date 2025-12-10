@@ -118,49 +118,60 @@ export const borderRadius = {
   full: 9999,
 } as const;
 
+// System font for iOS (SF Pro) and Android (Roboto)
+const systemFont = 'System';
+
 export const typography = {
   // Headers
   h1: {
+    fontFamily: systemFont,
     fontSize: 28,
     fontWeight: '600' as const,
     lineHeight: 36,
     letterSpacing: -0.5,
   },
   h2: {
+    fontFamily: systemFont,
     fontSize: 22,
     fontWeight: '600' as const,
     lineHeight: 28,
     letterSpacing: -0.3,
   },
   h3: {
+    fontFamily: systemFont,
     fontSize: 18,
     fontWeight: '600' as const,
     lineHeight: 24,
   },
   // Body
   body: {
+    fontFamily: systemFont,
     fontSize: 16,
     fontWeight: '400' as const,
     lineHeight: 24,
   },
   bodyMedium: {
+    fontFamily: systemFont,
     fontSize: 16,
     fontWeight: '500' as const,
     lineHeight: 24,
   },
   // Small
   caption: {
+    fontFamily: systemFont,
     fontSize: 14,
     fontWeight: '400' as const,
     lineHeight: 20,
   },
   captionMedium: {
+    fontFamily: systemFont,
     fontSize: 14,
     fontWeight: '500' as const,
     lineHeight: 20,
   },
   // Tiny
   label: {
+    fontFamily: systemFont,
     fontSize: 12,
     fontWeight: '500' as const,
     lineHeight: 16,

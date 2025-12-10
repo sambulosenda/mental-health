@@ -103,7 +103,7 @@ export function InterventionPicker({
     return (
       <View className="py-4">
         {showTitle && (
-          <Text variant="h3" color="textPrimary" className="mb-4 px-4">
+          <Text variant="h3" color="textPrimary" className="mb-4 px-6">
             {title}
           </Text>
         )}
@@ -121,7 +121,7 @@ export function InterventionPicker({
   return (
     <View className="py-2">
       {showTitle && (
-        <View className="flex-row items-center justify-between mb-3 px-4">
+        <View className="flex-row items-center justify-between mb-3 px-6">
           <Text variant="h3" color="textPrimary">
             {title}
           </Text>
@@ -136,7 +136,7 @@ export function InterventionPicker({
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ paddingHorizontal: spacing.md, gap: spacing.md }}
+        contentContainerStyle={{ paddingHorizontal: spacing.lg, gap: spacing.md }}
       >
         {recommendations.map((rec) => (
           <RecommendationCard
