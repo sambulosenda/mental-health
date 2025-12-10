@@ -1,5 +1,5 @@
 import { Platform, View, StyleSheet, Modal, Pressable } from 'react-native';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Host, DateTimePicker } from '@expo/ui/swift-ui';
 import DateTimePickerRN from '@react-native-community/datetimepicker';
 import { colors, spacing, borderRadius } from '@/src/constants/theme';
@@ -18,10 +18,20 @@ export function NativeTimePicker({
   visible,
   onClose,
 }: NativeTimePickerProps) {
-  const [tempDate, setTempDate] = useState(value);
+  const tempDateRef = useRef(value);
+
+  useEffect(() => {
+    if (visible) {
+      tempDateRef.current = value;
+    }
+  }, [visible, value]);
+
+  const handleDateChange = (date: Date) => {
+    tempDateRef.current = date;
+  };
 
   const handleConfirm = () => {
-    onChange(tempDate);
+    onChange(tempDateRef.current);
     onClose();
   };
 
@@ -50,11 +60,22 @@ export function NativeTimePicker({
             <View style={styles.pickerWrapper}>
               <Host style={styles.hostContainer}>
                 <DateTimePicker
-                  onDateSelected={({ nativeEvent: { date } }) => {
-                    setTempDate(new Date(date));
+                  onDateSelected={(date) => {
+                    // Handle various date formats from @expo/ui
+                    let newDate: Date;
+                    if (date instanceof Date) {
+                      newDate = date;
+                    } else if (typeof date === 'string') {
+                      newDate = new Date(date);
+                    } else if ((date as any)?.nativeEvent?.date) {
+                      newDate = new Date((date as any).nativeEvent.date);
+                    } else {
+                      return;
+                    }
+                    handleDateChange(newDate);
                   }}
                   displayedComponents="hourAndMinute"
-                  initialDate={tempDate.toISOString()}
+                  initialDate={value.toISOString()}
                   variant="wheel"
                 />
               </Host>
