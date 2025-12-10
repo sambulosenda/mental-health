@@ -26,7 +26,7 @@ export function CompletionStep({ name, onComplete }: CompletionStepProps) {
 
         <Animated.View entering={FadeInUp.delay(400).duration(500)}>
           <Text variant="h1" color="textPrimary" center className="mb-3">
-            You're all set{name ? `, ${name}` : ''}!
+            You're all set{name?.trim() ? `, ${name}` : ''}!
           </Text>
         </Animated.View>
 

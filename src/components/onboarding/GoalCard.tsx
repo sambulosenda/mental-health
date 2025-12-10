@@ -7,7 +7,7 @@ import Animated, {
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { Text } from '@/src/components/ui';
-import { colors, darkColors } from '@/src/constants/theme';
+import { darkColors, colors } from '@/src/constants/theme';
 import { useTheme } from '@/src/contexts/ThemeContext';
 import type { GoalDefinition } from '@/src/constants/onboarding';
 
@@ -56,7 +56,7 @@ export function GoalCard({ goal, selected, onToggle }: GoalCardProps) {
           backgroundColor: selected
             ? isDark
               ? themeColors.primaryDark
-              : colors.mood[1]
+              : themeColors.mood[1]
             : themeColors.surfaceElevated,
           borderWidth: 2,
           borderColor: selected ? themeColors.primary : themeColors.border,

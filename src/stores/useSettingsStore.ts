@@ -28,7 +28,6 @@ interface SettingsState extends AppSettings {
   setPasscodeEnabled: (enabled: boolean) => void;
   setBiometricEnabled: (enabled: boolean) => void;
   setTheme: (theme: 'light' | 'dark' | 'system') => void;
-  setOnboardingComplete: () => void;
   completeOnboarding: (profile: UserProfile) => void;
   setUserProfile: (profile: UserProfile) => void;
   setInsightDepth: (depth: 'brief' | 'detailed') => void;
@@ -128,7 +127,6 @@ export const useSettingsStore = create<SettingsState>()(
       setPasscodeEnabled: (enabled) => set({ passcodeEnabled: enabled }),
       setBiometricEnabled: (enabled) => set({ biometricEnabled: enabled }),
       setTheme: (theme) => set({ theme }),
-      setOnboardingComplete: () => set({ hasCompletedOnboarding: true }),
       completeOnboarding: (profile) => set({ hasCompletedOnboarding: true, userProfile: profile }),
       setUserProfile: (profile) => set({ userProfile: profile }),
       setInsightDepth: (depth) => set({ insightDepth: depth }),
