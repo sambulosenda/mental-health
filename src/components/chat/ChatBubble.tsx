@@ -1,13 +1,15 @@
 import { useEffect } from 'react';
-import { View } from 'react-native';
+import { View, useWindowDimensions } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withTiming,
   withSpring,
+  withSequence,
   Easing,
 } from 'react-native-reanimated';
 import { Text } from '@/src/components/ui';
+import { StreamingText } from './StreamingText';
 import { useTheme } from '@/src/contexts/ThemeContext';
 import { useChatAnimation } from '@/src/contexts/ChatAnimationContext';
 import { colors, darkColors, spacing } from '@/src/constants/theme';
@@ -17,19 +19,37 @@ interface ChatBubbleProps {
   message: ChatMessage;
   index: number;
   isFirstMessage?: boolean;
+  isLatestAssistant?: boolean;
+  isStreaming?: boolean;
 }
 
-export function ChatBubble({ message, index, isFirstMessage = false }: ChatBubbleProps) {
+export function ChatBubble({
+  message,
+  index,
+  isFirstMessage = false,
+  isLatestAssistant = false,
+  isStreaming = false,
+}: ChatBubbleProps) {
   const { isDark } = useTheme();
   const themeColors = isDark ? darkColors : colors;
+  const { height: windowHeight } = useWindowDimensions();
   const isUser = message.role === 'user';
+  const shouldStream = !isUser && isLatestAssistant && isStreaming;
 
-  const { registerMessage, notifyAnimationComplete, waitForPreviousUserMessage } =
-    useChatAnimation();
+  const {
+    registerMessage,
+    notifyAnimationComplete,
+    waitForPreviousUserMessage,
+    isNewChatAnimating,
+    markNewChatAnimationComplete,
+  } = useChatAnimation();
 
   // Animation shared values
   const opacity = useSharedValue(0);
   const translateY = useSharedValue(isUser ? 16 : 8);
+
+  // Check if this is first user message in a new chat (v0-style animation)
+  const isFirstUserInNewChat = isUser && index === 0 && isNewChatAnimating;
 
   useEffect(() => {
     registerMessage(message.id, message.role);
@@ -41,20 +61,43 @@ export function ChatBubble({ message, index, isFirstMessage = false }: ChatBubbl
         await new Promise((resolve) => setTimeout(resolve, 80));
       }
 
-      // Animate in
-      opacity.value = withTiming(1, {
-        duration: 200,
-        easing: Easing.out(Easing.cubic),
-      });
+      // Special animation for first user message in new chat (v0-style)
+      if (isFirstUserInNewChat) {
+        // Start from center-ish of screen, slide up to top
+        const startY = windowHeight * 0.3;
+        translateY.value = startY;
 
-      translateY.value = withSpring(0, {
-        damping: 20,
-        stiffness: 300,
-      });
+        opacity.value = withTiming(1, {
+          duration: 250,
+          easing: Easing.out(Easing.cubic),
+        });
 
-      setTimeout(() => {
-        notifyAnimationComplete(message.id);
-      }, 250);
+        translateY.value = withSpring(0, {
+          damping: 18,
+          stiffness: 180,
+          mass: 1,
+        });
+
+        setTimeout(() => {
+          notifyAnimationComplete(message.id);
+          markNewChatAnimationComplete();
+        }, 400);
+      } else {
+        // Standard animation
+        opacity.value = withTiming(1, {
+          duration: 200,
+          easing: Easing.out(Easing.cubic),
+        });
+
+        translateY.value = withSpring(0, {
+          damping: 20,
+          stiffness: 300,
+        });
+
+        setTimeout(() => {
+          notifyAnimationComplete(message.id);
+        }, 250);
+      }
     };
 
     runAnimation();
@@ -100,15 +143,27 @@ export function ChatBubble({ message, index, isFirstMessage = false }: ChatBubbl
           },
         ]}
       >
-        <Text
-          variant="body"
-          style={{
-            color: isUser ? '#FFFFFF' : themeColors.textPrimary,
-            lineHeight: 22,
-          }}
-        >
-          {message.content}
-        </Text>
+{shouldStream ? (
+          <StreamingText
+            text={message.content}
+            isStreaming={true}
+            style={{
+              color: themeColors.textPrimary,
+              fontSize: 16,
+              lineHeight: 22,
+            }}
+          />
+        ) : (
+          <Text
+            variant="body"
+            style={{
+              color: isUser ? '#FFFFFF' : themeColors.textPrimary,
+              lineHeight: 22,
+            }}
+          >
+            {message.content}
+          </Text>
+        )}
       </View>
     </Animated.View>
   );

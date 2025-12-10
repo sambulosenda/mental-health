@@ -1,6 +1,11 @@
 import { useEffect, useCallback, useRef, useState } from 'react';
 import { View, ScrollView } from 'react-native';
-import { KeyboardStickyView } from 'react-native-keyboard-controller';
+import { KeyboardStickyView, useKeyboardHandler } from 'react-native-keyboard-controller';
+import Animated, {
+  useSharedValue,
+  useAnimatedRef,
+  runOnJS,
+} from 'react-native-reanimated';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useChatStore, useMoodStore, useJournalStore } from '@/src/stores';
@@ -14,13 +19,19 @@ import {
 } from '@/src/components/chat';
 import { Text } from '@/src/components/ui';
 import { useTheme } from '@/src/contexts/ThemeContext';
-import { ChatAnimationProvider } from '@/src/contexts/ChatAnimationContext';
+import { ChatAnimationProvider, useChatAnimation } from '@/src/contexts/ChatAnimationContext';
 import { colors, darkColors, spacing } from '@/src/constants/theme';
 import {
   getCheckinPrompt,
   inferMoodFromConversation,
 } from '@/src/lib/ai/chatPrompts';
+import { useMessageBlankSize } from '@/src/hooks/useMessageBlankSize';
+import { useInitialScrollToEnd } from '@/src/hooks/useInitialScrollToEnd';
+import { useScrollOnComposerResize } from '@/src/hooks/useScrollOnComposerResize';
 import type { ConversationType, ChatMessage } from '@/src/types/chat';
+
+// v0-style: Animated ScrollView for contentInset
+const AnimatedScrollView = Animated.createAnimatedComponent(ScrollView);
 
 function ChatScreenContent() {
   const router = useRouter();
@@ -28,8 +39,29 @@ function ChatScreenContent() {
   const { isDark } = useTheme();
   const themeColors = isDark ? darkColors : colors;
   const insets = useSafeAreaInsets();
-  const scrollViewRef = useRef<ScrollView>(null);
+  const scrollViewRef = useAnimatedRef<Animated.ScrollView>();
   const [composerHeight, setComposerHeight] = useState(80);
+  const { setNewChatAnimating } = useChatAnimation();
+
+  // v0-style: Track keyboard height for contentInset
+  const keyboardHeight = useSharedValue(0);
+
+  useKeyboardHandler({
+    onMove: (e) => {
+      'worklet';
+      keyboardHeight.value = e.height;
+    },
+    onEnd: (e) => {
+      'worklet';
+      keyboardHeight.value = e.height;
+    },
+  }, []);
+
+  // v0-style: useMessageBlankSize for proper contentInset calculation
+  const { animatedProps } = useMessageBlankSize({
+    composerHeight,
+    keyboardHeight,
+  });
 
   const type: ConversationType = (params.type as ConversationType) || 'chat';
   const isCheckin = type === 'checkin';
@@ -60,12 +92,28 @@ function ChatScreenContent() {
     journalEntries: journalEntries.slice(0, 3),
   });
 
+  // v0-style: scroll to end when chat first loads (for existing chats)
+  useInitialScrollToEnd(scrollViewRef, messages.length > 0);
+
+  // v0-style: scroll when composer grows (multiline typing)
+  useScrollOnComposerResize(scrollViewRef, composerHeight);
+
   // Scroll to bottom helper
   const scrollToBottom = useCallback((animated = true) => {
     setTimeout(() => {
       scrollViewRef.current?.scrollToEnd({ animated });
-    }, 100);
+    }, 150);
   }, []);
+
+  // Scroll to bottom when keyboard opens
+  useKeyboardHandler({
+    onEnd: (e) => {
+      'worklet';
+      if (e.height > 0) {
+        runOnJS(scrollToBottom)(true);
+      }
+    },
+  }, [scrollToBottom]);
 
   // Initialize conversation
   useEffect(() => {
@@ -122,6 +170,13 @@ function ChatScreenContent() {
   const handleSend = useCallback(
     async (content: string) => {
       if (!activeConversation || isGenerating) return;
+
+      // Trigger new chat animation for first user message
+      const isFirstUserMessage = messages.length === 0 ||
+        (messages.length === 1 && messages[0].role === 'assistant');
+      if (isFirstUserMessage) {
+        setNewChatAnimating(true);
+      }
 
       await addUserMessage(content);
       scrollToBottom();
@@ -198,10 +253,6 @@ function ChatScreenContent() {
     );
   }
 
-  // Calculate bottom padding for scroll content
-  // This ensures content is visible above the floating composer
-  const bottomPadding = composerHeight + insets.bottom + spacing.sm;
-
   return (
     <SafeAreaView
       className="flex-1"
@@ -215,18 +266,19 @@ function ChatScreenContent() {
       />
 
       <View className="flex-1">
-        <ScrollView
+        <AnimatedScrollView
           ref={scrollViewRef}
           contentContainerStyle={{
             paddingHorizontal: spacing.sm,
             paddingTop: spacing.md,
-            paddingBottom: bottomPadding,
           }}
+          // v0-style: contentInset from useMessageBlankSize
+          // handles composer padding + keyboard height
+          animatedProps={animatedProps}
           keyboardShouldPersistTaps="handled"
           keyboardDismissMode="interactive"
           showsVerticalScrollIndicator={false}
-          // iOS 15+ native keyboard avoidance
-          automaticallyAdjustKeyboardInsets={true}
+          scrollEventThrottle={16}
         >
           {messages.length === 0 && !isGenerating ? (
             <View className="items-center py-12">
@@ -235,25 +287,27 @@ function ChatScreenContent() {
               </Text>
             </View>
           ) : (
-            messages.map((message, index) => (
-              <ChatBubble
-                key={message.id}
-                message={message}
-                index={index}
-                isFirstMessage={index === 0 && messages.length === 1}
-              />
-            ))
+            messages.map((message, index) => {
+              const isLastAssistant =
+                message.role === 'assistant' &&
+                index === messages.length - 1;
+              return (
+                <ChatBubble
+                  key={message.id}
+                  message={message}
+                  index={index}
+                  isFirstMessage={index === 0 && messages.length === 1}
+                  isLatestAssistant={isLastAssistant}
+                  isStreaming={isGenerating}
+                />
+              );
+            })
           )}
           {isGenerating && <TypingIndicator />}
-        </ScrollView>
+        </AnimatedScrollView>
 
-        {/* Floating composer sticks above keyboard */}
-        <KeyboardStickyView
-          offset={{
-            closed: 0,
-            opened: 0,
-          }}
-        >
+        {/* Floating composer - sticks above keyboard */}
+        <KeyboardStickyView offset={{ closed: 0, opened: 0 }}>
           {showCheckinSummary ? (
             <CheckinSummary
               suggestedMood={suggestedMood}

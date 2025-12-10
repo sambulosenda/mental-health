@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useRef, useCallback } from 'react';
+import React, { createContext, useContext, useRef, useCallback, useState } from 'react';
 
 interface AnimationEntry {
   role: 'user' | 'assistant';
@@ -11,6 +11,10 @@ interface ChatAnimationContextValue {
   notifyAnimationComplete: (id: string) => void;
   waitForPreviousUserMessage: (assistantId: string) => Promise<void>;
   isFirstMessage: (id: string) => boolean;
+  // New chat animation state
+  isNewChatAnimating: boolean;
+  setNewChatAnimating: (value: boolean) => void;
+  markNewChatAnimationComplete: () => void;
 }
 
 const ChatAnimationContext = createContext<ChatAnimationContextValue | null>(null);
@@ -18,6 +22,11 @@ const ChatAnimationContext = createContext<ChatAnimationContextValue | null>(nul
 export function ChatAnimationProvider({ children }: { children: React.ReactNode }) {
   const animationStates = useRef<Map<string, AnimationEntry>>(new Map());
   const messageOrder = useRef<string[]>([]);
+  const [isNewChatAnimating, setNewChatAnimating] = useState(false);
+
+  const markNewChatAnimationComplete = useCallback(() => {
+    setNewChatAnimating(false);
+  }, []);
 
   const registerMessage = useCallback((id: string, role: 'user' | 'assistant') => {
     if (!animationStates.current.has(id)) {
@@ -82,6 +91,9 @@ export function ChatAnimationProvider({ children }: { children: React.ReactNode 
         notifyAnimationComplete,
         waitForPreviousUserMessage,
         isFirstMessage,
+        isNewChatAnimating,
+        setNewChatAnimating,
+        markNewChatAnimationComplete,
       }}
     >
       {children}
