@@ -1,6 +1,20 @@
 // Smart Reminders
 export type ReminderType = 'mood' | 'exercise' | 'journal';
 
+// User Profile (collected during onboarding)
+export type UserGoal =
+  | 'reduce_stress'
+  | 'track_mood'
+  | 'build_habits'
+  | 'self_reflection'
+  | 'manage_anxiety'
+  | 'improve_sleep';
+
+export interface UserProfile {
+  name: string;
+  goals: UserGoal[];
+}
+
 export interface ReminderConfig {
   enabled: boolean;
   time: string; // HH:mm format
@@ -28,6 +42,7 @@ export interface AppSettings {
 
   // Onboarding
   hasCompletedOnboarding: boolean;
+  userProfile: UserProfile | null;
 
   // Insights
   insightDepth: 'brief' | 'detailed';

@@ -5,6 +5,7 @@ import type {
   AppSettings,
   SmartRemindersSettings,
   ReminderType,
+  UserProfile,
 } from '@/src/types/settings';
 import { defaultSmartReminders } from '@/src/types/settings';
 import {
@@ -28,6 +29,8 @@ interface SettingsState extends AppSettings {
   setBiometricEnabled: (enabled: boolean) => void;
   setTheme: (theme: 'light' | 'dark' | 'system') => void;
   setOnboardingComplete: () => void;
+  completeOnboarding: (profile: UserProfile) => void;
+  setUserProfile: (profile: UserProfile) => void;
   setInsightDepth: (depth: 'brief' | 'detailed') => void;
   setInsightTone: (tone: 'empathetic' | 'professional') => void;
   resetSettings: () => Promise<void>;
@@ -39,6 +42,7 @@ const defaultSettings: AppSettings = {
   biometricEnabled: false,
   theme: 'system',
   hasCompletedOnboarding: false,
+  userProfile: null,
   insightDepth: 'brief',
   insightTone: 'empathetic',
 };
@@ -125,6 +129,8 @@ export const useSettingsStore = create<SettingsState>()(
       setBiometricEnabled: (enabled) => set({ biometricEnabled: enabled }),
       setTheme: (theme) => set({ theme }),
       setOnboardingComplete: () => set({ hasCompletedOnboarding: true }),
+      completeOnboarding: (profile) => set({ hasCompletedOnboarding: true, userProfile: profile }),
+      setUserProfile: (profile) => set({ userProfile: profile }),
       setInsightDepth: (depth) => set({ insightDepth: depth }),
       setInsightTone: (tone) => set({ insightTone: tone }),
       resetSettings: async () => {
@@ -134,10 +140,10 @@ export const useSettingsStore = create<SettingsState>()(
     }),
     {
       name: 'daysi-settings',
-      version: 2,
+      version: 3,
       storage: createJSONStorage(() => AsyncStorage),
       migrate: (persistedState: unknown, version: number) => {
-         
+
         const state = persistedState as any;
 
         if (version < 2) {
@@ -155,6 +161,13 @@ export const useSettingsStore = create<SettingsState>()(
             delete state.reminderTime;
           } else if (!state.smartReminders) {
             state.smartReminders = defaultSmartReminders;
+          }
+        }
+
+        if (version < 3) {
+          // Add userProfile field
+          if (state.userProfile === undefined) {
+            state.userProfile = null;
           }
         }
 

@@ -116,9 +116,14 @@ function RootLayoutContent() {
 
     const inOnboarding = segments[0] === 'onboarding';
 
-    if (!hasCompletedOnboarding && !inOnboarding) {
+    // In dev mode, always show onboarding for testing
+    const forceOnboarding = __DEV__ && true; // Set to true to test onboarding
+
+    if (forceOnboarding && !inOnboarding) {
       router.replace('/onboarding');
-    } else if (hasCompletedOnboarding && inOnboarding) {
+    } else if (!hasCompletedOnboarding && !inOnboarding) {
+      router.replace('/onboarding');
+    } else if (hasCompletedOnboarding && inOnboarding && !forceOnboarding) {
       router.replace('/(tabs)');
     }
   }, [isReady, hasCompletedOnboarding, segments]);
