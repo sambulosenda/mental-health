@@ -1,4 +1,4 @@
-import { useEffect, useCallback, useRef, useState } from 'react';
+import { useEffect, useCallback, useState } from 'react';
 import { View, ScrollView } from 'react-native';
 import { KeyboardStickyView, useKeyboardHandler } from 'react-native-keyboard-controller';
 import Animated, {
@@ -7,7 +7,7 @@ import Animated, {
   runOnJS,
 } from 'react-native-reanimated';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useChatStore, useMoodStore, useJournalStore } from '@/src/stores';
 import { useAIChat } from '@/src/lib/ai/useAIChat';
 import {
@@ -38,7 +38,6 @@ function ChatScreenContent() {
   const params = useLocalSearchParams<{ type?: string }>();
   const { isDark } = useTheme();
   const themeColors = isDark ? darkColors : colors;
-  const insets = useSafeAreaInsets();
   const scrollViewRef = useAnimatedRef<Animated.ScrollView>();
   const [composerHeight, setComposerHeight] = useState(80);
   const { setNewChatAnimating } = useChatAnimation();

@@ -6,6 +6,9 @@ interface AnimationEntry {
   resolvers: Array<() => void>;
 }
 
+// Keep only last N completed animations to prevent unbounded growth
+const MAX_COMPLETED_ENTRIES = 20;
+
 interface ChatAnimationContextValue {
   registerMessage: (id: string, role: 'user' | 'assistant') => void;
   notifyAnimationComplete: (id: string) => void;
@@ -39,6 +42,28 @@ export function ChatAnimationProvider({ children }: { children: React.ReactNode 
     }
   }, []);
 
+  const pruneOldEntries = useCallback(() => {
+    const completedCount = Array.from(animationStates.current.values())
+      .filter(e => e.completed).length;
+
+    if (completedCount > MAX_COMPLETED_ENTRIES) {
+      // Remove oldest completed entries
+      const toRemove = completedCount - MAX_COMPLETED_ENTRIES;
+      let removed = 0;
+
+      for (const id of [...messageOrder.current]) {
+        if (removed >= toRemove) break;
+
+        const entry = animationStates.current.get(id);
+        if (entry?.completed && entry.resolvers.length === 0) {
+          animationStates.current.delete(id);
+          messageOrder.current = messageOrder.current.filter(mid => mid !== id);
+          removed++;
+        }
+      }
+    }
+  }, []);
+
   const notifyAnimationComplete = useCallback((id: string) => {
     const entry = animationStates.current.get(id);
     if (entry) {
@@ -46,14 +71,20 @@ export function ChatAnimationProvider({ children }: { children: React.ReactNode 
       // Resolve any waiting promises
       entry.resolvers.forEach((resolve) => resolve());
       entry.resolvers = [];
+
+      // Prune old entries periodically
+      pruneOldEntries();
     }
-  }, []);
+  }, [pruneOldEntries]);
 
   const waitForPreviousUserMessage = useCallback((assistantId: string): Promise<void> => {
     return new Promise((resolve) => {
       const orderIndex = messageOrder.current.indexOf(assistantId);
+
+      // -1 means message not registered yet (race condition) - resolve immediately
+      // 0 means this is the first message - no previous message to wait for
+      // Both cases: safe to proceed without waiting
       if (orderIndex <= 0) {
-        // No previous message, resolve immediately
         resolve();
         return;
       }

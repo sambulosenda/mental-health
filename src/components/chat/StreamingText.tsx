@@ -9,7 +9,6 @@ import Animated, {
 
 const WORD_DELAY_MS = 32;
 const WORD_DURATION_MS = 150;
-const POOL_SIZE = 4;
 
 interface StreamingTextProps {
   text: string;
@@ -26,10 +25,12 @@ interface WordProps {
 }
 
 function StreamingWord({ word, delay, isAnimated, style }: WordProps) {
-  const opacity = useSharedValue(isAnimated ? 1 : 0);
+  const opacity = useSharedValue(0);
 
   useEffect(() => {
-    if (!isAnimated) {
+    if (isAnimated) {
+      opacity.value = 1;
+    } else {
       const timer = setTimeout(() => {
         opacity.value = withTiming(1, {
           duration: WORD_DURATION_MS,
@@ -39,7 +40,7 @@ function StreamingWord({ word, delay, isAnimated, style }: WordProps) {
 
       return () => clearTimeout(timer);
     }
-  }, [delay, isAnimated]);
+  }, [delay, isAnimated, opacity]);
 
   const animatedStyle = useAnimatedStyle(() => ({
     opacity: opacity.value,
@@ -71,20 +72,31 @@ export function StreamingText({
   // Track which words have been seen before (for re-renders)
   const seenWordsCount = useRef(0);
   const animatedIndices = useRef<Set<number>>(new Set());
+  // Snapshot count when streaming stops for accurate completion timing
+  const countAtStreamEnd = useRef(0);
 
   // Mark words as already animated if not streaming
   useEffect(() => {
     if (!isStreaming) {
+      // Capture count before marking all as animated
+      countAtStreamEnd.current = seenWordsCount.current;
       // Mark all words as animated
       words.forEach((_, i) => animatedIndices.current.add(i));
-      seenWordsCount.current = words.length;
     }
   }, [isStreaming, words.length]);
+
+  // Update seen words count after each render (deferred to avoid race condition)
+  useEffect(() => {
+    Promise.resolve().then(() => {
+      seenWordsCount.current = words.length;
+    });
+  });
 
   // When streaming completes
   useEffect(() => {
     if (!isStreaming && words.length > 0) {
-      const totalDuration = words.length * WORD_DELAY_MS + WORD_DURATION_MS;
+      const newWordCount = Math.max(0, words.length - countAtStreamEnd.current);
+      const totalDuration = newWordCount * WORD_DELAY_MS + WORD_DURATION_MS;
       const timer = setTimeout(() => {
         onStreamComplete?.();
       }, totalDuration);

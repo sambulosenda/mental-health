@@ -1,11 +1,10 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { View, useWindowDimensions } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withTiming,
   withSpring,
-  withSequence,
   Easing,
 } from 'react-native-reanimated';
 import { Text } from '@/src/components/ui';
@@ -52,13 +51,14 @@ export function ChatBubble({
   const isFirstUserInNewChat = isUser && index === 0 && isNewChatAnimating;
 
   useEffect(() => {
+    let isMounted = true;
     registerMessage(message.id, message.role);
 
     const runAnimation = async () => {
       // Assistant messages wait for previous user message
       if (!isUser) {
         await waitForPreviousUserMessage(message.id);
-        await new Promise((resolve) => setTimeout(resolve, 80));
+        if (!isMounted) return;
       }
 
       // Special animation for first user message in new chat (v0-style)
@@ -79,8 +79,10 @@ export function ChatBubble({
         });
 
         setTimeout(() => {
-          notifyAnimationComplete(message.id);
-          markNewChatAnimationComplete();
+          if (isMounted) {
+            notifyAnimationComplete(message.id);
+            markNewChatAnimationComplete();
+          }
         }, 400);
       } else {
         // Standard animation
@@ -95,12 +97,18 @@ export function ChatBubble({
         });
 
         setTimeout(() => {
-          notifyAnimationComplete(message.id);
+          if (isMounted) {
+            notifyAnimationComplete(message.id);
+          }
         }, 250);
       }
     };
 
     runAnimation();
+
+    return () => {
+      isMounted = false;
+    };
   }, [message.id]);
 
   const animatedStyle = useAnimatedStyle(() => ({
@@ -157,7 +165,7 @@ export function ChatBubble({
           <Text
             variant="body"
             style={{
-              color: isUser ? '#FFFFFF' : themeColors.textPrimary,
+              color: isUser ? themeColors.textInverse : themeColors.textPrimary,
               lineHeight: 22,
             }}
           >

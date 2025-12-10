@@ -30,10 +30,12 @@ export function FloatingChatInput({
   const inputRef = useRef<TextInput>(null);
   const buttonScale = useSharedValue(1);
 
-  const handleSend = async () => {
+  const handleSend = () => {
     if (!text.trim() || disabled) return;
 
-    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {
+      // Silently ignore haptics errors
+    });
     onSend(text.trim());
     setText('');
   };
@@ -108,7 +110,7 @@ export function FloatingChatInput({
               },
             ]}
             onSubmitEditing={handleSend}
-            blurOnSubmit={false}
+            submitBehavior="newline"
           />
 
           {/* Send Button */}

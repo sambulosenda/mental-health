@@ -5,4 +5,3 @@ export { ChatHeader } from './ChatHeader';
 export { TypingIndicator } from './TypingIndicator';
 export { CheckinSummary } from './CheckinSummary';
 export { StreamingText } from './StreamingText';
-export { AssistantBubble } from './AssistantBubble';
