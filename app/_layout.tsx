@@ -1,20 +1,20 @@
-import '../global.css';
-import { useEffect, useState, useRef } from 'react';
-import { View, ActivityIndicator, StyleSheet } from 'react-native';
-import { Stack, useRouter, useSegments } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { KeyboardProvider } from 'react-native-keyboard-controller';
-import * as Notifications from 'expo-notifications';
-import { initializeDatabase } from '@/src/lib/database';
-import { getNotificationService } from '@/src/lib/notifications';
-import { useSettingsStore } from '@/src/stores';
 import { BiometricLock } from '@/src/components/BiometricLock';
 import { colors, darkColors } from '@/src/constants/theme';
 import { ThemeProvider, useTheme } from '@/src/contexts/ThemeContext';
+import { initializeDatabase } from '@/src/lib/database';
+import { getNotificationService } from '@/src/lib/notifications';
 import { hasCompletedToday } from '@/src/lib/streaks';
+import { useSettingsStore } from '@/src/stores';
 import type { ReminderType } from '@/src/types/settings';
+import * as Notifications from 'expo-notifications';
+import { Stack, useRouter, useSegments } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
+import { useEffect, useRef, useState } from 'react';
+import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { KeyboardProvider } from 'react-native-keyboard-controller';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import '../global.css';
 
 const VALID_REMINDER_TYPES: readonly ReminderType[] = ['mood', 'exercise', 'journal'];
 
@@ -116,8 +116,8 @@ function RootLayoutContent() {
 
     const inOnboarding = segments[0] === 'onboarding';
 
-    // In dev mode, always show onboarding for testing
-    const forceOnboarding = __DEV__ && true; // Set to true to test onboarding
+    // In dev mode, set to true to force onboarding for testing
+    const forceOnboarding = __DEV__ && false;
 
     if (forceOnboarding && !inOnboarding && !hasCompletedOnboarding) {
       router.replace('/onboarding');
