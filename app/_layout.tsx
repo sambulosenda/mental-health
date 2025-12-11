@@ -1,4 +1,5 @@
 import { BiometricLock } from '@/src/components/BiometricLock';
+import { AnimatedSplash } from '@/src/components/splash/AnimatedSplash';
 import { colors, darkColors } from '@/src/constants/theme';
 import { ThemeProvider, useTheme } from '@/src/contexts/ThemeContext';
 import { initializeDatabase } from '@/src/lib/database';
@@ -9,8 +10,9 @@ import type { ReminderType } from '@/src/types/settings';
 import * as Notifications from 'expo-notifications';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { View } from 'react-native';
+import BootSplash from 'react-native-bootsplash';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { KeyboardProvider } from 'react-native-keyboard-controller';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -24,6 +26,7 @@ function isValidReminderType(value: unknown): value is ReminderType {
 
 function RootLayoutContent() {
   const [isReady, setIsReady] = useState(false);
+  const [showSplash, setShowSplash] = useState(true);
   const { hasCompletedOnboarding } = useSettingsStore();
   const router = useRouter();
   const segments = useSegments();
@@ -32,6 +35,10 @@ function RootLayoutContent() {
   const responseListener = useRef<Notifications.EventSubscription | null>(null);
 
   const themeColors = isDark ? darkColors : colors;
+
+  const onSplashAnimationComplete = useCallback(() => {
+    setShowSplash(false);
+  }, []);
 
   useEffect(() => {
     async function prepare() {
@@ -45,6 +52,8 @@ function RootLayoutContent() {
         console.error('Failed to initialize app:', error);
       } finally {
         setIsReady(true);
+        // Hide the native splash screen once app is ready
+        await BootSplash.hide({ fade: true });
       }
     }
     prepare();
@@ -128,53 +137,53 @@ function RootLayoutContent() {
     }
   }, [isReady, hasCompletedOnboarding, segments]);
 
-  if (!isReady) {
-    return (
-      <View style={[styles.loading, { backgroundColor: themeColors.background }]}>
-        <ActivityIndicator size="large" color={themeColors.primary} />
-      </View>
-    );
-  }
-
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <KeyboardProvider>
         <SafeAreaProvider>
           <BiometricLock>
-          <StatusBar style={isDark ? 'light' : 'dark'} />
-          <Stack
-            screenOptions={{
-              headerShown: false,
-              contentStyle: { backgroundColor: themeColors.background },
-              animation: 'slide_from_right',
-              animationDuration: 250,
-              gestureEnabled: true,
-              gestureDirection: 'horizontal',
-            }}
-          >
-            <Stack.Screen name="onboarding" options={{ headerShown: false }} />
-            <Stack.Screen name="(tabs)" options={{ headerShown: false, animation: 'fade' }} />
-            <Stack.Screen
-              name="chat"
-              options={{
-                headerShown: false,
-                animation: 'slide_from_right',
-                gestureEnabled: true,
-                gestureDirection: 'horizontal',
-              }}
-            />
-            <Stack.Screen
-              name="(modals)"
-              options={{
-                presentation: 'modal',
-                headerShown: false,
-                animation: 'slide_from_bottom',
-                gestureEnabled: true,
-                gestureDirection: 'vertical',
-              }}
-            />
-          </Stack>
-        </BiometricLock>
+            <StatusBar style={isDark ? 'light' : 'dark'} />
+            <View style={{ flex: 1 }}>
+              <Stack
+                screenOptions={{
+                  headerShown: false,
+                  contentStyle: { backgroundColor: themeColors.background },
+                  animation: 'slide_from_right',
+                  animationDuration: 250,
+                  gestureEnabled: true,
+                  gestureDirection: 'horizontal',
+                }}
+              >
+                <Stack.Screen name="onboarding" options={{ headerShown: false }} />
+                <Stack.Screen name="(tabs)" options={{ headerShown: false, animation: 'fade' }} />
+                <Stack.Screen
+                  name="chat"
+                  options={{
+                    headerShown: false,
+                    animation: 'slide_from_right',
+                    gestureEnabled: true,
+                    gestureDirection: 'horizontal',
+                  }}
+                />
+                <Stack.Screen
+                  name="(modals)"
+                  options={{
+                    presentation: 'modal',
+                    headerShown: false,
+                    animation: 'slide_from_bottom',
+                    gestureEnabled: true,
+                    gestureDirection: 'vertical',
+                  }}
+                />
+              </Stack>
+              {showSplash && (
+                <AnimatedSplash
+                  isAppReady={isReady}
+                  onAnimationComplete={onSplashAnimationComplete}
+                />
+              )}
+            </View>
+          </BiometricLock>
         </SafeAreaProvider>
       </KeyboardProvider>
     </GestureHandlerRootView>
@@ -189,10 +198,3 @@ export default function RootLayout() {
   );
 }
 
-const styles = StyleSheet.create({
-  loading: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-});

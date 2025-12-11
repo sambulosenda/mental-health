@@ -42,15 +42,9 @@
       "expo-router",
       "@react-native-voice/voice",
       [
-        "expo-splash-screen",
+        "react-native-bootsplash",
         {
-          "image": "./assets/images/splash-icon.png",
-          "imageWidth": 200,
-          "resizeMode": "contain",
-          "backgroundColor": "#ffffff",
-          "dark": {
-            "backgroundColor": "#000000"
-          }
+          "assetsDir": "assets/bootsplash"
         }
       ],
       "expo-sqlite",
