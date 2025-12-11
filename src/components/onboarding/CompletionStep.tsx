@@ -26,7 +26,7 @@ export function CompletionStep({ name, onComplete }: CompletionStepProps) {
 
         <Animated.View entering={FadeInUp.delay(400).duration(500)}>
           <Text variant="h1" color="textPrimary" center className="mb-3">
-            You're all set{name?.trim() ? `, ${name}` : ''}!
+            You&apos;re all set{name?.trim() ? `, ${name}` : ''}!
           </Text>
         </Animated.View>
 
@@ -37,7 +37,7 @@ export function CompletionStep({ name, onComplete }: CompletionStepProps) {
             center
             style={{ maxWidth: 280 }}
           >
-            Your personalized wellness journey begins now. We're here to support you every step of the way.
+            Your personalized wellness journey begins now. We&apos;re here to support you every step of the way.
           </Text>
         </Animated.View>
       </View>

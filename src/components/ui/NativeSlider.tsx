@@ -27,11 +27,11 @@ export function NativeSlider({
         <Host style={styles.hostContainer}>
           <Slider
             value={value}
-            onValueChange={(event) => {
+            onValueChange={(event: number | { nativeEvent?: { value?: number }; value?: number }) => {
               // Handle both possible event structures
               const rawValue = typeof event === 'number'
                 ? event
-                : event?.nativeEvent?.value ?? event?.value ?? value;
+                : (event as { nativeEvent?: { value?: number }; value?: number })?.nativeEvent?.value ?? (event as { value?: number })?.value ?? value;
 
               // Round to step if provided
               let newValue = rawValue;
