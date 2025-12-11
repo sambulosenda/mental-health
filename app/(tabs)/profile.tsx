@@ -353,7 +353,7 @@ export default function ProfileScreen() {
           </Text>
           <Card variant="flat">
             <Text variant="bodyMedium" color="textPrimary">
-              DaySi
+              Softmind
             </Text>
             <Text variant="caption" color="textSecondary">
               Version 1.0.0

@@ -30,7 +30,7 @@ export async function checkBiometricAvailability(): Promise<BiometricStatus> {
 
 export async function authenticate(promptMessage?: string): Promise<boolean> {
   const result = await LocalAuthentication.authenticateAsync({
-    promptMessage: promptMessage ?? 'Authenticate to access DaySi',
+    promptMessage: promptMessage ?? 'Authenticate to access Softmind',
     fallbackLabel: 'Use passcode',
     disableDeviceFallback: false,
   });

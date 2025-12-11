@@ -16,7 +16,7 @@ export async function exportToCSV(data: ExportData): Promise<void> {
   // Create mood CSV
   if (data.moods.length > 0) {
     const moodCsv = createMoodCSV(data.moods);
-    const file = new File(Paths.cache, `daysi_moods_${timestamp}.csv`);
+    const file = new File(Paths.cache, `softmind_moods_${timestamp}.csv`);
     await file.write(moodCsv);
     await shareAsync(file.uri, {
       mimeType: 'text/csv',
@@ -30,7 +30,7 @@ export async function exportJournalToCSV(journals: JournalEntry[]): Promise<void
 
   const timestamp = format(new Date(), 'yyyy-MM-dd_HHmm');
   const journalCsv = createJournalCSV(journals);
-  const file = new File(Paths.cache, `daysi_journal_${timestamp}.csv`);
+  const file = new File(Paths.cache, `softmind_journal_${timestamp}.csv`);
   await file.write(journalCsv);
 
   await shareAsync(file.uri, {
@@ -44,7 +44,7 @@ export async function exportMoodToCSV(moods: MoodEntry[]): Promise<void> {
 
   const timestamp = format(new Date(), 'yyyy-MM-dd_HHmm');
   const moodCsv = createMoodCSV(moods);
-  const file = new File(Paths.cache, `daysi_moods_${timestamp}.csv`);
+  const file = new File(Paths.cache, `softmind_moods_${timestamp}.csv`);
   await file.write(moodCsv);
 
   await shareAsync(file.uri, {
@@ -111,11 +111,11 @@ export async function exportAllData(data: ExportData): Promise<void> {
     })),
   };
 
-  const file = new File(Paths.cache, `daysi_export_${timestamp}.json`);
+  const file = new File(Paths.cache, `softmind_export_${timestamp}.json`);
   await file.write(JSON.stringify(exportContent, null, 2));
 
   await shareAsync(file.uri, {
     mimeType: 'application/json',
-    dialogTitle: 'Export DaySi Data',
+    dialogTitle: 'Export Softmind Data',
   });
 }

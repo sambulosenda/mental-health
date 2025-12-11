@@ -124,7 +124,7 @@ export default function HomeScreen() {
         {/* AI Chat Cards */}
         <View className="mb-6">
           <Text variant="h3" color="textPrimary" className="mb-4">
-            Talk with Zen
+            Talk with Softmind
           </Text>
           <View className="gap-3">
             <Card onPress={() => router.push('/chat?type=checkin')}>

@@ -82,7 +82,7 @@ export function BiometricLock({ children }: BiometricLockProps) {
           <Ionicons name="lock-closed" size={48} color={themeColors.textInverse} />
         </View>
         <Text variant="h2" color="textPrimary" center className="mb-2">
-          DaySi is Locked
+          Softmind is Locked
         </Text>
         <Text variant="body" color="textSecondary" center className="mb-8">
           Use {biometricName} to unlock and access your data

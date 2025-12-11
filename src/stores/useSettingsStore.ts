@@ -137,7 +137,7 @@ export const useSettingsStore = create<SettingsState>()(
       },
     }),
     {
-      name: 'daysi-settings',
+      name: 'softmind-settings',
       version: 3,
       storage: createJSONStorage(() => AsyncStorage),
       migrate: (persistedState: unknown, version: number) => {

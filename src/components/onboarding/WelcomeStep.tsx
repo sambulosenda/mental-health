@@ -26,7 +26,7 @@ export function WelcomeStep({ onNext }: WelcomeStepProps) {
 
         <Animated.View entering={FadeInUp.delay(300).duration(500)}>
           <Text variant="h1" color="textPrimary" center className="mb-3">
-            Welcome to DaySi
+            Welcome to Softmind
           </Text>
         </Animated.View>
 

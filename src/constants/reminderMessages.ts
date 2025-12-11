@@ -19,7 +19,7 @@ export const moodReminderMessages: ReminderMessage[] = [
 // Exercise reminder messages
 export const exerciseReminderMessages: ReminderMessage[] = [
   { title: 'Time for a mental exercise', body: 'A quick exercise can reset your day.' },
-  { title: 'Zen moment', body: 'Take 5 minutes to ground yourself.' },
+  { title: 'Calm moment', body: 'Take 5 minutes to ground yourself.' },
   { title: 'Breathing break', body: 'Your mind could use a short break.' },
   { title: 'Self-care reminder', body: 'A small exercise can shift your whole day.' },
   { title: 'Mindfulness time', body: 'Give yourself a few minutes of calm.' },

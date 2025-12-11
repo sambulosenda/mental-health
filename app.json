@@ -1,19 +1,19 @@
 {
   "expo": {
-    "name": "zen-mobile-app",
-    "slug": "zen-mobile-app",
+    "name": "Softmind",
+    "slug": "softmind",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "zenmobileapp",
+    "scheme": "softmind",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.sambulosendas1.zenmobileapp",
+      "bundleIdentifier": "com.sambulosendas1.softmind",
       "infoPlist": {
-        "NSSpeechRecognitionUsageDescription": "DaySi uses speech recognition to transcribe your voice journal entries.",
-        "NSMicrophoneUsageDescription": "DaySi needs microphone access to record your voice for journaling."
+        "NSSpeechRecognitionUsageDescription": "Softmind uses speech recognition to transcribe your voice journal entries.",
+        "NSMicrophoneUsageDescription": "Softmind needs microphone access to record your voice for journaling."
       }
     },
     "android": {
@@ -25,7 +25,7 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.sambulosendas1.zenmobileapp",
+      "package": "com.sambulosendas1.softmind",
       "permissions": ["android.permission.RECORD_AUDIO"]
     },
     "web": {

@@ -1,4 +1,4 @@
-// DaySi Design System - Forest Green & Warm Cream
+// Softmind Design System - Forest Green & Warm Cream
 
 export const colors = {
   // Primary palette - deep forest green

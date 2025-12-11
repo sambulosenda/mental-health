@@ -12,7 +12,7 @@ interface ThemeContextValue {
   isDark: boolean;
 }
 
-const THEME_STORAGE_KEY = '@daysi_theme_mode';
+const THEME_STORAGE_KEY = '@softmind_theme_mode';
 
 const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
 

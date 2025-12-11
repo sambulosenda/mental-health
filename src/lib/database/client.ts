@@ -3,7 +3,7 @@ import { drizzle } from 'drizzle-orm/expo-sqlite';
 import * as schema from './schema';
 
 // Create SQLite database
-const expo = SQLite.openDatabaseSync('daysi.db');
+const expo = SQLite.openDatabaseSync('softmind.db');
 
 // Create Drizzle instance
 export const db = drizzle(expo, { schema });
