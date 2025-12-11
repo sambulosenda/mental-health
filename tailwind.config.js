@@ -9,72 +9,72 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // Primary palette - forest green
+        // Primary palette - soft blue & lavender
         primary: {
-          DEFAULT: '#1B4332',
-          light: '#2D6A4F',
-          dark: '#0D2818',
+          DEFAULT: '#A9C9FF',
+          light: '#C7B8FF',
+          dark: '#9B8CFF',
         },
-        // Mood colors - all green tones
+        // Mood colors - calming gradient
         mood: {
-          1: '#D8E2DC',
-          2: '#B7E4C7',
-          3: '#95D5B2',
-          4: '#74C69D',
-          5: '#52B788',
+          1: '#FFE4EC',
+          2: '#F2C7FF',
+          3: '#C7B8FF',
+          4: '#B8D4FF',
+          5: '#A9C9FF',
         },
         'mood-text': {
-          1: '#5C7065',
-          2: '#4A7C59',
-          3: '#3D6B4F',
-          4: '#2D5A3D',
-          5: '#1B4332',
+          1: '#8B5A6B',
+          2: '#7B5A8B',
+          3: '#5A5A8B',
+          4: '#4A6A8B',
+          5: '#3A5A7B',
         },
-        // Light mode backgrounds - Apple News style
-        background: '#F2F2F7',
+        // Light mode backgrounds - gentle gray
+        background: '#F7F8FA',
         surface: {
           DEFAULT: '#FFFFFF',
           elevated: '#FFFFFF',
         },
-        // Dark mode backgrounds - Apple News style
-        'background-dark': '#000000',
+        // Dark mode backgrounds - calm charcoal
+        'background-dark': '#1A1D24',
         'surface-dark': {
-          DEFAULT: '#1C1C1E',
-          elevated: '#1C1C1E',
+          DEFAULT: '#2F3441',
+          elevated: '#3A3F4C',
         },
         // Text colors
-        'text-primary': '#1B4332',
-        'text-secondary': '#40694D',
-        'text-muted': '#6B8068',
-        'text-inverse': '#FFFEFB',
+        'text-primary': '#2F3441',
+        'text-secondary': '#5A6170',
+        'text-muted': '#8A8F9C',
+        'text-inverse': '#FFFFFF',
         // Dark mode text
-        'text-primary-dark': '#FAF6EF',
-        'text-secondary-dark': '#B8B4A8',
-        'text-muted-dark': '#8A8680',
+        'text-primary-dark': '#F7F8FA',
+        'text-secondary-dark': '#B8BCC5',
+        'text-muted-dark': '#8A8F9C',
         // Semantic
         error: {
-          DEFAULT: '#BC4749',
-          light: '#F5E0E0',
+          DEFAULT: '#E57373',
+          light: '#FFEBEE',
         },
         success: {
-          DEFAULT: '#52B788',
-          light: '#D8E2DC',
+          DEFAULT: '#81C784',
+          light: '#E8F5E9',
         },
         warning: {
-          DEFAULT: '#DDA15E',
-          light: '#F5EDE0',
+          DEFAULT: '#FFB74D',
+          light: '#FFF3E0',
         },
-        // Borders - warm tones
+        // Borders
         border: {
-          DEFAULT: '#D8D4CB',
-          light: '#E8E4DB',
+          DEFAULT: '#E4E6EB',
+          light: '#F0F2F5',
         },
         'border-dark': {
-          DEFAULT: '#3A3A35',
-          light: '#2A2A26',
+          DEFAULT: '#3A3F4C',
+          light: '#4A4F5C',
         },
-        divider: '#E0DCD3',
-        'divider-dark': '#2A2A26',
+        divider: '#EBEDF0',
+        'divider-dark': '#3A3F4C',
       },
       spacing: {
         xs: '4px',
@@ -101,9 +101,9 @@ module.exports = {
         label: ['12px', { lineHeight: '16px', letterSpacing: '0.5px', fontWeight: '500' }],
       },
       boxShadow: {
-        sm: '0 1px 2px rgba(0, 0, 0, 0.05)',
-        md: '0 2px 4px rgba(0, 0, 0, 0.08)',
-        lg: '0 4px 8px rgba(0, 0, 0, 0.1)',
+        sm: '0 1px 2px rgba(47, 52, 65, 0.05)',
+        md: '0 2px 4px rgba(47, 52, 65, 0.08)',
+        lg: '0 4px 8px rgba(47, 52, 65, 0.1)',
       },
     },
   },

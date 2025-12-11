@@ -233,7 +233,7 @@ export function MoodGradientSlider({ selectedMood, onSelectMood }: MoodGradientS
               right: 0,
               top: 0,
               bottom: 0,
-              backgroundColor: isDark ? 'rgba(0,0,0,0.2)' : 'rgba(255,255,255,0.15)',
+              backgroundColor: isDark ? 'rgba(26,29,36,0.2)' : 'rgba(255,255,255,0.15)',
               borderRadius: TRACK_HEIGHT / 2,
             }}
           />
@@ -298,7 +298,7 @@ export function MoodGradientSlider({ selectedMood, onSelectMood }: MoodGradientS
                   width: 3,
                   height: 3,
                   borderRadius: 1.5,
-                  backgroundColor: isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.15)',
+                  backgroundColor: isDark ? 'rgba(247,248,250,0.3)' : 'rgba(47,52,65,0.15)',
                 }}
               />
             ))}

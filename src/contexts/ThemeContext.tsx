@@ -66,24 +66,24 @@ export function useThemeColors() {
   const { isDark } = useTheme();
 
   return {
-    // Backgrounds
-    background: isDark ? '#121212' : '#FAFAFA',
-    surface: isDark ? '#1E1E1E' : '#FFFFFF',
-    surfaceElevated: isDark ? '#2A2A2A' : '#F5F5F5',
+    // Backgrounds - calm mental health palette
+    background: isDark ? '#1A1D24' : '#F7F8FA',
+    surface: isDark ? '#2F3441' : '#FFFFFF',
+    surfaceElevated: isDark ? '#3A3F4C' : '#FFFFFF',
 
     // Text
-    textPrimary: isDark ? '#FAFAFA' : '#2C3E3E',
-    textSecondary: isDark ? '#B0B0B0' : '#5A6B6B',
-    textMuted: isDark ? '#707070' : '#8A9A9A',
+    textPrimary: isDark ? '#F7F8FA' : '#2F3441',
+    textSecondary: isDark ? '#B8BCC5' : '#5A6170',
+    textMuted: isDark ? '#8A8F9C' : '#8A8F9C',
 
     // Borders
-    border: isDark ? '#3A3A3A' : '#E5E8E8',
-    borderLight: isDark ? '#2A2A2A' : '#F0F2F2',
-    divider: isDark ? '#2A2A2A' : '#E8EBEB',
+    border: isDark ? '#3A3F4C' : '#E4E6EB',
+    borderLight: isDark ? '#4A4F5C' : '#F0F2F5',
+    divider: isDark ? '#3A3F4C' : '#EBEDF0',
 
-    // Primary (same in both modes)
-    primary: '#6B8E8E',
-    primaryLight: '#A8C5C5',
-    primaryDark: '#4A6B6B',
+    // Primary - soft blue & lavender
+    primary: '#A9C9FF',
+    primaryLight: '#C7B8FF',
+    primaryDark: '#9B8CFF',
   };
 }
