@@ -102,7 +102,7 @@ export default function ProfileScreen() {
   const handleExport = async () => {
     // Check premium for export
     if (!isPremium) {
-      router.push('/(modals)/paywall');
+      router.push('/paywall');
       return;
     }
 
@@ -331,7 +331,7 @@ export default function ProfileScreen() {
                 <Button
                   variant="primary"
                   fullWidth
-                  onPress={() => router.push('/(modals)/paywall')}
+                  onPress={() => router.push('/paywall')}
                   style={{ marginTop: spacing.md }}
                 >
                   Upgrade to Premium

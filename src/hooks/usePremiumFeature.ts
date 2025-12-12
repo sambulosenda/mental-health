@@ -20,7 +20,7 @@ export function usePremiumFeature(feature?: PremiumFeature) {
         onAllowed();
       } else {
         // Show paywall
-        router.push('/(modals)/paywall');
+        router.push('/paywall');
       }
     },
     [isPremium, isInitialized, router]

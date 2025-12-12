@@ -30,7 +30,6 @@ export default function ModalsLayout() {
           gestureEnabled: false, // Prevent accidental swipe dismiss during assessments
         }}
       />
-      <Stack.Screen name="paywall" />
     </Stack>
   );
 }

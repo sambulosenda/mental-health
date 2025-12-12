@@ -119,7 +119,7 @@ export function InterventionPicker({
 
   const handleSelectExercise = (templateId: string, templateIsPremium?: boolean) => {
     if (templateIsPremium && !isPremium) {
-      router.push('/(modals)/paywall');
+      router.push('/paywall');
       return;
     }
     onSelectExercise(templateId);
