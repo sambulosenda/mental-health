@@ -5,7 +5,7 @@ import { ThemeProvider, useTheme } from '@/src/contexts/ThemeContext';
 import { initializeDatabase } from '@/src/lib/database';
 import { getNotificationService } from '@/src/lib/notifications';
 import { hasCompletedToday } from '@/src/lib/streaks';
-import { useSettingsStore } from '@/src/stores';
+import { useSettingsStore, useSubscriptionStore } from '@/src/stores';
 import type { ReminderType } from '@/src/types/settings';
 import * as Notifications from 'expo-notifications';
 import { Stack, useRouter, useSegments } from 'expo-router';
@@ -28,6 +28,7 @@ function RootLayoutContent() {
   const [isReady, setIsReady] = useState(false);
   const [showSplash, setShowSplash] = useState(true);
   const { hasCompletedOnboarding } = useSettingsStore();
+  const initializeSubscription = useSubscriptionStore((state) => state.initialize);
   const router = useRouter();
   const segments = useSegments();
   const { isDark } = useTheme();
@@ -48,6 +49,9 @@ function RootLayoutContent() {
 
         // Initialize database
         await initializeDatabase();
+
+        // Initialize RevenueCat subscription service
+        await initializeSubscription();
       } catch (error) {
         console.error('Failed to initialize app:', error);
       } finally {
@@ -57,7 +61,7 @@ function RootLayoutContent() {
       }
     }
     prepare();
-  }, []);
+  }, [initializeSubscription]);
 
   // Set up notification handlers
   useEffect(() => {

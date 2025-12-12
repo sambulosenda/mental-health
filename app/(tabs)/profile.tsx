@@ -1,11 +1,14 @@
 import { useEffect, useState } from 'react';
-import { View, StyleSheet, Alert, Modal } from 'react-native';
+import { View, StyleSheet, Alert, Modal, Linking } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Host, Switch } from '@expo/ui/swift-ui';
+import { useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
+import { format } from 'date-fns';
 import Animated, { useSharedValue, useAnimatedScrollHandler } from 'react-native-reanimated';
 import { Text, Card, Button, ThemeToggleButton, AnimatedHeader } from '@/src/components/ui';
 import { ReminderTypeCard } from '@/src/components/settings';
-import { useSettingsStore, useMoodStore, useJournalStore } from '@/src/stores';
+import { useSettingsStore, useMoodStore, useJournalStore, useSubscriptionStore } from '@/src/stores';
 import { requestNotificationPermissions } from '@/src/lib/notifications';
 import {
   checkBiometricAvailability,
@@ -21,6 +24,7 @@ import { useTheme } from '@/src/contexts/ThemeContext';
 const HEADER_EXPANDED_HEIGHT = 120;
 
 export default function ProfileScreen() {
+  const router = useRouter();
   const {
     smartReminders,
     biometricEnabled,
@@ -34,6 +38,7 @@ export default function ProfileScreen() {
 
   const { entries: moodEntries, loadEntries: loadMoodEntries, clearEntries: clearMoodEntries } = useMoodStore();
   const { entries: journalEntries, loadEntries: loadJournalEntries, clearEntries: clearJournalEntries } = useJournalStore();
+  const { isPremium, customerInfo, isInitialized } = useSubscriptionStore();
   const { mode, isDark } = useTheme();
 
   const themeColors = isDark ? darkColors : colors;
@@ -95,6 +100,12 @@ export default function ProfileScreen() {
   };
 
   const handleExport = async () => {
+    // Check premium for export
+    if (!isPremium) {
+      router.push('/(modals)/paywall');
+      return;
+    }
+
     if (moodEntries.length === 0 && journalEntries.length === 0) {
       Alert.alert('No Data', 'You don\'t have any data to export yet.');
       return;
@@ -274,6 +285,62 @@ export default function ProfileScreen() {
           </Card>
         </View>
 
+        {/* Subscription Section */}
+        <View style={styles.section}>
+          <Text variant="h3" color="textPrimary" style={styles.sectionTitle}>
+            Subscription
+          </Text>
+          <Card variant="flat">
+            {isPremium ? (
+              <View>
+                <View style={styles.settingRow}>
+                  <View style={styles.settingText}>
+                    <Text variant="bodyMedium" color="textPrimary">
+                      Premium Active
+                    </Text>
+                    <Text variant="caption" color="textSecondary">
+                      {customerInfo?.entitlements.active['premium']?.expirationDate
+                        ? `Renews ${format(new Date(customerInfo.entitlements.active['premium'].expirationDate), 'MMM d, yyyy')}`
+                        : 'Lifetime access'}
+                    </Text>
+                  </View>
+                  <Ionicons name="checkmark-circle" size={24} color={themeColors.success} />
+                </View>
+                <Button
+                  variant="ghost"
+                  fullWidth
+                  onPress={() => Linking.openURL('https://apps.apple.com/account/subscriptions')}
+                  style={{ marginTop: spacing.md }}
+                >
+                  Manage Subscription
+                </Button>
+              </View>
+            ) : (
+              <View>
+                <View style={styles.settingRow}>
+                  <View style={styles.settingText}>
+                    <Text variant="bodyMedium" color="textPrimary">
+                      Free Plan
+                    </Text>
+                    <Text variant="caption" color="textSecondary">
+                      Upgrade to unlock all features
+                    </Text>
+                  </View>
+                  <Ionicons name="lock-closed-outline" size={24} color={themeColors.textMuted} />
+                </View>
+                <Button
+                  variant="primary"
+                  fullWidth
+                  onPress={() => router.push('/(modals)/paywall')}
+                  style={{ marginTop: spacing.md }}
+                >
+                  Upgrade to Premium
+                </Button>
+              </View>
+            )}
+          </Card>
+        </View>
+
         <View style={styles.section}>
           <Text variant="h3" color="textPrimary" style={styles.sectionTitle}>
             Appearance
@@ -352,7 +419,7 @@ export default function ProfileScreen() {
               onPress={handleExport}
               disabled={isExporting}
             >
-              {isExporting ? 'Exporting...' : 'Export Data'}
+              {isExporting ? 'Exporting...' : isPremium ? 'Export Data' : 'Export Data (Premium)'}
             </Button>
             <Button
               variant="ghost"

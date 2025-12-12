@@ -72,6 +72,7 @@ export interface ExerciseTemplate {
   steps: ExerciseStep[];
   icon?: string;                 // Ionicons name
   color?: string;                // Accent color
+  isPremium?: boolean;           // Whether this exercise requires premium
 }
 
 // Session status

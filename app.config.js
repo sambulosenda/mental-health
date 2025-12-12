@@ -57,6 +57,8 @@ export default {
     },
     extra: {
       groqApiKey: process.env.GROQ_API_KEY,
+      revenueCatApiKeyIOS: process.env.REVENUECAT_API_KEY_IOS,
+      revenueCatApiKeyAndroid: process.env.REVENUECAT_API_KEY_ANDROID,
       router: {},
       eas: {
         projectId: "b7a89065-39ec-4a55-9e5d-af703806e0f5",

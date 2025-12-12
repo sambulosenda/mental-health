@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useCallback } from 'react';
 import { View, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -9,7 +9,8 @@ import { Text, Card, AnimatedHeader, NativeGauge } from '@/src/components/ui';
 import { MoodAnimation } from '@/src/components/mood';
 import { InterventionPicker } from '@/src/components/interventions/InterventionPicker';
 import { AssessmentCard } from '@/src/components/assessments';
-import { useMoodStore, useAssessmentStore } from '@/src/stores';
+import { useMoodStore, useAssessmentStore, useSubscriptionStore } from '@/src/stores';
+import { usePremiumFeature } from '@/src/hooks/usePremiumFeature';
 import { GAD7_TEMPLATE, PHQ9_TEMPLATE } from '@/src/constants/assessments';
 import { colors, darkColors, spacing, moodLabels } from '@/src/constants/theme';
 import { useTheme } from '@/src/contexts/ThemeContext';
@@ -29,6 +30,17 @@ export default function HomeScreen() {
     loadLastAssessments,
     checkDueStatus,
   } = useAssessmentStore();
+  const { isPremium } = useSubscriptionStore();
+  const { requirePremium } = usePremiumFeature('ai_chat');
+
+  const handleChatPress = useCallback(
+    (type: 'checkin' | 'chat') => {
+      requirePremium(() => {
+        router.push(`/chat?type=${type}`);
+      });
+    },
+    [requirePremium, router]
+  );
   useEffect(() => {
     loadTodayEntries();
     loadEntries();
@@ -123,11 +135,20 @@ export default function HomeScreen() {
 
         {/* AI Chat Cards */}
         <View className="mb-6">
-          <Text variant="h3" color="textPrimary" className="mb-4">
-            Talk with Softmind
-          </Text>
+          <View className="flex-row items-center gap-2 mb-4">
+            <Text variant="h3" color="textPrimary">
+              Talk with Softmind
+            </Text>
+            {!isPremium && (
+              <View className="px-2 py-0.5 rounded-full" style={{ backgroundColor: themeColors.warningLight }}>
+                <Text variant="label" style={{ color: themeColors.warning, fontSize: 10 }}>
+                  Premium
+                </Text>
+              </View>
+            )}
+          </View>
           <View className="gap-3">
-            <Card onPress={() => router.push('/chat?type=checkin')}>
+            <Card onPress={() => handleChatPress('checkin')}>
               <View className="flex-row items-center">
                 <View
                   className="w-11 h-11 rounded-full items-center justify-center mr-3"
@@ -150,10 +171,11 @@ export default function HomeScreen() {
                     Quick guided mood check
                   </Text>
                 </View>
+                {!isPremium && <Ionicons name="lock-closed" size={16} color={themeColors.textMuted} style={{ marginRight: 4 }} />}
                 <Ionicons name="chevron-forward" size={20} color={themeColors.textMuted} />
               </View>
             </Card>
-            <Card onPress={() => router.push('/chat?type=chat')}>
+            <Card onPress={() => handleChatPress('chat')}>
               <View className="flex-row items-center">
                 <View
                   className="w-11 h-11 rounded-full items-center justify-center mr-3"
@@ -169,6 +191,7 @@ export default function HomeScreen() {
                     {"I'm here to listen"}
                   </Text>
                 </View>
+                {!isPremium && <Ionicons name="lock-closed" size={16} color={themeColors.textMuted} style={{ marginRight: 4 }} />}
                 <Ionicons name="chevron-forward" size={20} color={themeColors.textMuted} />
               </View>
             </Card>

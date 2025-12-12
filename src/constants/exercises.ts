@@ -11,6 +11,7 @@ export const EXERCISE_TEMPLATES: ExerciseTemplate[] = [
     duration: 8,
     icon: 'document-text-outline',
     color: '#6366F1',
+    isPremium: true,
     steps: [
       {
         id: 'situation',
@@ -63,7 +64,7 @@ export const EXERCISE_TEMPLATES: ExerciseTemplate[] = [
     ],
   },
 
-  // DBT - Box Breathing
+  // DBT - Box Breathing (FREE)
   {
     id: 'box-breathing',
     type: 'dbt',
@@ -73,6 +74,7 @@ export const EXERCISE_TEMPLATES: ExerciseTemplate[] = [
     duration: 4,
     icon: 'square-outline',
     color: '#10B981',
+    isPremium: false,
     steps: [
       {
         id: 'intro',
@@ -100,7 +102,7 @@ export const EXERCISE_TEMPLATES: ExerciseTemplate[] = [
     ],
   },
 
-  // DBT - 5-4-3-2-1 Grounding
+  // DBT - 5-4-3-2-1 Grounding (FREE)
   {
     id: 'grounding-54321',
     type: 'dbt',
@@ -110,6 +112,7 @@ export const EXERCISE_TEMPLATES: ExerciseTemplate[] = [
     duration: 5,
     icon: 'hand-left-outline',
     color: '#F59E0B',
+    isPremium: false,
     steps: [
       {
         id: 'intro',
@@ -181,6 +184,7 @@ export const EXERCISE_TEMPLATES: ExerciseTemplate[] = [
     duration: 3,
     icon: 'heart-outline',
     color: '#EC4899',
+    isPremium: true,
     steps: [
       {
         id: 'intro',
@@ -220,6 +224,7 @@ export const EXERCISE_TEMPLATES: ExerciseTemplate[] = [
     duration: 2,
     icon: 'cloud-outline',
     color: '#8B5CF6',
+    isPremium: true,
     steps: [
       {
         id: 'intro',
@@ -259,6 +264,7 @@ export const EXERCISE_TEMPLATES: ExerciseTemplate[] = [
     duration: 2,
     icon: 'heart-circle-outline',
     color: '#F472B6',
+    isPremium: true,
     steps: [
       {
         id: 'intro',
@@ -304,6 +310,7 @@ export const EXERCISE_TEMPLATES: ExerciseTemplate[] = [
     duration: 2,
     icon: 'flag-outline',
     color: '#22D3EE',
+    isPremium: true,
     steps: [
       {
         id: 'intro',
