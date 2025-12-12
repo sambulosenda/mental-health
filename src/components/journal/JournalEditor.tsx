@@ -135,8 +135,8 @@ export function JournalEditor({
             style={{ backgroundColor: themeColors.primaryLight + '15' }}
           >
             <View className="flex-row items-center gap-2 mb-2">
-              <Ionicons name="sparkles" size={16} color={themeColors.primary} />
-              <Text variant="label" color="primary">
+              <Ionicons name="sparkles" size={16} color={themeColors.iconPrimary} />
+              <Text variant="label" color="textPrimary">
                 {prompt.category.toUpperCase()}
               </Text>
             </View>

@@ -147,7 +147,7 @@ export function VoiceButton({ onTranscription, disabled }: VoiceButtonProps) {
           <Ionicons
             name={isRecording ? 'stop' : 'mic'}
             size={24}
-            color={isRecording || state === 'error' ? themeColors.error : themeColors.primary}
+            color={isRecording || state === 'error' ? '#B91C1C' : themeColors.iconPrimary}
           />
         </Animated.View>
       </Pressable>

@@ -13,7 +13,8 @@
       "bundleIdentifier": "com.sambulosendas1.softmind",
       "infoPlist": {
         "NSSpeechRecognitionUsageDescription": "Softmind uses speech recognition to transcribe your voice journal entries.",
-        "NSMicrophoneUsageDescription": "Softmind needs microphone access to record your voice for journaling."
+        "NSMicrophoneUsageDescription": "Softmind needs microphone access to record your voice for journaling.",
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
@@ -26,12 +27,21 @@
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
       "package": "com.sambulosendas1.softmind",
-      "permissions": ["android.permission.RECORD_AUDIO"]
+      "permissions": [
+        "android.permission.RECORD_AUDIO"
+      ]
     },
     "web": {
       "output": "static",
       "favicon": "./assets/images/favicon.png"
     },
+    "updates": {
+      "url": "https://u.expo.dev/b7a89065-39ec-4a55-9e5d-af703806e0f5",
+      "enabled": true,
+      "checkAutomatically": "ON_LOAD",
+      "fallbackToCacheTimeout": 30000
+    },
+    "runtimeVersion": "1.0.0",
     "plugins": [
       [
         "expo-dev-client",
@@ -48,11 +58,24 @@
         }
       ],
       "expo-sqlite",
-      "expo-secure-store"
+      "expo-secure-store",
+      [
+        "expo-updates",
+        {
+          "username": "sambulosendas1"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "b7a89065-39ec-4a55-9e5d-af703806e0f5"
+      }
+    },
+    "owner": "sambulosendas1"
   }
 }

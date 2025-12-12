@@ -1,0 +1,30 @@
+name: Production build and submit
+
+# Triggered by GitHub Actions on tag push
+
+jobs:
+  build_ios:
+    type: build
+    params:
+      platform: ios
+      profile: production
+
+  build_android:
+    type: build
+    params:
+      platform: android
+      profile: production
+
+  submit_ios:
+    needs: [build_ios]
+    type: submit
+    params:
+      platform: ios
+      build_id: ${{ needs.build_ios.outputs.build_id }}
+
+  submit_android:
+    needs: [build_android]
+    type: submit
+    params:
+      platform: android
+      build_id: ${{ needs.build_android.outputs.build_id }}

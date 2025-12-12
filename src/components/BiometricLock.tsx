@@ -79,7 +79,7 @@ export function BiometricLock({ children }: BiometricLockProps) {
           className="w-[100px] h-[100px] rounded-full justify-center items-center mb-8"
           style={{ backgroundColor: themeColors.primaryLight }}
         >
-          <Ionicons name="lock-closed" size={48} color={themeColors.textInverse} />
+          <Ionicons name="lock-closed" size={48} color={themeColors.textOnAccent} />
         </View>
         <Text variant="h2" color="textPrimary" center className="mb-2">
           Softmind is Locked

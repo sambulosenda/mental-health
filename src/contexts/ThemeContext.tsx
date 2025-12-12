@@ -81,9 +81,9 @@ export function useThemeColors() {
     borderLight: isDark ? '#4A4F5C' : '#F0F2F5',
     divider: isDark ? '#3A3F4C' : '#EBEDF0',
 
-    // Primary - soft blue & lavender
-    primary: '#A9C9FF',
-    primaryLight: '#C7B8FF',
-    primaryDark: '#9B8CFF',
+    // Primary - muted indigo (Apple-style)
+    primary: '#8A9CFF',
+    primaryLight: '#C7D7FE',
+    primaryDark: '#6B7FE3',
   };
 }

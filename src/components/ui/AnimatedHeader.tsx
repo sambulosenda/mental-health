@@ -178,7 +178,7 @@ export function AnimatedHeader({
                 style={{ backgroundColor: themeColors.primaryLight }}
                 hitSlop={{ top: 4, bottom: 4, left: 4, right: 4 }}
               >
-                <Ionicons name={rightAction.icon} size={20} color={themeColors.textInverse} />
+                <Ionicons name={rightAction.icon} size={20} color={themeColors.textOnAccent} />
               </Pressable>
             ) : rightAction
           )}

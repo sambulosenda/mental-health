@@ -202,11 +202,11 @@ export default function InsightsScreen() {
               <Card variant="flat">
                 <View className="flex-row justify-between">
                   <View className="items-center flex-1">
-                    <Text variant="h2" color="primary">{completed.length}</Text>
+                    <Text variant="h2" color="textPrimary">{completed.length}</Text>
                     <Text variant="caption" color="textMuted">Completed</Text>
                   </View>
                   <View className="items-center flex-1">
-                    <Text variant="h2" color={avgMoodDelta && avgMoodDelta > 0 ? 'primary' : 'textPrimary'}>
+                    <Text variant="h2" color="textPrimary">
                       {avgMoodDelta !== null ? (avgMoodDelta > 0 ? '+' : '') + avgMoodDelta.toFixed(1) : '-'}
                     </Text>
                     <Text variant="caption" color="textMuted">Avg Mood Δ</Text>

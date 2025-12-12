@@ -163,7 +163,7 @@ export function MoodCalendar({ summaries, isLoading }: MoodCalendarProps) {
               className="mt-4 p-2 rounded-lg items-center gap-1"
               style={{ backgroundColor: themeColors.surfaceElevated }}
             >
-              <Text variant="captionMedium" color="primary">
+              <Text variant="captionMedium" color="textPrimary">
                 {format(selectedDayData.date, 'EEEE, MMM d')}
               </Text>
               <Text variant="body" color="textPrimary">
@@ -197,7 +197,7 @@ export function MoodCalendar({ summaries, isLoading }: MoodCalendarProps) {
           {monthStats && (
             <View className="flex-row justify-around mt-4">
               <View className="items-center">
-                <Text variant="bodyMedium" color="primary">
+                <Text variant="bodyMedium" color="textPrimary">
                   {monthStats.avg.toFixed(1)}
                 </Text>
                 <Text variant="label" color="textMuted">
@@ -205,7 +205,7 @@ export function MoodCalendar({ summaries, isLoading }: MoodCalendarProps) {
                 </Text>
               </View>
               <View className="items-center">
-                <Text variant="bodyMedium" color="primary">
+                <Text variant="bodyMedium" color="textPrimary">
                   {monthStats.daysTracked}
                 </Text>
                 <Text variant="label" color="textMuted">

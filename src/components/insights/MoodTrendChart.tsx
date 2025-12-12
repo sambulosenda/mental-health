@@ -152,7 +152,7 @@ export function MoodTrendChart({ summaries, isLoading }: MoodTrendChartProps) {
               style={{ borderTopColor: themeColors.border }}
             >
               <View className="items-center">
-                <Text variant="h3" color="primary">
+                <Text variant="h3" color="textPrimary">
                   {stats.avg.toFixed(1)}
                 </Text>
                 <Text variant="caption" color="textSecondary">
@@ -164,7 +164,7 @@ export function MoodTrendChart({ summaries, isLoading }: MoodTrendChartProps) {
                 style={{ backgroundColor: themeColors.divider }}
               />
               <View className="items-center">
-                <Text variant="h3" color="primary">
+                <Text variant="h3" color="textPrimary">
                   {stats.days}
                 </Text>
                 <Text variant="caption" color="textSecondary">

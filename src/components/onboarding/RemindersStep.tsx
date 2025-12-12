@@ -133,7 +133,7 @@ export function RemindersStep({
                 <Text variant="body" color="textSecondary">
                   Remind me at
                 </Text>
-                <Text variant="bodyMedium" color="primary">
+                <Text variant="bodyMedium" color="textPrimary">
                   {formatTimeDisplay(reminders.moodTime)}
                 </Text>
               </Pressable>
@@ -180,7 +180,7 @@ export function RemindersStep({
                 <Text variant="body" color="textSecondary">
                   Remind me at
                 </Text>
-                <Text variant="bodyMedium" color="primary">
+                <Text variant="bodyMedium" color="textPrimary">
                   {formatTimeDisplay(reminders.journalTime)}
                 </Text>
               </Pressable>

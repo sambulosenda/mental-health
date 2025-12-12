@@ -106,7 +106,7 @@ export default function HomeScreen() {
                 className="w-14 h-14 rounded-2xl items-center justify-center mr-4"
                 style={{ backgroundColor: themeColors.primaryLight }}
               >
-                <Ionicons name="happy-outline" size={32} color={themeColors.textInverse} />
+                <Ionicons name="happy-outline" size={32} color={themeColors.textOnAccent} />
               </View>
               <View className="flex-1">
                 <Text variant="caption" color="textMuted" className="mb-0.5">
@@ -133,7 +133,7 @@ export default function HomeScreen() {
                   className="w-11 h-11 rounded-full items-center justify-center mr-3"
                   style={{ backgroundColor: themeColors.primaryLight }}
                 >
-                  <Ionicons name="chatbubble-ellipses-outline" size={20} color={themeColors.textInverse} />
+                  <Ionicons name="chatbubble-ellipses-outline" size={20} color={themeColors.textOnAccent} />
                 </View>
                 <View className="flex-1">
                   <View className="flex-row items-center gap-2">
@@ -141,7 +141,7 @@ export default function HomeScreen() {
                       2-min Check-in
                     </Text>
                     <View className="px-2 py-0.5 rounded-full" style={{ backgroundColor: themeColors.primaryLight }}>
-                      <Text variant="label" style={{ color: themeColors.textInverse, fontSize: 10 }}>
+                      <Text variant="label" style={{ color: themeColors.textOnAccent, fontSize: 10 }}>
                         Quick
                       </Text>
                     </View>
@@ -186,7 +186,7 @@ export default function HomeScreen() {
               hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
               className="py-2 px-3 -my-2 -mx-3"
             >
-              <Text variant="captionMedium" color="primary">
+              <Text variant="captionMedium" color="textPrimary">
                 View History
               </Text>
             </Pressable>
@@ -231,19 +231,19 @@ export default function HomeScreen() {
                 <View className="flex-1 gap-2">
                   <View className="flex-row justify-between items-center">
                     <Text variant="caption" color="textSecondary">Avg. Mood</Text>
-                    <Text variant="bodyMedium" color="primary">
+                    <Text variant="bodyMedium" color="textPrimary">
                       {weeklyAverage?.toFixed(1) ?? '-'}
                     </Text>
                   </View>
                   <View className="flex-row justify-between items-center">
                     <Text variant="caption" color="textSecondary">Check-ins</Text>
-                    <Text variant="bodyMedium" color="primary">
+                    <Text variant="bodyMedium" color="textPrimary">
                       {weekEntries.length}
                     </Text>
                   </View>
                   <View className="flex-row justify-between items-center">
                     <Text variant="caption" color="textSecondary">Today</Text>
-                    <Text variant="bodyMedium" color="primary">
+                    <Text variant="bodyMedium" color="textPrimary">
                       {todayEntries.length}
                     </Text>
                   </View>

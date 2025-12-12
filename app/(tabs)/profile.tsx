@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { View, StyleSheet, Alert } from 'react-native';
+import { View, StyleSheet, Alert, Modal } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Host, Switch } from '@expo/ui/swift-ui';
 import Animated, { useSharedValue, useAnimatedScrollHandler } from 'react-native-reanimated';
@@ -13,6 +13,8 @@ import {
   authenticate,
 } from '@/src/lib/biometrics';
 import { exportMoodToCSV, exportAllData } from '@/src/lib/export';
+import { sendSMSInvites } from '@/src/lib/share';
+import { ContactPicker } from '@/src/components/share/ContactPicker';
 import { colors, darkColors, spacing } from '@/src/constants/theme';
 import { useTheme } from '@/src/contexts/ThemeContext';
 
@@ -47,6 +49,7 @@ export default function ProfileScreen() {
   const [biometricName, setBiometricName] = useState('Biometric');
   const [isExporting, setIsExporting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [showContactPicker, setShowContactPicker] = useState(false);
 
   useEffect(() => {
     checkBiometrics();
@@ -174,6 +177,22 @@ export default function ProfileScreen() {
         },
       ]
     );
+  };
+
+  const handleShareApp = () => {
+    setShowContactPicker(true);
+  };
+
+  const handleContactsSelected = async (contacts: { id: string; name: string; phoneNumber: string }[]) => {
+    setShowContactPicker(false);
+    if (contacts.length === 0) return;
+
+    const phoneNumbers = contacts.map((c) => c.phoneNumber);
+    const success = await sendSMSInvites(phoneNumbers);
+
+    if (!success) {
+      Alert.alert('Unable to Send', 'SMS is not available on this device.');
+    }
   };
 
   return (
@@ -310,7 +329,7 @@ export default function ProfileScreen() {
           </Text>
           <View style={styles.statsRow}>
             <Card variant="flat" style={styles.statCard}>
-              <Text variant="h2" color="primary">
+              <Text variant="h2" color="textPrimary">
                 {moodEntries.length}
               </Text>
               <Text variant="caption" color="textSecondary">
@@ -318,7 +337,7 @@ export default function ProfileScreen() {
               </Text>
             </Card>
             <Card variant="flat" style={styles.statCard}>
-              <Text variant="h2" color="primary">
+              <Text variant="h2" color="textPrimary">
                 {journalEntries.length}
               </Text>
               <Text variant="caption" color="textSecondary">
@@ -349,6 +368,28 @@ export default function ProfileScreen() {
 
         <View style={styles.section}>
           <Text variant="h3" color="textPrimary" style={styles.sectionTitle}>
+            Invite Friends
+          </Text>
+          <Card variant="flat">
+            <Text variant="bodyMedium" color="textPrimary">
+              Share Softmind
+            </Text>
+            <Text variant="caption" color="textSecondary" style={styles.shareDescription}>
+              Help friends take care of their mental wellness by sharing the app with them.
+            </Text>
+            <Button
+              variant="secondary"
+              fullWidth
+              onPress={handleShareApp}
+              style={styles.shareButton}
+            >
+              Invite via SMS
+            </Button>
+          </Card>
+        </View>
+
+        <View style={styles.section}>
+          <Text variant="h3" color="textPrimary" style={styles.sectionTitle}>
             About
           </Text>
           <Card variant="flat">
@@ -364,6 +405,18 @@ export default function ProfileScreen() {
           </Card>
         </View>
       </Animated.ScrollView>
+
+      <Modal
+        visible={showContactPicker}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={() => setShowContactPicker(false)}
+      >
+        <ContactPicker
+          onSelect={handleContactsSelected}
+          onClose={() => setShowContactPicker(false)}
+        />
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -415,5 +468,11 @@ const styles = StyleSheet.create({
   },
   aboutText: {
     marginTop: spacing.sm,
+  },
+  shareDescription: {
+    marginTop: spacing.xs,
+  },
+  shareButton: {
+    marginTop: spacing.md,
   },
 });

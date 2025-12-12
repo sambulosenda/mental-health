@@ -57,7 +57,7 @@ export function NativeTimePicker({
               </Pressable>
               <Text variant="bodyMedium" color="textPrimary">Select Time</Text>
               <Pressable onPress={handleConfirm}>
-                <Text variant="body" color="primary">Done</Text>
+                <Text variant="body" color="textPrimary">Done</Text>
               </Pressable>
             </View>
             <View style={styles.pickerWrapper}>

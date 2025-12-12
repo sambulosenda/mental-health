@@ -1,0 +1,83 @@
+name: Lint, test, then EAS Workflow
+
+on:
+  push:
+    branches: [master]
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Lint
+        run: bun run lint
+
+      - name: Type check
+        run: bun run typecheck
+
+  run-eas-workflow:
+    needs: lint-and-test
+    runs-on: ubuntu-latest
+    env:
+      EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup EAS
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Run EAS Workflow (build or update)
+        run: |
+          eas workflow:run .eas/workflows/build-or-update.yaml --wait --json > "$RUNNER_TEMP/result.json"
+
+      - name: Parse results
+        id: parse
+        run: |
+          FILE="$RUNNER_TEMP/result.json"
+
+          # Validate result file exists
+          if [ ! -f "$FILE" ]; then
+            echo "EAS workflow result file not found"
+            exit 1
+          fi
+
+          # Check workflow status
+          STATUS=$(jq -r '.status' "$FILE" 2>/dev/null)
+          if [ "$STATUS" != "SUCCESS" ]; then
+            echo "EAS workflow failed with status: $STATUS"
+            jq '.' "$FILE"
+            exit 1
+          fi
+
+          echo "Workflow success: $STATUS"
+
+          # Extract build URLs if available
+          BUILD_URLS=$(jq -r '.jobs[]? | select(.type == "build") | .outputs.artifacts.buildUrl // empty' "$FILE" || true)
+
+          if [ -n "$BUILD_URLS" ]; then
+            echo "Build URLs:"
+            echo "$BUILD_URLS"
+          fi
+
+      - name: Upload workflow result
+        uses: actions/upload-artifact@v4
+        with:
+          name: eas-workflow-result
+          path: ${{ runner.temp }}/result.json

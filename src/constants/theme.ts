@@ -1,101 +1,125 @@
-// Softmind Design System - Calm Mental Health Palette
+// Softmind Design System - Ultra-Minimal Apple-Style Theme
 
 export const colors = {
-  // Primary palette - soft blue & lavender
-  primary: '#A9C9FF',
-  primaryLight: '#C7B8FF',
-  primaryDark: '#9B8CFF',
+  // Primary palette - muted indigo
+  primary: '#8A9CFF',
+  primaryLight: '#C7D7FE',
+  primaryDark: '#6B7FE3',
+
+  // Accent - soft indigo wash
+  accent: '#EEF2FF',
 
   // Mood colors - calming gradient (WCAG AA compliant)
   mood: {
     1: '#FFE4EC', // Struggling - soft pink
     2: '#F2C7FF', // Low - light pink lavender
-    3: '#C7B8FF', // Okay - lavender
+    3: '#C7D7FE', // Okay - cool mist
     4: '#B8D4FF', // Good - sky blue
-    5: '#A9C9FF', // Great - soft blue
+    5: '#8A9CFF', // Great - muted indigo
   } as Record<number, string>,
 
   // Mood text colors (darker versions for contrast)
   moodText: {
     1: '#8B5A6B',
     2: '#7B5A8B',
-    3: '#5A5A8B',
+    3: '#4B5563',
     4: '#4A6A8B',
-    5: '#3A5A7B',
+    5: '#3730A3',
   } as Record<number, string>,
 
-  // Backgrounds - gentle gray
-  background: '#F7F8FA',
+  // Backgrounds - off-white
+  background: '#F9FAFB',
   surface: '#FFFFFF',
   surfaceElevated: '#FFFFFF',
 
-  // Text (WCAG AA contrast ratios met)
-  textPrimary: '#2F3441',
-  textSecondary: '#5A6170',
-  textMuted: '#8A8F9C',
+  // Text - black for maximum readability
+  textPrimary: '#111827',
+  textSecondary: '#111827',
+  textMuted: '#111827',
   textInverse: '#FFFFFF',
 
+  // Icons - deep muted indigo for visibility
+  iconPrimary: '#7585E6',
+  iconSecondary: '#6B7280',
+
+  // Text/icons on colored backgrounds
+  textOnPrimary: '#FFFFFF',
+  textOnAccent: '#3730A3',
+  textOnMood: '#111827',
+
   // Semantic
-  error: '#E57373',
-  errorLight: '#FFEBEE',
-  success: '#81C784',
-  successLight: '#E8F5E9',
-  warning: '#FFB74D',
-  warningLight: '#FFF3E0',
+  error: '#EF4444',
+  errorLight: '#FEE2E2',
+  success: '#10B981',
+  successLight: '#D1FAE5',
+  warning: '#F59E0B',
+  warningLight: '#FEF3C7',
 
   // Borders & dividers
-  border: '#E4E6EB',
-  borderLight: '#F0F2F5',
-  divider: '#EBEDF0',
+  border: '#E5E7EB',
+  borderLight: '#EEF2FF',
+  divider: '#E5E7EB',
 } as const;
 
-// Dark mode colors - calm charcoal with soft accents
+// Dark mode colors - calm charcoal with indigo accents
 export const darkColors = {
-  // Primary palette - brighter for dark mode visibility
-  primary: '#A9C9FF',
-  primaryLight: '#C7B8FF',
-  primaryDark: '#9B8CFF',
+  // Primary palette - brighter indigo for dark mode
+  primary: '#A5B4FF',
+  primaryLight: '#C7D7FE',
+  primaryDark: '#8A9CFF',
+
+  // Accent - soft indigo wash
+  accent: '#1E2340',
 
   // Mood colors - same as light (for consistency)
   mood: {
     1: '#FFE4EC',
     2: '#F2C7FF',
-    3: '#C7B8FF',
+    3: '#C7D7FE',
     4: '#B8D4FF',
-    5: '#A9C9FF',
+    5: '#A5B4FF',
   } as Record<number, string>,
 
   moodText: {
     1: '#FFE4EC',
     2: '#F2C7FF',
-    3: '#C7B8FF',
+    3: '#C7D7FE',
     4: '#B8D4FF',
-    5: '#A9C9FF',
+    5: '#A5B4FF',
   } as Record<number, string>,
 
   // Dark backgrounds - calm charcoal
-  background: '#1A1D24',
-  surface: '#2F3441',
-  surfaceElevated: '#3A3F4C',
+  background: '#111827',
+  surface: '#1F2937',
+  surfaceElevated: '#374151',
 
   // Dark text (WCAG AA contrast ratios met)
-  textPrimary: '#F7F8FA',
-  textSecondary: '#B8BCC5',
-  textMuted: '#8A8F9C',
-  textInverse: '#2F3441',
+  textPrimary: '#F9FAFB',
+  textSecondary: '#D1D5DB',
+  textMuted: '#9CA3AF',
+  textInverse: '#111827',
+
+  // Icons - brighter for dark mode
+  iconPrimary: '#A5B4FF',
+  iconSecondary: '#9CA3AF',
+
+  // Text/icons on colored backgrounds
+  textOnPrimary: '#111827',
+  textOnAccent: '#C7D7FE',
+  textOnMood: '#111827',
 
   // Semantic - adjusted for dark mode
-  error: '#EF9A9A',
-  errorLight: '#3D2424',
-  success: '#A5D6A7',
-  successLight: '#243D24',
-  warning: '#FFCC80',
-  warningLight: '#3D3424',
+  error: '#FCA5A5',
+  errorLight: '#7F1D1D',
+  success: '#6EE7B7',
+  successLight: '#064E3B',
+  warning: '#FCD34D',
+  warningLight: '#78350F',
 
   // Dark borders
-  border: '#3A3F4C',
-  borderLight: '#4A4F5C',
-  divider: '#3A3F4C',
+  border: '#374151',
+  borderLight: '#4B5563',
+  divider: '#374151',
 } as const;
 
 // Helper to get colors based on theme
@@ -181,21 +205,21 @@ export const typography = {
 
 export const shadows = {
   sm: {
-    shadowColor: '#2F3441',
+    shadowColor: '#111827',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
     shadowRadius: 2,
     elevation: 1,
   },
   md: {
-    shadowColor: '#2F3441',
+    shadowColor: '#111827',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
     shadowRadius: 4,
     elevation: 2,
   },
   lg: {
-    shadowColor: '#2F3441',
+    shadowColor: '#111827',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
     shadowRadius: 8,

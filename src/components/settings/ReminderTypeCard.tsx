@@ -64,7 +64,7 @@ export function ReminderTypeCard({
           className="w-10 h-10 rounded-full items-center justify-center mr-3"
           style={{ backgroundColor: themeColors.primaryLight }}
         >
-          <Ionicons name={icon} size={20} color={themeColors.textInverse} />
+          <Ionicons name={icon} size={20} color={themeColors.textOnAccent} />
         </View>
         <View className="flex-1 mr-3">
           <Text variant="bodyMedium" color="textPrimary">
@@ -100,7 +100,7 @@ export function ReminderTypeCard({
               Reminder Time
             </Text>
             <View className="flex-row items-center gap-1">
-              <Text variant="bodyMedium" color="primary">
+              <Text variant="bodyMedium" color="textPrimary">
                 {formatTimeDisplay(config.time)}
               </Text>
               <Ionicons
@@ -139,7 +139,7 @@ export function ReminderTypeCard({
                   Follow-up Time
                 </Text>
                 <View className="flex-row items-center gap-1">
-                  <Text variant="bodyMedium" color="primary">
+                  <Text variant="bodyMedium" color="textPrimary">
                     {formatTimeDisplay(config.followUpTime)}
                   </Text>
                   <Ionicons

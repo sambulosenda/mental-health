@@ -85,7 +85,7 @@ function ActivityPill({ label, isSelected, onPress }: ActivityPillProps) {
         <Text
           variant="caption"
           style={{
-            color: isSelected ? themeColors.primary : themeColors.textSecondary,
+            color: isSelected ? themeColors.textOnAccent : themeColors.textSecondary,
             fontWeight: isSelected ? '600' : '400',
           }}
         >

@@ -68,7 +68,7 @@ export function PostCheckInSuggestion({
           {/* Header */}
           <View className="flex-row items-center justify-between mb-6">
             <View className="flex-row items-center gap-2">
-              <Ionicons name="sparkles" size={20} color={themeColors.primary} />
+              <Ionicons name="sparkles" size={20} color={themeColors.iconPrimary} />
               <Text variant="h3" color="textPrimary">
                 {"Based on how you're feeling"}
               </Text>
