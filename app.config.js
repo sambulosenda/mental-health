@@ -16,6 +16,8 @@ export default {
           "Softmind uses speech recognition to transcribe your voice journal entries.",
         NSMicrophoneUsageDescription:
           "Softmind needs microphone access to record your voice for journaling.",
+        NSPhotoLibraryUsageDescription:
+          "Softmind may access your photo library to save or share content.",
         ITSAppUsesNonExemptEncryption: false,
       },
     },
