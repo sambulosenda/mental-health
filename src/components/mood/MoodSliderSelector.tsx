@@ -1,3 +1,4 @@
+import { memo, useCallback } from 'react';
 import { View, Pressable } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import Animated, {
@@ -15,21 +16,23 @@ import { MoodAnimation } from './MoodAnimation';
 import { colors, darkColors, moodLabels } from '@/src/constants/theme';
 import { useTheme } from '@/src/contexts/ThemeContext';
 
+type MoodValue = 1 | 2 | 3 | 4 | 5;
+
 interface MoodSliderSelectorProps {
-  selectedMood: (1 | 2 | 3 | 4 | 5) | null;
-  onSelectMood: (mood: 1 | 2 | 3 | 4 | 5) => void;
+  selectedMood: MoodValue | null;
+  onSelectMood: (mood: MoodValue) => void;
 }
 
-const MOODS: (1 | 2 | 3 | 4 | 5)[] = [1, 2, 3, 4, 5];
+const MOODS: MoodValue[] = [1, 2, 3, 4, 5];
 
 export function MoodSliderSelector({ selectedMood, onSelectMood }: MoodSliderSelectorProps) {
   const { isDark } = useTheme();
   const themeColors = isDark ? darkColors : colors;
 
-  const handleSelectMood = async (mood: 1 | 2 | 3 | 4 | 5) => {
+  const handleSelectMood = useCallback(async (mood: MoodValue) => {
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     onSelectMood(mood);
-  };
+  }, [onSelectMood]);
 
   return (
     <View className="items-center w-full">
@@ -73,7 +76,7 @@ export function MoodSliderSelector({ selectedMood, onSelectMood }: MoodSliderSel
             key={mood}
             mood={mood}
             isSelected={selectedMood === mood}
-            onPress={() => handleSelectMood(mood)}
+            onSelect={handleSelectMood}
           />
         ))}
       </View>
@@ -82,10 +85,10 @@ export function MoodSliderSelector({ selectedMood, onSelectMood }: MoodSliderSel
 }
 
 interface HeroMoodProps {
-  mood: 1 | 2 | 3 | 4 | 5;
+  mood: MoodValue;
 }
 
-function HeroMood({ mood }: HeroMoodProps) {
+const HeroMood = memo(function HeroMood({ mood }: HeroMoodProps) {
   const scale = useSharedValue(1);
   const glow = useSharedValue(0.3);
 
@@ -139,26 +142,26 @@ function HeroMood({ mood }: HeroMoodProps) {
       </Animated.View>
     </View>
   );
-}
+});
 
 interface MoodOptionProps {
-  mood: 1 | 2 | 3 | 4 | 5;
+  mood: MoodValue;
   isSelected: boolean;
-  onPress: () => void;
+  onSelect: (mood: MoodValue) => void;
 }
 
-function MoodOption({ mood, isSelected, onPress }: MoodOptionProps) {
+const MoodOption = memo(function MoodOption({ mood, isSelected, onSelect }: MoodOptionProps) {
   const { isDark } = useTheme();
   const themeColors = isDark ? darkColors : colors;
   const scale = useSharedValue(1);
 
-  const handlePress = () => {
+  const handlePress = useCallback(() => {
     scale.value = withSequence(
       withSpring(0.9, { damping: 10 }),
       withSpring(1, { damping: 8 })
     );
-    onPress();
-  };
+    onSelect(mood);
+  }, [mood, onSelect, scale]);
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
@@ -191,4 +194,4 @@ function MoodOption({ mood, isSelected, onPress }: MoodOptionProps) {
       </Text>
     </Pressable>
   );
-}
+});

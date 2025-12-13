@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Text, Card } from '@/src/components/ui';
@@ -28,7 +29,7 @@ const typeConfig: Record<InsightType, { icon: keyof typeof Ionicons.glyphMap; co
   milestone: { icon: 'trophy', color: colors.warning, darkColor: darkColors.warning, bgColor: `${colors.warning}15`, darkBgColor: `${darkColors.warning}25` },
 };
 
-export function InsightCard({ insight }: InsightCardProps) {
+export const InsightCard = memo(function InsightCard({ insight }: InsightCardProps) {
   const { isDark } = useTheme();
   const themeColors = isDark ? darkColors : colors;
   const config = typeConfig[insight.type];
@@ -67,7 +68,7 @@ export function InsightCard({ insight }: InsightCardProps) {
       </View>
     </Card>
   );
-}
+});
 
 interface InsightListProps {
   insights: Insight[];

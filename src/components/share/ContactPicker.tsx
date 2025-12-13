@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, memo } from 'react';
 import {
   View,
   StyleSheet,
@@ -19,6 +19,58 @@ interface Contact {
   name: string;
   phoneNumber: string;
 }
+
+interface ContactListItemProps {
+  contact: Contact;
+  isSelected: boolean;
+  onToggle: (id: string) => void;
+}
+
+const ContactListItem = memo(function ContactListItem({
+  contact,
+  isSelected,
+  onToggle,
+}: ContactListItemProps) {
+  const { isDark } = useTheme();
+  const themeColors = isDark ? darkColors : colors;
+
+  const handlePress = useCallback(() => {
+    onToggle(contact.id);
+  }, [contact.id, onToggle]);
+
+  return (
+    <TouchableOpacity
+      style={[
+        styles.contactItem,
+        { borderBottomColor: themeColors.border },
+      ]}
+      onPress={handlePress}
+      activeOpacity={0.7}
+    >
+      <View
+        style={[
+          styles.checkbox,
+          {
+            borderColor: isSelected ? themeColors.primary : themeColors.textMuted,
+            backgroundColor: isSelected ? themeColors.primary : 'transparent',
+          },
+        ]}
+      >
+        {isSelected && (
+          <Ionicons name="checkmark" size={16} color="#fff" />
+        )}
+      </View>
+      <View style={styles.contactInfo}>
+        <Text variant="bodyMedium" color="textPrimary">
+          {contact.name}
+        </Text>
+        <Text variant="caption" color="textSecondary">
+          {contact.phoneNumber}
+        </Text>
+      </View>
+    </TouchableOpacity>
+  );
+});
 
 interface ContactPickerProps {
   onSelect: (contacts: Contact[]) => void;
@@ -105,41 +157,13 @@ export function ContactPicker({ onSelect, onClose }: ContactPickerProps) {
     onSelect(selected);
   };
 
-  const renderContact = ({ item }: { item: Contact }) => {
-    const isSelected = selectedContacts.has(item.id);
-    return (
-      <TouchableOpacity
-        style={[
-          styles.contactItem,
-          { borderBottomColor: themeColors.border },
-        ]}
-        onPress={() => toggleContact(item.id)}
-        activeOpacity={0.7}
-      >
-        <View
-          style={[
-            styles.checkbox,
-            {
-              borderColor: isSelected ? themeColors.primary : themeColors.textMuted,
-              backgroundColor: isSelected ? themeColors.primary : 'transparent',
-            },
-          ]}
-        >
-          {isSelected && (
-            <Ionicons name="checkmark" size={16} color="#fff" />
-          )}
-        </View>
-        <View style={styles.contactInfo}>
-          <Text variant="bodyMedium" color="textPrimary">
-            {item.name}
-          </Text>
-          <Text variant="caption" color="textSecondary">
-            {item.phoneNumber}
-          </Text>
-        </View>
-      </TouchableOpacity>
-    );
-  };
+  const renderContact = useCallback(({ item }: { item: Contact }) => (
+    <ContactListItem
+      contact={item}
+      isSelected={selectedContacts.has(item.id)}
+      onToggle={toggleContact}
+    />
+  ), [selectedContacts, toggleContact]);
 
   return (
     <SafeAreaView

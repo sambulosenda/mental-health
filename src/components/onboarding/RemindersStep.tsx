@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, memo, useCallback } from 'react';
 import { View, Pressable, Switch } from 'react-native';
 import Animated, { FadeIn, FadeInUp } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
@@ -40,34 +40,111 @@ function formatTimeDisplay(time: string): string {
   return `${displayHours}:${String(minutes).padStart(2, '0')} ${period}`;
 }
 
+interface ReminderCardProps {
+  icon: keyof typeof Ionicons.glyphMap;
+  iconColor: string;
+  title: string;
+  subtitle: string;
+  enabled: boolean;
+  time: string;
+  onToggle: (enabled: boolean) => void;
+  onTimePress: () => void;
+}
+
+const ReminderCard = memo(function ReminderCard({
+  icon,
+  iconColor,
+  title,
+  subtitle,
+  enabled,
+  time,
+  onToggle,
+  onTimePress,
+}: ReminderCardProps) {
+  const { isDark } = useTheme();
+  const themeColors = isDark ? darkColors : colors;
+
+  const handleToggle = useCallback((value: boolean) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    onToggle(value);
+  }, [onToggle]);
+
+  return (
+    <View
+      className="rounded-2xl p-4"
+      style={{ backgroundColor: themeColors.surfaceElevated }}
+    >
+      <View className="flex-row items-center justify-between mb-3">
+        <View className="flex-row items-center gap-3">
+          <View
+            className="w-10 h-10 rounded-full justify-center items-center"
+            style={{ backgroundColor: iconColor }}
+          >
+            <Ionicons name={icon} size={20} color={themeColors.textPrimary} />
+          </View>
+          <View>
+            <Text variant="bodyMedium" color="textPrimary">
+              {title}
+            </Text>
+            <Text variant="caption" color="textSecondary">
+              {subtitle}
+            </Text>
+          </View>
+        </View>
+        <Switch
+          value={enabled}
+          onValueChange={handleToggle}
+          trackColor={{ false: themeColors.border, true: themeColors.primary }}
+          thumbColor="#FFFFFF"
+        />
+      </View>
+      {enabled && (
+        <Pressable
+          onPress={onTimePress}
+          className="flex-row items-center justify-between py-2 px-3 rounded-lg"
+          style={{ backgroundColor: themeColors.background }}
+        >
+          <Text variant="body" color="textSecondary">
+            Remind me at
+          </Text>
+          <Text variant="bodyMedium" color="textPrimary">
+            {formatTimeDisplay(time)}
+          </Text>
+        </Pressable>
+      )}
+    </View>
+  );
+});
+
 export function RemindersStep({
   reminders,
   onRemindersChange,
   onNext,
   onBack,
 }: RemindersStepProps) {
-  const { isDark } = useTheme();
-  const themeColors = isDark ? darkColors : colors;
   const [showMoodPicker, setShowMoodPicker] = useState(false);
   const [showJournalPicker, setShowJournalPicker] = useState(false);
 
-  const handleMoodToggle = (enabled: boolean) => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+  const handleMoodToggle = useCallback((enabled: boolean) => {
     onRemindersChange({ ...reminders, moodEnabled: enabled });
-  };
+  }, [reminders, onRemindersChange]);
 
-  const handleJournalToggle = (enabled: boolean) => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+  const handleJournalToggle = useCallback((enabled: boolean) => {
     onRemindersChange({ ...reminders, journalEnabled: enabled });
-  };
+  }, [reminders, onRemindersChange]);
 
-  const handleMoodTimeChange = (date: Date) => {
+  const handleMoodTimeChange = useCallback((date: Date) => {
     onRemindersChange({ ...reminders, moodTime: formatTime(date) });
-  };
+  }, [reminders, onRemindersChange]);
 
-  const handleJournalTimeChange = (date: Date) => {
+  const handleJournalTimeChange = useCallback((date: Date) => {
     onRemindersChange({ ...reminders, journalTime: formatTime(date) });
-  };
+  }, [reminders, onRemindersChange]);
+
+  const openMoodPicker = useCallback(() => setShowMoodPicker(true), []);
+  const closeMoodPicker = useCallback(() => setShowMoodPicker(false), []);
+  const openJournalPicker = useCallback(() => setShowJournalPicker(true), []);
+  const closeJournalPicker = useCallback(() => setShowJournalPicker(false), []);
 
   return (
     <View className="flex-1">
@@ -93,99 +170,26 @@ export function RemindersStep({
           entering={FadeInUp.delay(350).duration(400)}
           className="gap-4"
         >
-          {/* Mood Reminder */}
-          <View
-            className="rounded-2xl p-4"
-            style={{ backgroundColor: themeColors.surfaceElevated }}
-          >
-            <View className="flex-row items-center justify-between mb-3">
-              <View className="flex-row items-center gap-3">
-                <View
-                  className="w-10 h-10 rounded-full justify-center items-center"
-                  style={{ backgroundColor: colors.mood[3] }}
-                >
-                  <Ionicons name="happy-outline" size={20} color={themeColors.textPrimary} />
-                </View>
-                <View>
-                  <Text variant="bodyMedium" color="textPrimary">
-                    Mood Check-in
-                  </Text>
-                  <Text variant="caption" color="textSecondary">
-                    Track how you feel
-                  </Text>
-                </View>
-              </View>
-              <Switch
-                value={reminders.moodEnabled}
-                onValueChange={handleMoodToggle}
-                trackColor={{ false: themeColors.border, true: themeColors.primary }}
-                thumbColor="#FFFFFF"
-                accessibilityLabel="Enable mood check-in reminder"
-                accessibilityRole="switch"
-              />
-            </View>
-            {reminders.moodEnabled && (
-              <Pressable
-                onPress={() => setShowMoodPicker(true)}
-                className="flex-row items-center justify-between py-2 px-3 rounded-lg"
-                style={{ backgroundColor: themeColors.background }}
-              >
-                <Text variant="body" color="textSecondary">
-                  Remind me at
-                </Text>
-                <Text variant="bodyMedium" color="textPrimary">
-                  {formatTimeDisplay(reminders.moodTime)}
-                </Text>
-              </Pressable>
-            )}
-          </View>
-
-          {/* Journal Reminder */}
-          <View
-            className="rounded-2xl p-4"
-            style={{ backgroundColor: themeColors.surfaceElevated }}
-          >
-            <View className="flex-row items-center justify-between mb-3">
-              <View className="flex-row items-center gap-3">
-                <View
-                  className="w-10 h-10 rounded-full justify-center items-center"
-                  style={{ backgroundColor: colors.mood[4] }}
-                >
-                  <Ionicons name="book-outline" size={20} color={themeColors.textPrimary} />
-                </View>
-                <View>
-                  <Text variant="bodyMedium" color="textPrimary">
-                    Evening Journal
-                  </Text>
-                  <Text variant="caption" color="textSecondary">
-                    Reflect on your day
-                  </Text>
-                </View>
-              </View>
-              <Switch
-                value={reminders.journalEnabled}
-                onValueChange={handleJournalToggle}
-                trackColor={{ false: themeColors.border, true: themeColors.primary }}
-                thumbColor="#FFFFFF"
-                accessibilityLabel="Enable evening journal reminder"
-                accessibilityRole="switch"
-              />
-            </View>
-            {reminders.journalEnabled && (
-              <Pressable
-                onPress={() => setShowJournalPicker(true)}
-                className="flex-row items-center justify-between py-2 px-3 rounded-lg"
-                style={{ backgroundColor: themeColors.background }}
-              >
-                <Text variant="body" color="textSecondary">
-                  Remind me at
-                </Text>
-                <Text variant="bodyMedium" color="textPrimary">
-                  {formatTimeDisplay(reminders.journalTime)}
-                </Text>
-              </Pressable>
-            )}
-          </View>
+          <ReminderCard
+            icon="happy-outline"
+            iconColor={colors.mood[3]}
+            title="Mood Check-in"
+            subtitle="Track how you feel"
+            enabled={reminders.moodEnabled}
+            time={reminders.moodTime}
+            onToggle={handleMoodToggle}
+            onTimePress={openMoodPicker}
+          />
+          <ReminderCard
+            icon="book-outline"
+            iconColor={colors.mood[4]}
+            title="Evening Journal"
+            subtitle="Reflect on your day"
+            enabled={reminders.journalEnabled}
+            time={reminders.journalTime}
+            onToggle={handleJournalToggle}
+            onTimePress={openJournalPicker}
+          />
         </Animated.View>
       </View>
 
@@ -202,14 +206,14 @@ export function RemindersStep({
         value={parseTime(reminders.moodTime)}
         onChange={handleMoodTimeChange}
         visible={showMoodPicker}
-        onClose={() => setShowMoodPicker(false)}
+        onClose={closeMoodPicker}
       />
 
       <NativeTimePicker
         value={parseTime(reminders.journalTime)}
         onChange={handleJournalTimeChange}
         visible={showJournalPicker}
-        onClose={() => setShowJournalPicker(false)}
+        onClose={closeJournalPicker}
       />
     </View>
   );
