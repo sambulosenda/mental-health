@@ -230,33 +230,34 @@ export default function JournalScreen() {
                 className="mb-6"
                 entering={FadeInDown.duration(400).delay(200 + categoryIndex * 100)}
               >
-                <View className="flex-row items-center gap-2 mb-4">
-                  <View
-                    className="w-1 h-5 rounded-full"
-                    style={{ backgroundColor: themeColors.primary }}
-                  />
-                  <Text
-                    variant="bodyMedium"
-                    color="textPrimary"
-                    style={{ textTransform: 'capitalize', letterSpacing: -0.2 }}
-                  >
-                    {category}
-                  </Text>
-                  <Text variant="caption" color="textMuted">
-                    ({categoryPrompts.length})
-                  </Text>
-                </View>
-                {categoryPrompts.map((prompt, promptIndex) => (
-                  <Animated.View
-                    key={prompt.id}
-                    entering={FadeInDown.duration(300).delay(300 + categoryIndex * 100 + promptIndex * 60)}
-                  >
+                <Text
+                  variant="caption"
+                  color="textSecondary"
+                  style={{
+                    textTransform: 'uppercase',
+                    letterSpacing: 0.5,
+                    marginBottom: 8,
+                    marginLeft: 16,
+                  }}
+                >
+                  {category}
+                </Text>
+                <View
+                  style={{
+                    borderRadius: 12,
+                    overflow: 'hidden',
+                  }}
+                >
+                  {categoryPrompts.map((prompt, promptIndex) => (
                     <PromptCard
+                      key={prompt.id}
                       prompt={prompt}
                       onPress={() => handlePromptSelect(prompt.id)}
+                      isFirst={promptIndex === 0}
+                      isLast={promptIndex === categoryPrompts.length - 1}
                     />
-                  </Animated.View>
-                ))}
+                  ))}
+                </View>
               </Animated.View>
             ))}
           </>
