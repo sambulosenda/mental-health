@@ -25,6 +25,9 @@ interface ExerciseState {
   activeSession: ExerciseSession | null;
   exerciseFlow: ExerciseFlow | null;
 
+  // Session key to track current session instance (prevents stale updates)
+  sessionKey: number;
+
   // History
   recentSessions: ExerciseSession[];
 
@@ -33,7 +36,7 @@ interface ExerciseState {
   error: string | null;
 
   // Actions
-  startExercise: (templateId: string) => Promise<void>;
+  startExercise: (templateId: string, key: number) => Promise<void>;
   setMoodBefore: (mood: MoodValue) => Promise<void>;
   setMoodAfter: (mood: MoodValue) => Promise<void>;
   advanceStep: () => void;
@@ -57,13 +60,14 @@ export const useExerciseStore = create<ExerciseState>((set, get) => ({
   templates: ALL_TEMPLATES,
   activeSession: null,
   exerciseFlow: null,
+  sessionKey: 0,
   recentSessions: [],
   isLoading: false,
   error: null,
 
   // Start a new exercise
-  startExercise: async (templateId) => {
-    console.log('[ExerciseStore] startExercise called with:', templateId);
+  startExercise: async (templateId, key) => {
+    console.log('[ExerciseStore] startExercise called with:', templateId, 'key:', key);
     const template = get().templates.find((t) => t.id === templateId);
     if (!template) {
       console.log('[ExerciseStore] Template not found:', templateId);
@@ -72,11 +76,24 @@ export const useExerciseStore = create<ExerciseState>((set, get) => ({
     }
     console.log('[ExerciseStore] Found template:', template.name);
 
-    set({ isLoading: true, error: null });
+    set({ isLoading: true, error: null, sessionKey: key });
 
     try {
       console.log('[ExerciseStore] Creating session in database...');
       const session = await createExerciseSession(templateId);
+
+      // Check if this session is still current (user may have navigated away or abandoned)
+      if (get().sessionKey !== key) {
+        console.log('[ExerciseStore] Session key mismatch, abandoning created session');
+        // Session was created but user abandoned - mark it as abandoned in DB
+        try {
+          await abandonExerciseSession(session.id);
+        } catch (abandonError) {
+          console.error('[ExerciseStore] Failed to abandon orphaned session:', abandonError);
+        }
+        return;
+      }
+
       console.log('[ExerciseStore] Session created:', session.id);
       set({
         activeSession: session,
@@ -91,6 +108,11 @@ export const useExerciseStore = create<ExerciseState>((set, get) => ({
       });
       console.log('[ExerciseStore] Exercise flow set successfully');
     } catch (error) {
+      // Check if this session is still current before setting error
+      if (get().sessionKey !== key) {
+        console.log('[ExerciseStore] Session key mismatch on error, ignoring');
+        return;
+      }
       console.log('[ExerciseStore] Error starting exercise:', error);
       const message = error instanceof Error ? error.message : 'Failed to start exercise';
       set({ error: message, isLoading: false });
@@ -239,13 +261,25 @@ export const useExerciseStore = create<ExerciseState>((set, get) => ({
   // Abandon the exercise
   abandonExercise: async () => {
     const { activeSession } = get();
-    if (!activeSession) return;
+
+    // Increment sessionKey first to invalidate any in-flight startExercise calls
+    set((state) => ({
+      sessionKey: state.sessionKey + 1,
+      error: null, // Clear stale errors
+    }));
+
+    // Always reset loading state, even if no active session
+    if (!activeSession) {
+      set({ isLoading: false, exerciseFlow: null });
+      return;
+    }
 
     try {
       await abandonExerciseSession(activeSession.id);
       set({
         activeSession: null,
         exerciseFlow: null,
+        isLoading: false,
       });
     } catch (error) {
       console.error('Failed to abandon exercise:', error);
@@ -253,6 +287,7 @@ export const useExerciseStore = create<ExerciseState>((set, get) => ({
       set({
         activeSession: null,
         exerciseFlow: null,
+        isLoading: false,
       });
     }
   },
@@ -267,13 +302,14 @@ export const useExerciseStore = create<ExerciseState>((set, get) => ({
     }
   },
 
-  // Reset state
+  // Reset state (increments sessionKey to invalidate any in-flight requests)
   reset: () => {
-    set({
+    set((state) => ({
       activeSession: null,
       exerciseFlow: null,
       isLoading: false,
       error: null,
-    });
+      sessionKey: state.sessionKey + 1,
+    }));
   },
 }));

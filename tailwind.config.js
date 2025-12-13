@@ -9,72 +9,72 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // Primary palette - soft blue & lavender
+        // Primary palette - healing sage green
         primary: {
-          DEFAULT: '#A9C9FF',
-          light: '#C7B8FF',
-          dark: '#9B8CFF',
+          DEFAULT: '#5B8A72',
+          light: '#7BA393',
+          dark: '#3D6B54',
         },
-        // Mood colors - calming gradient
+        // Mood colors - warm to cool progression
         mood: {
-          1: '#FFE4EC',
-          2: '#F2C7FF',
-          3: '#C7B8FF',
-          4: '#B8D4FF',
-          5: '#A9C9FF',
+          1: '#F2D4D4', // Dusty rose
+          2: '#E8D5C4', // Warm sand
+          3: '#D4E0D9', // Sage mist
+          4: '#C5DDD3', // Soft mint
+          5: '#A8D4C2', // Fresh eucalyptus
         },
         'mood-text': {
-          1: '#8B5A6B',
-          2: '#7B5A8B',
-          3: '#5A5A8B',
-          4: '#4A6A8B',
-          5: '#3A5A7B',
+          1: '#8B5A5A',
+          2: '#7A6555',
+          3: '#4A5D53',
+          4: '#3D6B54',
+          5: '#2D5A47',
         },
-        // Light mode backgrounds - gentle gray
-        background: '#F7F8FA',
+        // Light mode backgrounds - warm off-white
+        background: '#FAFAF8',
         surface: {
           DEFAULT: '#FFFFFF',
           elevated: '#FFFFFF',
         },
-        // Dark mode backgrounds - calm charcoal
-        'background-dark': '#1A1D24',
+        // Dark mode backgrounds - warm charcoal
+        'background-dark': '#141816',
         'surface-dark': {
-          DEFAULT: '#2F3441',
-          elevated: '#3A3F4C',
+          DEFAULT: '#1E2320',
+          elevated: '#2A302C',
         },
-        // Text colors
-        'text-primary': '#2F3441',
-        'text-secondary': '#5A6170',
-        'text-muted': '#8A8F9C',
+        // Text colors - warm charcoal with hierarchy
+        'text-primary': '#1F2421',
+        'text-secondary': '#4A5568',
+        'text-muted': '#718096',
         'text-inverse': '#FFFFFF',
-        // Dark mode text
-        'text-primary-dark': '#F7F8FA',
-        'text-secondary-dark': '#B8BCC5',
-        'text-muted-dark': '#8A8F9C',
-        // Semantic
+        // Dark mode text - warm whites
+        'text-primary-dark': '#F5F5F3',
+        'text-secondary-dark': '#C4C7C5',
+        'text-muted-dark': '#8A8F8C',
+        // Semantic - warmer, refined
         error: {
-          DEFAULT: '#E57373',
-          light: '#FFEBEE',
+          DEFAULT: '#D66853',
+          light: '#FBEAE6',
         },
         success: {
-          DEFAULT: '#81C784',
-          light: '#E8F5E9',
+          DEFAULT: '#5B8A72',
+          light: '#E8F2ED',
         },
         warning: {
-          DEFAULT: '#FFB74D',
-          light: '#FFF3E0',
+          DEFAULT: '#D4915C',
+          light: '#FDF4EB',
         },
-        // Borders
+        // Borders - subtle warmth
         border: {
-          DEFAULT: '#E4E6EB',
-          light: '#F0F2F5',
+          DEFAULT: '#E8E6E1',
+          light: '#F2F0EB',
         },
         'border-dark': {
-          DEFAULT: '#3A3F4C',
-          light: '#4A4F5C',
+          DEFAULT: '#2A302C',
+          light: '#3A423E',
         },
-        divider: '#EBEDF0',
-        'divider-dark': '#3A3F4C',
+        divider: '#E8E6E1',
+        'divider-dark': '#2A302C',
       },
       spacing: {
         xs: '4px',
@@ -91,19 +91,20 @@ module.exports = {
         xl: '24px',
       },
       fontSize: {
-        h1: ['28px', { lineHeight: '36px', letterSpacing: '-0.5px', fontWeight: '600' }],
-        h2: ['22px', { lineHeight: '28px', letterSpacing: '-0.3px', fontWeight: '600' }],
-        h3: ['18px', { lineHeight: '24px', fontWeight: '600' }],
-        body: ['16px', { lineHeight: '24px', fontWeight: '400' }],
-        'body-medium': ['16px', { lineHeight: '24px', fontWeight: '500' }],
+        h1: ['32px', { lineHeight: '40px', letterSpacing: '-0.8px', fontWeight: '700' }],
+        h2: ['24px', { lineHeight: '30px', letterSpacing: '-0.4px', fontWeight: '600' }],
+        h3: ['18px', { lineHeight: '24px', letterSpacing: '-0.2px', fontWeight: '600' }],
+        body: ['16px', { lineHeight: '24px', letterSpacing: '-0.1px', fontWeight: '400' }],
+        'body-medium': ['16px', { lineHeight: '24px', letterSpacing: '-0.1px', fontWeight: '500' }],
         caption: ['14px', { lineHeight: '20px', fontWeight: '400' }],
         'caption-medium': ['14px', { lineHeight: '20px', fontWeight: '500' }],
-        label: ['12px', { lineHeight: '16px', letterSpacing: '0.5px', fontWeight: '500' }],
+        label: ['12px', { lineHeight: '16px', letterSpacing: '0.3px', fontWeight: '600' }],
       },
       boxShadow: {
-        sm: '0 1px 2px rgba(47, 52, 65, 0.05)',
-        md: '0 2px 4px rgba(47, 52, 65, 0.08)',
-        lg: '0 4px 8px rgba(47, 52, 65, 0.1)',
+        sm: '0 1px 3px rgba(31, 36, 33, 0.04)',
+        md: '0 2px 6px rgba(31, 36, 33, 0.06)',
+        lg: '0 8px 16px rgba(31, 36, 33, 0.08)',
+        xl: '0 12px 24px rgba(31, 36, 33, 0.12)',
       },
     },
   },

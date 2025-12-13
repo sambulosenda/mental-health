@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { View, Pressable } from 'react-native';
 import { CartesianChart, Line } from 'victory-native';
 import { Text, Card } from '@/src/components/ui';
-import { colors, darkColors, spacing } from '@/src/constants/theme';
+import { colors, darkColors, borderRadius } from '@/src/constants/theme';
 import { useTheme } from '@/src/contexts/ThemeContext';
 import type { DailyMoodSummary } from '@/src/types/mood';
 import { format, subDays } from 'date-fns';
@@ -66,35 +66,49 @@ export function MoodTrendChart({ summaries, isLoading }: MoodTrendChartProps) {
   }, [chartData]);
 
   return (
-    <Card className="p-4">
-      <View className="flex-row justify-between items-center mb-4">
+    <Card padding="md">
+      <View className="flex-row justify-between items-center mb-5">
         <Text variant="h3" color="textPrimary">
           Mood Trends
         </Text>
         <View
-          className="flex-row rounded-lg p-0.5"
-          style={{ backgroundColor: themeColors.surfaceElevated }}
+          className="flex-row"
+          style={{
+            backgroundColor: isDark ? themeColors.surface : themeColors.surfaceElevated,
+            borderRadius: borderRadius.md,
+            padding: 3,
+            borderWidth: isDark ? 1 : 0,
+            borderColor: themeColors.border,
+          }}
         >
           <Pressable
-            className="px-4 py-1 rounded-md"
-            style={timeRange === 7 ? { backgroundColor: themeColors.primary } : undefined}
+            style={{
+              paddingHorizontal: 14,
+              paddingVertical: 6,
+              borderRadius: borderRadius.sm,
+              backgroundColor: timeRange === 7 ? themeColors.primary : 'transparent',
+            }}
             onPress={() => setTimeRange(7)}
           >
             <Text
               variant="label"
-              color={timeRange === 7 ? 'textInverse' : 'textSecondary'}
+              style={{ color: timeRange === 7 ? '#FFFFFF' : themeColors.textSecondary }}
             >
               7D
             </Text>
           </Pressable>
           <Pressable
-            className="px-4 py-1 rounded-md"
-            style={timeRange === 30 ? { backgroundColor: themeColors.primary } : undefined}
+            style={{
+              paddingHorizontal: 14,
+              paddingVertical: 6,
+              borderRadius: borderRadius.sm,
+              backgroundColor: timeRange === 30 ? themeColors.primary : 'transparent',
+            }}
             onPress={() => setTimeRange(30)}
           >
             <Text
               variant="label"
-              color={timeRange === 30 ? 'textInverse' : 'textSecondary'}
+              style={{ color: timeRange === 30 ? '#FFFFFF' : themeColors.textSecondary }}
             >
               30D
             </Text>
@@ -116,7 +130,7 @@ export function MoodTrendChart({ summaries, isLoading }: MoodTrendChartProps) {
         </View>
       ) : (
         <>
-          <View style={{ height: 200, marginHorizontal: -spacing.sm }}>
+          <View style={{ height: 200 }}>
             <CartesianChart
               data={chartData}
               xKey="day"
@@ -148,38 +162,45 @@ export function MoodTrendChart({ summaries, isLoading }: MoodTrendChartProps) {
 
           {stats && (
             <View
-              className="flex-row justify-around items-center mt-4 pt-4 border-t"
-              style={{ borderTopColor: themeColors.border }}
+              className="flex-row mt-5 pt-4"
+              style={{ borderTopWidth: 1, borderTopColor: isDark ? themeColors.border : 'rgba(0,0,0,0.06)' }}
             >
-              <View className="items-center">
+              <View className="flex-1 items-center">
                 <Text variant="h3" color="textPrimary">
                   {stats.avg.toFixed(1)}
                 </Text>
-                <Text variant="caption" color="textSecondary">
+                <Text variant="caption" color="textMuted" className="mt-1">
                   Average
                 </Text>
               </View>
               <View
-                className="w-px h-8"
-                style={{ backgroundColor: themeColors.divider }}
+                style={{ width: 1, backgroundColor: isDark ? themeColors.border : 'rgba(0,0,0,0.08)' }}
               />
-              <View className="items-center">
+              <View className="flex-1 items-center">
                 <Text variant="h3" color="textPrimary">
                   {stats.days}
                 </Text>
-                <Text variant="caption" color="textSecondary">
+                <Text variant="caption" color="textMuted" className="mt-1">
                   Days tracked
                 </Text>
               </View>
               <View
-                className="w-px h-8"
-                style={{ backgroundColor: themeColors.divider }}
+                style={{ width: 1, backgroundColor: isDark ? themeColors.border : 'rgba(0,0,0,0.08)' }}
               />
-              <View className="items-center">
-                <Text variant="h3" color={stats.trend === 'up' ? 'success' : stats.trend === 'down' ? 'error' : 'primary'}>
+              <View className="flex-1 items-center">
+                <Text
+                  variant="h3"
+                  style={{
+                    color: stats.trend === 'up'
+                      ? themeColors.success
+                      : stats.trend === 'down'
+                        ? themeColors.error
+                        : themeColors.primary,
+                  }}
+                >
                   {stats.trend === 'up' ? '↑' : stats.trend === 'down' ? '↓' : '→'}
                 </Text>
-                <Text variant="caption" color="textSecondary">
+                <Text variant="caption" color="textMuted" className="mt-1">
                   Trend
                 </Text>
               </View>

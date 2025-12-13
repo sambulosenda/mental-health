@@ -1,7 +1,7 @@
 import type { ExerciseTemplate } from '@/src/types/exercise';
 
 export const MEDITATION_TEMPLATES: ExerciseTemplate[] = [
-  // MINDFULNESS BASICS
+  // MINDFULNESS BASICS (FREE intro meditation)
   {
     id: 'breath-awareness-5min',
     type: 'meditation',
@@ -11,6 +11,7 @@ export const MEDITATION_TEMPLATES: ExerciseTemplate[] = [
     duration: 5,
     icon: 'leaf-outline',
     color: '#059669',
+    isPremium: false,
     steps: [
       {
         id: 'intro',
@@ -76,6 +77,7 @@ export const MEDITATION_TEMPLATES: ExerciseTemplate[] = [
     duration: 10,
     icon: 'body-outline',
     color: '#7C3AED',
+    isPremium: true,
     steps: [
       {
         id: 'intro',
@@ -147,6 +149,7 @@ export const MEDITATION_TEMPLATES: ExerciseTemplate[] = [
     duration: 10,
     icon: 'timer-outline',
     color: '#6366F1',
+    isPremium: true,
     steps: [
       {
         id: 'timer',
@@ -171,6 +174,7 @@ export const MEDITATION_TEMPLATES: ExerciseTemplate[] = [
     duration: 12,
     icon: 'moon-outline',
     color: '#6366F1',
+    isPremium: true,
     steps: [
       {
         id: 'intro',
@@ -238,6 +242,7 @@ export const MEDITATION_TEMPLATES: ExerciseTemplate[] = [
     duration: 7,
     icon: 'water-outline',
     color: '#0EA5E9',
+    isPremium: true,
     steps: [
       {
         id: 'grounding',
@@ -305,6 +310,7 @@ export const MEDITATION_TEMPLATES: ExerciseTemplate[] = [
     duration: 5,
     icon: 'earth-outline',
     color: '#84CC16',
+    isPremium: true,
     steps: [
       {
         id: 'senses',

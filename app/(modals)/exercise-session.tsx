@@ -10,8 +10,9 @@ import { colors, darkColors } from '@/src/constants/theme';
 import { useTheme } from '@/src/contexts/ThemeContext';
 import { useExerciseStore } from '@/src/stores';
 import type { MoodValue } from '@/src/types/exercise';
+import { useFocusEffect } from '@react-navigation/native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { ActivityIndicator, Alert, View } from 'react-native';
 import { useKeyboardHandler } from 'react-native-keyboard-controller';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
@@ -43,7 +44,6 @@ function ExerciseSessionContent() {
 
   const {
     exerciseFlow,
-    isLoading,
     error,
     startExercise,
     setMoodBefore,
@@ -56,12 +56,39 @@ function ExerciseSessionContent() {
     reset,
   } = useExerciseStore();
 
+  // Track the current templateId to detect changes
+  const currentTemplateRef = useRef<string | null>(null);
+
+  // Handle blur for cleanup
+  useFocusEffect(
+    useCallback(() => {
+      // On blur: reset the store to clean up (also invalidates in-flight requests)
+      return () => {
+        console.log('[Exercise] Screen blur, resetting store');
+        reset();
+        currentTemplateRef.current = null;
+      };
+    }, [reset])
+  );
+
+  // Start exercise when templateId changes (or on initial mount)
   useEffect(() => {
-    if (templateId && !exerciseFlow && !isLoading && !error) {
-      console.log('[Exercise] Starting exercise with templateId:', templateId);
-      startExercise(templateId);
+    if (!templateId) return;
+
+    // Only start if templateId changed
+    if (currentTemplateRef.current === templateId) return;
+
+    // Reset if switching exercises
+    if (currentTemplateRef.current !== null) {
+      console.log('[Exercise] Template changed, resetting');
+      reset();
     }
-  }, [templateId, exerciseFlow, isLoading, error, startExercise]);
+
+    currentTemplateRef.current = templateId;
+    const sessionKey = Date.now();
+    console.log('[Exercise] Starting exercise with templateId:', templateId, 'key:', sessionKey);
+    startExercise(templateId, sessionKey);
+  }, [templateId, startExercise, reset]);
 
   const handleClose = useCallback(() => {
     if (exerciseFlow && exerciseFlow.currentStepIndex > 0) {

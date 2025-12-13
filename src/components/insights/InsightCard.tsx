@@ -21,11 +21,11 @@ interface InsightCardProps {
 }
 
 const typeConfig: Record<InsightType, { icon: keyof typeof Ionicons.glyphMap; color: string; darkColor: string; bgColor: string; darkBgColor: string }> = {
-  pattern: { icon: 'analytics', color: colors.textOnAccent, darkColor: darkColors.textOnAccent, bgColor: colors.primaryLight, darkBgColor: `${colors.primary}40` },
-  trigger: { icon: 'flash', color: '#B45309', darkColor: darkColors.warning, bgColor: colors.warningLight, darkBgColor: `${colors.warning}40` },
-  suggestion: { icon: 'bulb', color: '#047857', darkColor: darkColors.success, bgColor: colors.successLight, darkBgColor: `${colors.success}40` },
-  streak: { icon: 'flame', color: '#B91C1C', darkColor: darkColors.error, bgColor: colors.errorLight, darkBgColor: `${colors.error}40` },
-  milestone: { icon: 'trophy', color: '#B45309', darkColor: darkColors.warning, bgColor: colors.warningLight, darkBgColor: `${colors.warning}40` },
+  pattern: { icon: 'analytics', color: colors.primary, darkColor: darkColors.primary, bgColor: `${colors.primary}15`, darkBgColor: `${darkColors.primary}25` },
+  trigger: { icon: 'flash', color: colors.warning, darkColor: darkColors.warning, bgColor: `${colors.warning}15`, darkBgColor: `${darkColors.warning}25` },
+  suggestion: { icon: 'bulb', color: colors.success, darkColor: darkColors.success, bgColor: `${colors.success}15`, darkBgColor: `${darkColors.success}25` },
+  streak: { icon: 'flame', color: colors.error, darkColor: darkColors.error, bgColor: `${colors.error}15`, darkBgColor: `${darkColors.error}25` },
+  milestone: { icon: 'trophy', color: colors.warning, darkColor: darkColors.warning, bgColor: `${colors.warning}15`, darkBgColor: `${darkColors.warning}25` },
 };
 
 export function InsightCard({ insight }: InsightCardProps) {
@@ -35,26 +35,36 @@ export function InsightCard({ insight }: InsightCardProps) {
   const icon = insight.icon ?? config.icon;
 
   return (
-    <Card className="flex-row items-center p-4">
-      <View
-        className="w-11 h-11 rounded-xl justify-center items-center mr-4"
-        style={{ backgroundColor: isDark ? config.darkBgColor : config.bgColor }}
-      >
-        <Ionicons name={icon} size={24} color={isDark ? config.darkColor : config.color} />
-      </View>
-      <View className="flex-1">
-        <Text variant="captionMedium" color="textPrimary">
-          {insight.title}
-        </Text>
-        <Text variant="caption" color="textSecondary" className="mt-0.5">
-          {insight.description}
-        </Text>
-      </View>
-      {insight.priority === 'high' && (
-        <View className="ml-2">
-          <Ionicons name="star" size={12} color={themeColors.warning} />
+    <Card padding="md">
+      <View className="flex-row items-start" style={{ gap: 12 }}>
+        <View
+          className="w-10 h-10 rounded-xl justify-center items-center"
+          style={{ backgroundColor: isDark ? config.darkBgColor : config.bgColor }}
+        >
+          <Ionicons name={icon} size={20} color={isDark ? config.darkColor : config.color} />
         </View>
-      )}
+        <View className="flex-1">
+          <View className="flex-row items-start justify-between">
+            <Text variant="bodyMedium" color="textPrimary" className="flex-1">
+              {insight.title}
+            </Text>
+            {insight.priority === 'high' && (
+              <View
+                className="w-2 h-2 rounded-full ml-2 mt-1.5"
+                style={{ backgroundColor: themeColors.warning }}
+              />
+            )}
+          </View>
+          <Text
+            variant="caption"
+            color="textSecondary"
+            className="mt-1"
+            style={{ lineHeight: 20 }}
+          >
+            {insight.description}
+          </Text>
+        </View>
+      </View>
     </Card>
   );
 }
@@ -70,9 +80,14 @@ export function InsightList({ insights, emptyMessage }: InsightListProps) {
 
   if (insights.length === 0) {
     return (
-      <Card variant="flat" className="p-8 items-center">
-        <Ionicons name="sparkles-outline" size={32} color={themeColors.textMuted} />
-        <Text variant="body" color="textMuted" center className="mt-2">
+      <Card variant="flat" className="py-10 px-6 items-center">
+        <View
+          className="w-12 h-12 rounded-xl items-center justify-center mb-4"
+          style={{ backgroundColor: isDark ? `${darkColors.primary}30` : `${colors.primary}15` }}
+        >
+          <Ionicons name="sparkles-outline" size={24} color={themeColors.primary} />
+        </View>
+        <Text variant="body" color="textSecondary" center style={{ maxWidth: 260 }}>
           {emptyMessage ?? 'Track your mood for at least a week to discover patterns.'}
         </Text>
       </Card>
@@ -80,7 +95,7 @@ export function InsightList({ insights, emptyMessage }: InsightListProps) {
   }
 
   return (
-    <View className="gap-2">
+    <View className="gap-3">
       {insights.map((insight) => (
         <InsightCard key={insight.id} insight={insight} />
       ))}

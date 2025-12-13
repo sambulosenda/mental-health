@@ -29,21 +29,35 @@ export default function JournalEntryModal() {
   } = useJournalStore();
 
   const [selectedPrompt, setSelectedPrompt] = useState<JournalPrompt | null>(null);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
     loadPrompts();
   }, []);
 
+  // Initialize once on mount
   useEffect(() => {
+    if (isInitialized) return;
+
     if (params.editId) {
       loadEntryForEditing(params.editId);
-    } else if (params.promptId) {
+      setIsInitialized(true);
+    } else if (!params.promptId || prompts.length > 0) {
+      // Clear draft for new entries (not editing)
+      clearDraft();
+      setIsInitialized(true);
+    }
+  }, [params.editId, params.promptId, prompts.length, isInitialized]);
+
+  // Find prompt after prompts are loaded
+  useEffect(() => {
+    if (params.promptId && prompts.length > 0 && !selectedPrompt) {
       const prompt = prompts.find((p) => p.id === params.promptId);
       if (prompt) {
         setSelectedPrompt(prompt);
       }
     }
-  }, [params.editId, params.promptId, prompts]);
+  }, [params.promptId, prompts, selectedPrompt]);
 
   const handleSave = async (data: {
     title: string;

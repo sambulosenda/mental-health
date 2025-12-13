@@ -1,12 +1,20 @@
 import { View, Pressable } from 'react-native';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+  interpolate,
+} from 'react-native-reanimated';
 import { Text } from '@/src/components/ui';
-import { colors, darkColors } from '@/src/constants/theme';
+import { colors, darkColors, borderRadius, getCardShadow, getCardBorder, pressAnimation } from '@/src/constants/theme';
 import { useTheme } from '@/src/contexts/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { formatDistanceToNow } from 'date-fns';
 import type { AssessmentTemplate, AssessmentSession } from '@/src/types/assessment';
 import { ScoreInterpretation } from './ScoreInterpretation';
+
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 interface AssessmentCardProps {
   template: AssessmentTemplate;
@@ -24,6 +32,22 @@ export function AssessmentCard({
   const { isDark } = useTheme();
   const themeColors = isDark ? darkColors : colors;
   const accentColor = template.color;
+  const pressed = useSharedValue(0);
+
+  const animatedStyle = useAnimatedStyle(() => {
+    const scale = interpolate(pressed.value, [0, 1], [1, pressAnimation.scale]);
+    return {
+      transform: [{ scale }],
+    };
+  });
+
+  const handlePressIn = () => {
+    pressed.value = withSpring(1, pressAnimation.springConfig);
+  };
+
+  const handlePressOut = () => {
+    pressed.value = withSpring(0, pressAnimation.springConfig);
+  };
 
   const handlePress = async () => {
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -32,19 +56,30 @@ export function AssessmentCard({
 
   const lastTakenText = lastSession?.completedAt
     ? `${formatDistanceToNow(lastSession.completedAt, { addSuffix: true })}`
-    : 'Take your first →';
+    : 'Start →';
 
   return (
-    <Pressable
+    <AnimatedPressable
       onPress={handlePress}
-      className="rounded-2xl p-4 flex-1"
-      style={{ backgroundColor: themeColors.surfaceElevated }}
+      onPressIn={handlePressIn}
+      onPressOut={handlePressOut}
+      style={[
+        {
+          flex: 1,
+          borderRadius: borderRadius.lg,
+          padding: 16,
+          backgroundColor: themeColors.surfaceElevated,
+          ...getCardShadow(isDark),
+          ...getCardBorder(isDark),
+        },
+        animatedStyle,
+      ]}
     >
       {/* Header with icon and due badge */}
       <View className="flex-row items-start justify-between mb-3">
         <View
-          className="w-10 h-10 rounded-full items-center justify-center"
-          style={{ backgroundColor: `${accentColor}20` }}
+          className="w-10 h-10 rounded-xl items-center justify-center"
+          style={{ backgroundColor: `${accentColor}${isDark ? '30' : '15'}` }}
         >
           <Ionicons
             name={template.icon as any}
@@ -55,14 +90,14 @@ export function AssessmentCard({
 
         {isDue && (
           <View
-            className="px-2 py-1 rounded-full"
-            style={{ backgroundColor: `${accentColor}15` }}
+            className="px-2 py-0.5 rounded-full"
+            style={{ backgroundColor: `${accentColor}${isDark ? '30' : '15'}` }}
           >
             <Text
-              variant="caption"
-              style={{ color: accentColor, fontWeight: '600', fontSize: 10 }}
+              variant="label"
+              style={{ color: accentColor, fontSize: 10 }}
             >
-              Due
+              DUE
             </Text>
           </View>
         )}
@@ -83,7 +118,7 @@ export function AssessmentCard({
         {lastSession?.severity ? (
           <ScoreInterpretation severity={lastSession.severity} compact />
         ) : (
-          <Text variant="caption" color="textMuted">
+          <Text variant="caption" style={{ color: accentColor }}>
             {lastTakenText}
           </Text>
         )}
@@ -94,6 +129,6 @@ export function AssessmentCard({
           </Text>
         )}
       </View>
-    </Pressable>
+    </AnimatedPressable>
   );
 }

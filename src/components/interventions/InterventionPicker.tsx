@@ -3,7 +3,9 @@ import { colors, darkColors, spacing } from '@/src/constants/theme';
 import { useTheme } from '@/src/contexts/ThemeContext';
 import { useInterventionRecommendations } from '@/src/hooks/useInterventionRecommendations';
 import type { InterventionRecommendation } from '@/src/lib/interventions/recommendations';
+import { useSubscriptionStore } from '@/src/stores';
 import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 import { ActivityIndicator, Pressable, ScrollView, View } from 'react-native';
 
@@ -25,13 +27,16 @@ function RecommendationCard({
   recommendation,
   onPress,
   themeColors,
+  isPremiumUser,
 }: {
   recommendation: InterventionRecommendation;
   onPress: () => void;
   themeColors: typeof colors | typeof darkColors;
+  isPremiumUser: boolean;
 }) {
   const { template, reason, matchType } = recommendation;
   const accentColor = template.color || themeColors.primary;
+  const isLocked = template.isPremium && !isPremiumUser;
 
   const handlePress = async () => {
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -45,18 +50,29 @@ function RecommendationCard({
       style={{
         backgroundColor: themeColors.surfaceElevated,
         minWidth: 100,
+        opacity: isLocked ? 0.85 : 1,
       }}
     >
-      {/* Icon */}
-      <View
-        className="w-11 h-11 rounded-full items-center justify-center mb-3"
-        style={{ backgroundColor: `${accentColor}20` }}
-      >
-        <Ionicons
-          name={(template.icon as keyof typeof Ionicons.glyphMap) || 'fitness-outline'}
-          size={22}
-          color={accentColor}
-        />
+      {/* Icon with optional lock overlay */}
+      <View className="relative">
+        <View
+          className="w-11 h-11 rounded-full items-center justify-center mb-3"
+          style={{ backgroundColor: `${accentColor}20` }}
+        >
+          <Ionicons
+            name={(template.icon as keyof typeof Ionicons.glyphMap) || 'fitness-outline'}
+            size={22}
+            color={accentColor}
+          />
+        </View>
+        {isLocked && (
+          <View
+            className="absolute -top-1 -right-1 w-5 h-5 rounded-full items-center justify-center"
+            style={{ backgroundColor: themeColors.warning }}
+          >
+            <Ionicons name="lock-closed" size={10} color="#fff" />
+          </View>
+        )}
       </View>
 
       {/* Name */}
@@ -91,13 +107,24 @@ export function InterventionPicker({
   title = 'Suggested for You',
   showTitle = true,
 }: InterventionPickerProps) {
+  const router = useRouter();
   const { isDark } = useTheme();
   const themeColors = isDark ? darkColors : colors;
+  const { isPremium, isInitialized } = useSubscriptionStore();
 
   const { recommendations, isLoading } = useInterventionRecommendations({
     overrideMood,
     overrideActivities,
   });
+
+  const handleSelectExercise = (templateId: string, templateIsPremium?: boolean) => {
+    // Only block access once initialization is complete
+    if (templateIsPremium && isInitialized && !isPremium) {
+      router.push('/paywall');
+      return;
+    }
+    onSelectExercise(templateId);
+  };
 
   if (isLoading) {
     return (
@@ -142,8 +169,9 @@ export function InterventionPicker({
           <RecommendationCard
             key={rec.template.id}
             recommendation={rec}
-            onPress={() => onSelectExercise(rec.template.id)}
+            onPress={() => handleSelectExercise(rec.template.id, rec.template.isPremium)}
             themeColors={themeColors}
+            isPremiumUser={isPremium}
           />
         ))}
       </ScrollView>

@@ -14,7 +14,7 @@ import { EXERCISE_TEMPLATES } from '@/src/constants/exercises';
 import { useTheme } from '@/src/contexts/ThemeContext';
 import type { DailyMoodSummary } from '@/src/types/mood';
 
-const HEADER_EXPANDED_HEIGHT = 120;
+const HEADER_EXPANDED_HEIGHT = 110;
 
 const TIME_RANGES = ['Week', 'Month', 'Year'] as const;
 const DAYS_MAP = { Week: 7, Month: 30, Year: 365 } as const;
@@ -213,8 +213,8 @@ export default function InsightsScreen() {
                   </View>
                   <View className="items-center flex-1">
                     <View
-                      className="w-10 h-10 rounded-full items-center justify-center mb-1"
-                      style={{ backgroundColor: topExercise?.color ? `${topExercise.color}20` : themeColors.primaryLight }}
+                      className="w-10 h-10 rounded-xl items-center justify-center mb-1"
+                      style={{ backgroundColor: topExercise?.color ? `${topExercise.color}${isDark ? '30' : '15'}` : `${themeColors.primary}${isDark ? '30' : '15'}` }}
                     >
                       <Ionicons
                         name={(topExercise?.icon as any) || 'fitness-outline'}
@@ -237,7 +237,7 @@ export default function InsightsScreen() {
             AI Insights
           </Text>
           {!isModelReady ? (
-            <Card variant="outlined" className="p-4 items-center">
+            <Card variant="flat" className="p-4 items-center">
               <View className="flex-row items-center">
                 <ActivityIndicator size="small" color={themeColors.primary} />
                 <Text variant="body" color="textSecondary" className="ml-2">
@@ -249,7 +249,7 @@ export default function InsightsScreen() {
               </Text>
             </Card>
           ) : aiState === 'generating' ? (
-            <Card variant="outlined" className="p-4 items-center">
+            <Card variant="flat" className="p-4 items-center">
               <View className="flex-row items-center">
                 <ActivityIndicator size="small" color={themeColors.primary} />
                 <Text variant="body" color="textSecondary" className="ml-2">
@@ -270,7 +270,7 @@ export default function InsightsScreen() {
               </Button>
             </View>
           ) : (
-            <Card variant="outlined" className="p-4 items-center">
+            <Card variant="flat" className="p-4 items-center">
               <Ionicons name="sparkles" size={24} color={themeColors.primary} />
               <Text variant="body" color="textSecondary" className="mt-2 text-center">
                 {aiError || 'Generate personalized insights based on your mood and journal entries.'}
