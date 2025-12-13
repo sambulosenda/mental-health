@@ -82,9 +82,15 @@ export const useExerciseStore = create<ExerciseState>((set, get) => ({
       console.log('[ExerciseStore] Creating session in database...');
       const session = await createExerciseSession(templateId);
 
-      // Check if this session is still current (user may have navigated away)
+      // Check if this session is still current (user may have navigated away or abandoned)
       if (get().sessionKey !== key) {
-        console.log('[ExerciseStore] Session key mismatch, ignoring stale result');
+        console.log('[ExerciseStore] Session key mismatch, abandoning created session');
+        // Session was created but user abandoned - mark it as abandoned in DB
+        try {
+          await abandonExerciseSession(session.id);
+        } catch (abandonError) {
+          console.error('[ExerciseStore] Failed to abandon orphaned session:', abandonError);
+        }
         return;
       }
 
@@ -255,6 +261,12 @@ export const useExerciseStore = create<ExerciseState>((set, get) => ({
   // Abandon the exercise
   abandonExercise: async () => {
     const { activeSession } = get();
+
+    // Increment sessionKey first to invalidate any in-flight startExercise calls
+    set((state) => ({
+      sessionKey: state.sessionKey + 1,
+      error: null, // Clear stale errors
+    }));
 
     // Always reset loading state, even if no active session
     if (!activeSession) {

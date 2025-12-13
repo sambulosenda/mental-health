@@ -110,7 +110,7 @@ export function InterventionPicker({
   const router = useRouter();
   const { isDark } = useTheme();
   const themeColors = isDark ? darkColors : colors;
-  const { isPremium } = useSubscriptionStore();
+  const { isPremium, isInitialized } = useSubscriptionStore();
 
   const { recommendations, isLoading } = useInterventionRecommendations({
     overrideMood,
@@ -118,7 +118,8 @@ export function InterventionPicker({
   });
 
   const handleSelectExercise = (templateId: string, templateIsPremium?: boolean) => {
-    if (templateIsPremium && !isPremium) {
+    // Only block access once initialization is complete
+    if (templateIsPremium && isInitialized && !isPremium) {
       router.push('/paywall');
       return;
     }

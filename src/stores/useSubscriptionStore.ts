@@ -13,7 +13,7 @@ const ENTITLEMENT_ID = 'premium';
 
 // In-flight initialization promise to prevent concurrent calls
 let initializationPromise: Promise<void> | null = null;
-let listenerUnsubscribe: (() => void) | null = null;
+let customerInfoListener: ((info: CustomerInfo) => void) | null = null;
 
 interface SubscriptionState {
   // State
@@ -78,8 +78,8 @@ export const useSubscriptionStore = create<SubscriptionState>()(
             await Purchases.configure({ apiKey });
 
             // Only add listener if not already registered
-            if (!listenerUnsubscribe) {
-              listenerUnsubscribe = Purchases.addCustomerInfoUpdateListener((info) => {
+            if (!customerInfoListener) {
+              customerInfoListener = (info: CustomerInfo) => {
                 const isPremium = !!info.entitlements.active[ENTITLEMENT_ID];
                 set({
                   customerInfo: info,
@@ -87,7 +87,8 @@ export const useSubscriptionStore = create<SubscriptionState>()(
                   cachedPremiumStatus: isPremium,
                   lastSyncTime: Date.now(),
                 });
-              });
+              };
+              Purchases.addCustomerInfoUpdateListener(customerInfoListener);
             }
 
             // Initial check
@@ -191,9 +192,9 @@ export const useSubscriptionStore = create<SubscriptionState>()(
 
       reset: () => {
         // Clean up listener
-        if (listenerUnsubscribe) {
-          listenerUnsubscribe();
-          listenerUnsubscribe = null;
+        if (customerInfoListener) {
+          Purchases.removeCustomerInfoUpdateListener(customerInfoListener);
+          customerInfoListener = null;
         }
         initializationPromise = null;
 
