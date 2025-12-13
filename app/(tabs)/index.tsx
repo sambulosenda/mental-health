@@ -15,7 +15,7 @@ import { GAD7_TEMPLATE, PHQ9_TEMPLATE } from '@/src/constants/assessments';
 import { colors, darkColors, spacing, moodLabels } from '@/src/constants/theme';
 import { useTheme } from '@/src/contexts/ThemeContext';
 
-const HEADER_EXPANDED_HEIGHT = 120;
+const HEADER_EXPANDED_HEIGHT = 110;
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -85,10 +85,10 @@ export default function HomeScreen() {
           <Card className="mb-6">
             <View className="flex-row items-center">
               <View
-                className="w-14 h-14 rounded-2xl items-center justify-center mr-4"
+                className="w-12 h-12 rounded-xl items-center justify-center mr-4"
                 style={{ backgroundColor: colors.mood[latestMood.mood] }}
               >
-                <MoodAnimation mood={latestMood.mood} size={36} loop={false} />
+                <MoodAnimation mood={latestMood.mood} size={32} loop={false} />
               </View>
               <View className="flex-1">
                 <Text variant="caption" color="textMuted" className="mb-0.5">
@@ -115,10 +115,10 @@ export default function HomeScreen() {
           <Card className="mb-6" onPress={() => router.navigate('/(tabs)/track')}>
             <View className="flex-row items-center">
               <View
-                className="w-14 h-14 rounded-2xl items-center justify-center mr-4"
+                className="w-12 h-12 rounded-xl items-center justify-center mr-4"
                 style={{ backgroundColor: themeColors.primaryLight }}
               >
-                <Ionicons name="happy-outline" size={32} color={themeColors.textOnAccent} />
+                <Ionicons name="happy-outline" size={28} color={themeColors.textInverse} />
               </View>
               <View className="flex-1">
                 <Text variant="caption" color="textMuted" className="mb-0.5">
@@ -140,9 +140,9 @@ export default function HomeScreen() {
               Talk with Softmind
             </Text>
             {!isPremium && (
-              <View className="px-2 py-0.5 rounded-full" style={{ backgroundColor: themeColors.warningLight }}>
+              <View className="px-2 py-0.5 rounded-full" style={{ backgroundColor: isDark ? `${themeColors.warning}30` : `${themeColors.warning}15` }}>
                 <Text variant="label" style={{ color: themeColors.warning, fontSize: 10 }}>
-                  Premium
+                  PRO
                 </Text>
               </View>
             )}
@@ -151,19 +151,19 @@ export default function HomeScreen() {
             <Card onPress={() => handleChatPress('checkin')}>
               <View className="flex-row items-center">
                 <View
-                  className="w-11 h-11 rounded-full items-center justify-center mr-3"
+                  className="w-10 h-10 rounded-xl items-center justify-center mr-3"
                   style={{ backgroundColor: themeColors.primaryLight }}
                 >
-                  <Ionicons name="chatbubble-ellipses-outline" size={20} color={themeColors.textOnAccent} />
+                  <Ionicons name="chatbubble-ellipses-outline" size={20} color={themeColors.textInverse} />
                 </View>
                 <View className="flex-1">
                   <View className="flex-row items-center gap-2">
                     <Text variant="bodyMedium" color="textPrimary">
                       2-min Check-in
                     </Text>
-                    <View className="px-2 py-0.5 rounded-full" style={{ backgroundColor: themeColors.primaryLight }}>
-                      <Text variant="label" style={{ color: themeColors.textOnAccent, fontSize: 10 }}>
-                        Quick
+                    <View className="px-2 py-0.5 rounded-full" style={{ backgroundColor: isDark ? `${themeColors.primary}30` : `${themeColors.primary}15` }}>
+                      <Text variant="label" style={{ color: themeColors.primary, fontSize: 10 }}>
+                        QUICK
                       </Text>
                     </View>
                   </View>
@@ -178,7 +178,7 @@ export default function HomeScreen() {
             <Card onPress={() => handleChatPress('chat')}>
               <View className="flex-row items-center">
                 <View
-                  className="w-11 h-11 rounded-full items-center justify-center mr-3"
+                  className="w-10 h-10 rounded-xl items-center justify-center mr-3"
                   style={{ backgroundColor: themeColors.warningLight }}
                 >
                   <Ionicons name="chatbubbles-outline" size={20} color={themeColors.warning} />

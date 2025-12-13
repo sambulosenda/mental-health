@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { View, Pressable } from 'react-native';
 import { CartesianChart, Line } from 'victory-native';
 import { Text, Card } from '@/src/components/ui';
-import { colors, darkColors, spacing } from '@/src/constants/theme';
+import { colors, darkColors, spacing, borderRadius } from '@/src/constants/theme';
 import { useTheme } from '@/src/contexts/ThemeContext';
 import { GAD7_TEMPLATE, PHQ9_TEMPLATE } from '@/src/constants/assessments';
 import { ScoreInterpretation } from '@/src/components/assessments';
@@ -71,19 +71,29 @@ export function AssessmentTrendChart({
   }, [chartData]);
 
   return (
-    <Card className="p-4">
+    <Card padding="md">
       {/* Header */}
-      <View className="flex-row justify-between items-center mb-4">
+      <View className="flex-row justify-between items-center mb-5">
         <Text variant="h3" color="textPrimary">
           Assessment Trends
         </Text>
         <View
-          className="flex-row rounded-lg p-0.5"
-          style={{ backgroundColor: themeColors.surfaceElevated }}
+          className="flex-row"
+          style={{
+            backgroundColor: isDark ? themeColors.surface : themeColors.surfaceElevated,
+            borderRadius: borderRadius.md,
+            padding: 3,
+            borderWidth: isDark ? 1 : 0,
+            borderColor: themeColors.border,
+          }}
         >
           <Pressable
-            className="px-3 py-1 rounded-md"
-            style={selectedType === 'gad7' ? { backgroundColor: GAD7_TEMPLATE.color } : undefined}
+            style={{
+              paddingHorizontal: 12,
+              paddingVertical: 6,
+              borderRadius: borderRadius.sm,
+              backgroundColor: selectedType === 'gad7' ? GAD7_TEMPLATE.color : 'transparent',
+            }}
             onPress={() => setSelectedType('gad7')}
           >
             <Text
@@ -94,8 +104,12 @@ export function AssessmentTrendChart({
             </Text>
           </Pressable>
           <Pressable
-            className="px-3 py-1 rounded-md"
-            style={selectedType === 'phq9' ? { backgroundColor: PHQ9_TEMPLATE.color } : undefined}
+            style={{
+              paddingHorizontal: 12,
+              paddingVertical: 6,
+              borderRadius: borderRadius.sm,
+              backgroundColor: selectedType === 'phq9' ? PHQ9_TEMPLATE.color : 'transparent',
+            }}
             onPress={() => setSelectedType('phq9')}
           >
             <Text
@@ -214,9 +228,9 @@ export function AssessmentTrendChart({
                       size={16}
                       color={
                         stats.trend === 'improving'
-                          ? colors.success
+                          ? themeColors.success
                           : stats.trend === 'worsening'
-                            ? colors.error
+                            ? themeColors.error
                             : themeColors.textMuted
                       }
                     />
@@ -225,9 +239,9 @@ export function AssessmentTrendChart({
                       style={{
                         color:
                           stats.trend === 'improving'
-                            ? colors.success
+                            ? themeColors.success
                             : stats.trend === 'worsening'
-                              ? colors.error
+                              ? themeColors.error
                               : themeColors.textMuted,
                       }}
                     >

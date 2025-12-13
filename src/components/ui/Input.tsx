@@ -4,7 +4,7 @@ import {
   View,
 } from 'react-native';
 import { useState } from 'react';
-import { typography, colors, darkColors } from '@/src/constants/theme';
+import { typography, colors, darkColors, borderRadius } from '@/src/constants/theme';
 import { useTheme } from '@/src/contexts/ThemeContext';
 import { Text } from './Text';
 
@@ -59,10 +59,10 @@ export function Input({
         </Text>
       )}
       <TextInput
-        className={`rounded-md border-[1.5px] px-4 py-3 ${baseClass} ${focusedClass} ${errorClass}`}
+        className={`border-[1.5px] px-4 py-3 ${baseClass} ${focusedClass} ${errorClass}`}
         style={[
           typography.body,
-          { color: themeColors.textPrimary },
+          { color: themeColors.textPrimary, borderRadius: borderRadius.md },
           style,
         ]}
         placeholderTextColor={themeColors.textMuted}

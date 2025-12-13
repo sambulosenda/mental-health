@@ -3,9 +3,13 @@ import { View, RefreshControl, Share, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import Animated, { useSharedValue, useAnimatedScrollHandler } from 'react-native-reanimated';
-import { Text, AnimatedListItem, SwipeableRow, AnimatedHeader, NativePicker } from '@/src/components/ui';
-import { JournalCard, PromptCard, SearchBar } from '@/src/components/journal';
+import Animated, {
+  useSharedValue,
+  useAnimatedScrollHandler,
+  FadeInDown,
+} from 'react-native-reanimated';
+import { Text, SwipeableRow, AnimatedHeader, NativePicker } from '@/src/components/ui';
+import { JournalCard, JournalEmptyState, PromptCard, SearchBar } from '@/src/components/journal';
 import { useJournalStore } from '@/src/stores';
 import { colors, darkColors, spacing } from '@/src/constants/theme';
 import { useTheme } from '@/src/contexts/ThemeContext';
@@ -165,9 +169,12 @@ export default function JournalScreen() {
             </View>
 
             {displayedEntries.length > 0 ? (
-              <View className="gap-2">
+              <View className="gap-3">
                 {displayedEntries.map((item, index) => (
-                  <AnimatedListItem key={item.id} index={index}>
+                  <Animated.View
+                    key={item.id}
+                    entering={FadeInDown.duration(400).delay(index * 80).springify()}
+                  >
                     <SwipeableRow onDelete={() => handleDeleteEntry(item.id)}>
                       <JournalCard
                         entry={item}
@@ -177,43 +184,80 @@ export default function JournalScreen() {
                         onShare={() => handleShareEntry(item)}
                       />
                     </SwipeableRow>
-                  </AnimatedListItem>
+                  </Animated.View>
                 ))}
               </View>
-            ) : (
+            ) : searchQuery ? (
               <View className="flex-1 justify-center items-center py-16">
-                <Ionicons
-                  name="book-outline"
-                  size={64}
-                  color={themeColors.textMuted}
-                />
-                <Text variant="body" color="textMuted" center className="mt-4">
-                  {searchQuery
-                    ? 'No entries match your search'
-                    : 'No journal entries yet.\nTap + to start writing.'}
+                <View
+                  className="w-16 h-16 rounded-2xl items-center justify-center mb-4"
+                  style={{ backgroundColor: isDark ? `${themeColors.primary}20` : `${themeColors.primary}10` }}
+                >
+                  <Ionicons
+                    name="search-outline"
+                    size={32}
+                    color={themeColors.primary}
+                  />
+                </View>
+                <Text variant="bodyMedium" color="textPrimary" center>
+                  No results found
+                </Text>
+                <Text variant="caption" color="textMuted" center className="mt-1">
+                  Try a different search term
                 </Text>
               </View>
+            ) : (
+              <JournalEmptyState onStartWriting={handleNewEntry} />
             )}
           </>
         ) : (
           <>
-            <Text variant="body" color="textSecondary" className="mb-4">
-              Choose a prompt to inspire your writing
-            </Text>
+            <Animated.View
+              entering={FadeInDown.duration(400).delay(100)}
+              className="mb-6"
+            >
+              <Text variant="h3" color="textPrimary" className="mb-2">
+                Find your inspiration
+              </Text>
+              <Text variant="body" color="textSecondary">
+                Choose a prompt to guide your reflection
+              </Text>
+            </Animated.View>
 
-            {Object.entries(promptsByCategory).map(([category, categoryPrompts]) => (
-              <View key={category} className="mb-6">
-                <Text variant="h3" color="textPrimary" className="mb-3 capitalize">
-                  {category}
-                </Text>
-                {categoryPrompts.map((prompt) => (
-                  <PromptCard
-                    key={prompt.id}
-                    prompt={prompt}
-                    onPress={() => handlePromptSelect(prompt.id)}
+            {Object.entries(promptsByCategory).map(([category, categoryPrompts], categoryIndex) => (
+              <Animated.View
+                key={category}
+                className="mb-6"
+                entering={FadeInDown.duration(400).delay(200 + categoryIndex * 100)}
+              >
+                <View className="flex-row items-center gap-2 mb-4">
+                  <View
+                    className="w-1 h-5 rounded-full"
+                    style={{ backgroundColor: themeColors.primary }}
                   />
+                  <Text
+                    variant="bodyMedium"
+                    color="textPrimary"
+                    style={{ textTransform: 'capitalize', letterSpacing: -0.2 }}
+                  >
+                    {category}
+                  </Text>
+                  <Text variant="caption" color="textMuted">
+                    ({categoryPrompts.length})
+                  </Text>
+                </View>
+                {categoryPrompts.map((prompt, promptIndex) => (
+                  <Animated.View
+                    key={prompt.id}
+                    entering={FadeInDown.duration(300).delay(300 + categoryIndex * 100 + promptIndex * 60)}
+                  >
+                    <PromptCard
+                      prompt={prompt}
+                      onPress={() => handlePromptSelect(prompt.id)}
+                    />
+                  </Animated.View>
                 ))}
-              </View>
+              </Animated.View>
             ))}
           </>
         )}

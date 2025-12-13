@@ -9,7 +9,7 @@ import Animated, {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
-import { colors, darkColors, spacing, typography } from '@/src/constants/theme';
+import { colors, darkColors, typography } from '@/src/constants/theme';
 import { useTheme } from '@/src/contexts/ThemeContext';
 import { ThemeToggleButton } from './ThemeToggleButton';
 
@@ -30,8 +30,8 @@ export function AnimatedHeader({
   scrollY,
   title,
   subtitle,
-  collapsedHeight = 60,
-  expandedHeight = 120,
+  collapsedHeight = 56,
+  expandedHeight = 110,
   showThemeToggle = false,
   rightAction,
 }: AnimatedHeaderProps) {
@@ -56,13 +56,13 @@ export function AnimatedHeader({
   const collapsedTitleStyle = useAnimatedStyle(() => {
     const translateY = interpolate(
       scrollY.value,
-      [scrollDistance - 20, scrollDistance],
-      [30, 0],
+      [scrollDistance - 15, scrollDistance],
+      [20, 0],
       Extrapolation.CLAMP
     );
     const opacity = interpolate(
       scrollY.value,
-      [scrollDistance - 20, scrollDistance],
+      [scrollDistance - 15, scrollDistance],
       [0, 1],
       Extrapolation.CLAMP
     );
@@ -75,35 +75,43 @@ export function AnimatedHeader({
   const expandedTitleStyle = useAnimatedStyle(() => {
     const opacity = interpolate(
       scrollY.value,
-      [0, scrollDistance * 0.5],
+      [0, scrollDistance * 0.4],
       [1, 0],
       Extrapolation.CLAMP
     );
-    return { opacity };
+    const translateY = interpolate(
+      scrollY.value,
+      [0, scrollDistance * 0.4],
+      [0, -8],
+      Extrapolation.CLAMP
+    );
+    return {
+      opacity,
+      transform: [{ translateY }],
+    };
   });
 
   const subtitleStyle = useAnimatedStyle(() => ({
-    opacity: interpolate(scrollY.value, [0, 30], [1, 0], Extrapolation.CLAMP),
+    opacity: interpolate(scrollY.value, [0, 25], [1, 0], Extrapolation.CLAMP),
     transform: [
       {
         translateY: interpolate(
           scrollY.value,
-          [0, 30],
-          [0, -10],
+          [0, 25],
+          [0, -6],
           Extrapolation.CLAMP
         ),
       },
     ],
   }));
 
-  const borderStyle = useAnimatedStyle(() => ({
-    borderBottomWidth: interpolate(
+  const borderOpacity = useAnimatedStyle(() => ({
+    opacity: interpolate(
       scrollY.value,
-      [0, 10],
-      [0, 0.5],
+      [scrollDistance - 10, scrollDistance],
+      [0, 1],
       Extrapolation.CLAMP
     ),
-    borderBottomColor: themeColors.border,
   }));
 
   return (
@@ -119,16 +127,34 @@ export function AnimatedHeader({
           paddingTop: insets.top,
         },
         headerStyle,
-        borderStyle,
       ]}
     >
+      {/* Subtle bottom border that fades in */}
+      <Animated.View
+        style={[
+          {
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            height: 0.5,
+            backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)',
+          },
+          borderOpacity,
+        ]}
+      />
+
       {/* Collapsed title - slides up when scrolled */}
       <View className="absolute left-0 right-0 overflow-hidden" style={{ top: insets.top, height: collapsedHeight }}>
         <View className="flex-1 justify-center px-6">
           <Animated.Text
             style={[
-              typography.bodyMedium,
-              { color: themeColors.textPrimary, textAlign: 'center' },
+              {
+                ...typography.bodyMedium,
+                fontWeight: '600',
+                color: themeColors.textPrimary,
+                textAlign: 'center',
+              },
               collapsedTitleStyle,
             ]}
           >
@@ -138,7 +164,7 @@ export function AnimatedHeader({
       </View>
 
       {/* Expanded title - fades out when scrolling */}
-      <View className="flex-1 justify-end px-6 pb-2">
+      <View className="flex-1 justify-end px-6 pb-3">
         <Animated.Text
           style={[
             typography.h1,
@@ -151,8 +177,11 @@ export function AnimatedHeader({
         {subtitle && (
           <Animated.Text
             style={[
-              typography.body,
-              { color: themeColors.textSecondary, marginTop: spacing.xs },
+              {
+                ...typography.caption,
+                color: themeColors.textSecondary,
+                marginTop: 4,
+              },
               subtitleStyle,
             ]}
           >
@@ -164,7 +193,7 @@ export function AnimatedHeader({
       {/* Right actions - top right, vertically centered in collapsed header */}
       {(showThemeToggle || rightAction) && (
         <View
-          className="absolute right-4 justify-center flex-row items-center gap-2"
+          className="absolute right-5 justify-center flex-row items-center gap-2"
           style={{ top: insets.top, height: collapsedHeight, zIndex: 10 }}
         >
           {rightAction && (
@@ -174,11 +203,13 @@ export function AnimatedHeader({
                   await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                   rightAction.onPress();
                 }}
-                className="w-11 h-11 rounded-full items-center justify-center"
-                style={{ backgroundColor: themeColors.primaryLight }}
-                hitSlop={{ top: 4, bottom: 4, left: 4, right: 4 }}
+                className="w-10 h-10 rounded-full items-center justify-center"
+                style={{
+                  backgroundColor: isDark ? `${darkColors.primary}20` : `${colors.primary}15`,
+                }}
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
               >
-                <Ionicons name={rightAction.icon} size={20} color={themeColors.textOnAccent} />
+                <Ionicons name={rightAction.icon} size={20} color={themeColors.primary} />
               </Pressable>
             ) : rightAction
           )}

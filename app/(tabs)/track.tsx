@@ -158,12 +158,13 @@ export default function TrackScreen() {
               </Text>
               <View
                 style={{
-                  backgroundColor: isDark
-                    ? themeColors.surfaceElevated
-                    : `${themeColors.surfaceElevated}99`,
-                  borderRadius: borderRadius.xl,
+                  backgroundColor: themeColors.surfaceElevated,
+                  borderRadius: borderRadius.lg,
                   padding: spacing.lg,
                   minHeight: 140,
+                  // Subtle border for definition
+                  borderWidth: isDark ? 0 : 0.5,
+                  borderColor: isDark ? 'transparent' : 'rgba(0,0,0,0.04)',
                 }}
               >
                 <TextInput

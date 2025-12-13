@@ -1,125 +1,132 @@
-// Softmind Design System - Ultra-Minimal Apple-Style Theme
+// Softmind Design System - Organic Tranquility Theme
+// A calming sage/eucalyptus palette for mental wellness
 
 export const colors = {
-  // Primary palette - muted indigo
-  primary: '#8A9CFF',
-  primaryLight: '#C7D7FE',
-  primaryDark: '#6B7FE3',
+  // Primary palette - healing sage green
+  primary: '#5B8A72',
+  primaryLight: '#7BA393',
+  primaryDark: '#3D6B54',
 
-  // Accent - soft indigo wash
-  accent: '#EEF2FF',
+  // Accent - warm cream wash
+  accent: '#F7F5F0',
 
-  // Mood colors - calming gradient (WCAG AA compliant)
+  // Mood colors - warm to cool progression (WCAG AA compliant)
   mood: {
-    1: '#FFE4EC', // Struggling - soft pink
-    2: '#F2C7FF', // Low - light pink lavender
-    3: '#C7D7FE', // Okay - cool mist
-    4: '#B8D4FF', // Good - sky blue
-    5: '#8A9CFF', // Great - muted indigo
+    1: '#F2D4D4', // Struggling - dusty rose
+    2: '#E8D5C4', // Low - warm sand
+    3: '#D4E0D9', // Okay - sage mist
+    4: '#C5DDD3', // Good - soft mint
+    5: '#A8D4C2', // Great - fresh eucalyptus
   } as Record<number, string>,
 
-  // Mood text colors (darker versions for contrast)
+  // Mood text colors (harmonious darker versions)
   moodText: {
-    1: '#8B5A6B',
-    2: '#7B5A8B',
-    3: '#4B5563',
-    4: '#4A6A8B',
-    5: '#3730A3',
+    1: '#8B5A5A', // Deep rose
+    2: '#7A6555', // Warm brown
+    3: '#4A5D53', // Forest
+    4: '#3D6B54', // Sage
+    5: '#2D5A47', // Deep teal
   } as Record<number, string>,
 
-  // Backgrounds - off-white
-  background: '#F9FAFB',
+  // Backgrounds - warm off-white
+  background: '#FAFAF8',
   surface: '#FFFFFF',
   surfaceElevated: '#FFFFFF',
 
-  // Text - black for maximum readability
-  textPrimary: '#111827',
-  textSecondary: '#111827',
-  textMuted: '#111827',
+  // Text - warm charcoal with proper hierarchy
+  textPrimary: '#1F2421',
+  textSecondary: '#4A5568',
+  textMuted: '#718096',
   textInverse: '#FFFFFF',
 
-  // Icons - deep muted indigo for visibility
-  iconPrimary: '#7585E6',
-  iconSecondary: '#6B7280',
+  // Icons
+  iconPrimary: '#5B8A72',
+  iconSecondary: '#718096',
 
   // Text/icons on colored backgrounds
   textOnPrimary: '#FFFFFF',
-  textOnAccent: '#3730A3',
-  textOnMood: '#111827',
+  textOnAccent: '#3D6B54',
+  textOnMood: '#1F2421',
 
-  // Semantic
-  error: '#EF4444',
-  errorLight: '#FEE2E2',
-  success: '#10B981',
-  successLight: '#D1FAE5',
-  warning: '#F59E0B',
-  warningLight: '#FEF3C7',
+  // Semantic - warmer, more refined
+  error: '#D66853',
+  errorLight: '#FBEAE6',
+  success: '#5B8A72',
+  successLight: '#E8F2ED',
+  warning: '#D4915C',
+  warningLight: '#FDF4EB',
 
-  // Borders & dividers
-  border: '#E5E7EB',
-  borderLight: '#EEF2FF',
-  divider: '#E5E7EB',
+  // Borders & dividers - subtle warmth
+  border: '#E8E6E1',
+  borderLight: '#F2F0EB',
+  divider: '#E8E6E1',
+
+  // Chat bubbles
+  chatBubbleAssistant: '#F0F2F5',
 } as const;
 
-// Dark mode colors - calm charcoal with indigo accents
+// Dark mode - warm charcoal with sage accents
 export const darkColors = {
-  // Primary palette - brighter indigo for dark mode
-  primary: '#A5B4FF',
-  primaryLight: '#C7D7FE',
-  primaryDark: '#8A9CFF',
+  // Primary palette - luminous sage for dark mode
+  primary: '#7BA393',
+  primaryLight: '#A8D4C2',
+  primaryDark: '#5B8A72',
 
-  // Accent - soft indigo wash
-  accent: '#1E2340',
+  // Accent - deep forest wash
+  accent: '#1A2420',
 
-  // Mood colors - same as light (for consistency)
+  // Mood colors - luminous versions for dark mode
   mood: {
-    1: '#FFE4EC',
-    2: '#F2C7FF',
-    3: '#C7D7FE',
-    4: '#B8D4FF',
-    5: '#A5B4FF',
+    1: '#E8B4B4', // Dusty rose
+    2: '#D4C4A8', // Warm sand
+    3: '#B8D4C4', // Sage mist
+    4: '#A8D4C2', // Soft mint
+    5: '#8AC4AE', // Fresh eucalyptus
   } as Record<number, string>,
 
   moodText: {
-    1: '#FFE4EC',
-    2: '#F2C7FF',
-    3: '#C7D7FE',
-    4: '#B8D4FF',
-    5: '#A5B4FF',
+    1: '#E8B4B4',
+    2: '#D4C4A8',
+    3: '#B8D4C4',
+    4: '#A8D4C2',
+    5: '#8AC4AE',
   } as Record<number, string>,
 
-  // Dark backgrounds - calm charcoal
-  background: '#111827',
-  surface: '#1F2937',
-  surfaceElevated: '#374151',
+  // Dark backgrounds - warm charcoal
+  background: '#141816',
+  surface: '#1E2320',
+  surfaceElevated: '#2A302C',
 
-  // Dark text (WCAG AA contrast ratios met)
-  textPrimary: '#F9FAFB',
-  textSecondary: '#D1D5DB',
-  textMuted: '#9CA3AF',
-  textInverse: '#111827',
+  // Dark text - warm whites with hierarchy
+  textPrimary: '#F5F5F3',
+  textSecondary: '#C4C7C5',
+  textMuted: '#8A8F8C',
+  textInverse: '#141816',
 
-  // Icons - brighter for dark mode
-  iconPrimary: '#A5B4FF',
-  iconSecondary: '#9CA3AF',
+  // Icons - luminous for dark mode
+  iconPrimary: '#7BA393',
+  iconSecondary: '#8A8F8C',
 
   // Text/icons on colored backgrounds
-  textOnPrimary: '#111827',
-  textOnAccent: '#C7D7FE',
-  textOnMood: '#111827',
+  textOnPrimary: '#141816',
+  textOnAccent: '#A8D4C2',
+  textOnMood: '#141816',
 
-  // Semantic - adjusted for dark mode
-  error: '#FCA5A5',
-  errorLight: '#7F1D1D',
-  success: '#6EE7B7',
-  successLight: '#064E3B',
-  warning: '#FCD34D',
-  warningLight: '#78350F',
+  // Semantic - luminous for dark mode
+  error: '#E8A090',
+  errorLight: '#3D2420',
+  success: '#7BA393',
+  successLight: '#1A2C24',
+  warning: '#E8B480',
+  warningLight: '#2C2418',
 
-  // Dark borders
-  border: '#374151',
-  borderLight: '#4B5563',
-  divider: '#374151',
+  // Dark borders - subtle definition
+  border: '#2A302C',
+  borderLight: '#3A423E',
+  divider: '#2A302C',
+
+  // Chat bubbles
+  chatBubbleAssistant: '#1E2320', // Same as surface in dark mode
 } as const;
 
 // Helper to get colors based on theme
@@ -146,85 +153,126 @@ export const borderRadius = {
 const systemFont = 'System';
 
 export const typography = {
-  // Headers
+  // Headers - refined tracking for professional feel
   h1: {
     fontFamily: systemFont,
-    fontSize: 28,
-    fontWeight: '600' as const,
-    lineHeight: 36,
-    letterSpacing: -0.5,
+    fontSize: 32,
+    fontWeight: '700' as const,
+    lineHeight: 40,
+    letterSpacing: -0.8,
   },
   h2: {
     fontFamily: systemFont,
-    fontSize: 22,
+    fontSize: 24,
     fontWeight: '600' as const,
-    lineHeight: 28,
-    letterSpacing: -0.3,
+    lineHeight: 30,
+    letterSpacing: -0.4,
   },
   h3: {
     fontFamily: systemFont,
     fontSize: 18,
     fontWeight: '600' as const,
     lineHeight: 24,
+    letterSpacing: -0.2,
   },
-  // Body
+  // Body - optimized for readability
   body: {
     fontFamily: systemFont,
     fontSize: 16,
     fontWeight: '400' as const,
     lineHeight: 24,
+    letterSpacing: -0.1,
   },
   bodyMedium: {
     fontFamily: systemFont,
     fontSize: 16,
     fontWeight: '500' as const,
     lineHeight: 24,
+    letterSpacing: -0.1,
   },
-  // Small
+  // Small - slightly tighter for compact display
   caption: {
     fontFamily: systemFont,
     fontSize: 14,
     fontWeight: '400' as const,
     lineHeight: 20,
+    letterSpacing: 0,
   },
   captionMedium: {
     fontFamily: systemFont,
     fontSize: 14,
     fontWeight: '500' as const,
     lineHeight: 20,
+    letterSpacing: 0,
   },
-  // Tiny
+  // Tiny - used for labels and badges
   label: {
     fontFamily: systemFont,
     fontSize: 12,
-    fontWeight: '500' as const,
+    fontWeight: '600' as const,
     lineHeight: 16,
-    letterSpacing: 0.5,
+    letterSpacing: 0.3,
+    textTransform: 'uppercase' as const,
   },
 } as const;
 
 export const shadows = {
+  // Subtle elevation for cards
   sm: {
-    shadowColor: '#111827',
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
+    shadowOpacity: 0.04,
+    shadowRadius: 3,
     elevation: 1,
   },
+  // Standard card elevation
   md: {
-    shadowColor: '#111827',
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 4,
+    shadowOpacity: 0.06,
+    shadowRadius: 6,
     elevation: 2,
   },
+  // Elevated elements like modals
   lg: {
-    shadowColor: '#111827',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.08,
+    shadowRadius: 16,
     elevation: 4,
   },
+  // Floating elements
+  xl: {
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.12,
+    shadowRadius: 24,
+    elevation: 6,
+  },
+} as const;
+
+// Card shadow helper - returns appropriate shadow for light/dark mode
+export const getCardShadow = (isDark: boolean) => ({
+  shadowColor: '#000',
+  shadowOffset: { width: 0, height: 2 },
+  shadowOpacity: isDark ? 0.3 : 0.04,
+  shadowRadius: 8,
+  elevation: 2,
+});
+
+// Subtle card border for light mode definition
+export const getCardBorder = (isDark: boolean) =>
+  isDark
+    ? {}
+    : {
+        borderWidth: 0.5,
+        borderColor: 'rgba(0,0,0,0.04)',
+      };
+
+// Consistent press animation scale
+export const pressAnimation = {
+  scale: 0.97,
+  springConfig: { damping: 20, stiffness: 400 },
 } as const;
 
 // Mood labels for accessibility

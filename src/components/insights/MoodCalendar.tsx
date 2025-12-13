@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { View, Pressable } from 'react-native';
 import { Text, Card } from '@/src/components/ui';
-import { colors, darkColors, moodLabels } from '@/src/constants/theme';
+import { colors, darkColors, moodLabels, borderRadius } from '@/src/constants/theme';
 import { useTheme } from '@/src/contexts/ThemeContext';
 import type { DailyMoodSummary } from '@/src/types/mood';
 import {
@@ -24,15 +24,19 @@ interface MoodCalendarProps {
 
 const WEEKDAYS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 
-function getMoodColor(avgMood: number | null): string {
+// Get mood color with dark mode support
+function getMoodColor(avgMood: number | null, isDark: boolean): string {
   if (avgMood === null) return 'transparent';
-  const rounded = Math.round(avgMood);
-  return colors.mood[rounded] ?? 'transparent';
+  const rounded = Math.round(avgMood) as 1 | 2 | 3 | 4 | 5;
+  return isDark ? darkColors.mood[rounded] : colors.mood[rounded];
 }
 
-function getMoodOpacity(avgMood: number | null): number {
-  if (avgMood === null) return 0.3;
-  return 0.5 + (avgMood / 5) * 0.5;
+// Adjust opacity for dark mode visibility
+function getMoodOpacity(avgMood: number | null, isDark: boolean): number {
+  if (avgMood === null) return isDark ? 0.2 : 0.15;
+  // Higher base opacity in dark mode for visibility
+  const base = isDark ? 0.6 : 0.5;
+  return base + (avgMood / 5) * (isDark ? 0.4 : 0.5);
 }
 
 export function MoodCalendar({ summaries, isLoading }: MoodCalendarProps) {
@@ -85,26 +89,41 @@ export function MoodCalendar({ summaries, isLoading }: MoodCalendarProps) {
   }, [calendarData]);
 
   return (
-    <Card className="p-4">
-      <View className="flex-row justify-between items-center mb-4">
+    <Card padding="md">
+      <View className="flex-row justify-between items-center mb-5">
         <Pressable
           onPress={() => setCurrentMonth(subMonths(currentMonth, 1))}
-          className="p-1"
+          style={{
+            width: 40,
+            height: 40,
+            borderRadius: borderRadius.md,
+            backgroundColor: isDark ? themeColors.surface : themeColors.surfaceElevated,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
         >
-          <Ionicons name="chevron-back" size={24} color={themeColors.textSecondary} />
+          <Ionicons name="chevron-back" size={20} color={themeColors.textSecondary} />
         </Pressable>
         <Text variant="h3" color="textPrimary">
           {format(currentMonth, 'MMMM yyyy')}
         </Text>
         <Pressable
           onPress={() => setCurrentMonth(addMonths(currentMonth, 1))}
-          className="p-1"
           disabled={isSameMonth(currentMonth, new Date())}
+          style={{
+            width: 40,
+            height: 40,
+            borderRadius: borderRadius.md,
+            backgroundColor: isDark ? themeColors.surface : themeColors.surfaceElevated,
+            alignItems: 'center',
+            justifyContent: 'center',
+            opacity: isSameMonth(currentMonth, new Date()) ? 0.4 : 1,
+          }}
         >
           <Ionicons
             name="chevron-forward"
-            size={24}
-            color={isSameMonth(currentMonth, new Date()) ? themeColors.border : themeColors.textSecondary}
+            size={20}
+            color={themeColors.textSecondary}
           />
         </Pressable>
       </View>
@@ -115,10 +134,10 @@ export function MoodCalendar({ summaries, isLoading }: MoodCalendarProps) {
         </View>
       ) : (
         <>
-          <View className="flex-row mb-1">
+          <View className="flex-row mb-2">
             {WEEKDAYS.map((day, i) => (
-              <View key={i} className="flex-1 items-center py-1">
-                <Text variant="label" color="textMuted">
+              <View key={i} style={{ width: '14.28%', alignItems: 'center', paddingVertical: 8 }}>
+                <Text variant="label" color="textMuted" style={{ fontSize: 11 }}>
                   {day}
                 </Text>
               </View>
@@ -127,41 +146,59 @@ export function MoodCalendar({ summaries, isLoading }: MoodCalendarProps) {
 
           <View className="flex-row flex-wrap">
             {Array.from({ length: startPadding }).map((_, i) => (
-              <View key={`pad-${i}`} style={{ width: '14.28%', aspectRatio: 1 }} />
+              <View key={`pad-${i}`} style={{ width: '14.28%', aspectRatio: 1, padding: 2 }} />
             ))}
 
-            {calendarData.map((day) => (
-              <Pressable
-                key={day.dateStr}
-                style={{
-                  width: '14.28%',
-                  aspectRatio: 1,
-                  backgroundColor: day.avgMood !== null ? getMoodColor(day.avgMood) : themeColors.surfaceElevated,
-                  opacity: getMoodOpacity(day.avgMood),
-                  borderRadius: 8,
-                  marginBottom: 2,
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  borderWidth: day.isToday || selectedDay === day.dateStr ? 2 : 0,
-                  borderColor: day.isToday ? themeColors.primary : themeColors.primaryDark,
-                }}
-                onPress={() => setSelectedDay(day.dateStr === selectedDay ? null : day.dateStr)}
-              >
-                <Text
-                  variant="caption"
-                  color={day.avgMood !== null ? 'textPrimary' : 'textMuted'}
-                  style={day.isToday ? { fontWeight: '700' } : undefined}
-                >
-                  {day.dayOfMonth}
-                </Text>
-              </Pressable>
-            ))}
+            {calendarData.map((day) => {
+              const hasMood = day.avgMood !== null;
+              const isSelected = selectedDay === day.dateStr;
+
+              return (
+                <View key={day.dateStr} style={{ width: '14.28%', aspectRatio: 1, padding: 2 }}>
+                  <Pressable
+                    style={{
+                      flex: 1,
+                      backgroundColor: hasMood
+                        ? getMoodColor(day.avgMood, isDark)
+                        : isDark ? themeColors.surface : themeColors.surfaceElevated,
+                      opacity: hasMood ? getMoodOpacity(day.avgMood, isDark) : 1,
+                      borderRadius: borderRadius.sm,
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      borderWidth: day.isToday || isSelected ? 2 : isDark ? 1 : 0,
+                      borderColor: day.isToday
+                        ? themeColors.primary
+                        : isSelected
+                          ? themeColors.primaryDark
+                          : themeColors.border,
+                    }}
+                    onPress={() => setSelectedDay(day.dateStr === selectedDay ? null : day.dateStr)}
+                  >
+                    <Text
+                      variant="caption"
+                      style={{
+                        color: hasMood ? themeColors.textPrimary : themeColors.textMuted,
+                        fontWeight: day.isToday ? '700' : '400',
+                        fontSize: 13,
+                      }}
+                    >
+                      {day.dayOfMonth}
+                    </Text>
+                  </Pressable>
+                </View>
+              );
+            })}
           </View>
 
           {selectedDayData && selectedDayData.avgMood !== null && (
             <View
-              className="mt-4 p-2 rounded-lg items-center gap-1"
-              style={{ backgroundColor: themeColors.surfaceElevated }}
+              className="mt-4 items-center"
+              style={{
+                backgroundColor: isDark ? themeColors.surface : themeColors.surfaceElevated,
+                borderRadius: borderRadius.md,
+                padding: 12,
+                gap: 4,
+              }}
             >
               <Text variant="captionMedium" color="textPrimary">
                 {format(selectedDayData.date, 'EEEE, MMM d')}
@@ -169,47 +206,67 @@ export function MoodCalendar({ summaries, isLoading }: MoodCalendarProps) {
               <Text variant="body" color="textPrimary">
                 Avg: {selectedDayData.avgMood.toFixed(1)} ({moodLabels[Math.round(selectedDayData.avgMood)]?.label})
               </Text>
-              <Text variant="caption" color="textSecondary">
+              <Text variant="caption" color="textMuted">
                 {selectedDayData.entries.length} check-in{selectedDayData.entries.length !== 1 ? 's' : ''}
               </Text>
             </View>
           )}
 
           <View
-            className="flex-row items-center justify-center gap-1 mt-4 pt-4 border-t"
-            style={{ borderTopColor: themeColors.border }}
+            className="flex-row items-center justify-center mt-5 pt-4"
+            style={{
+              borderTopWidth: 1,
+              borderTopColor: isDark ? themeColors.border : 'rgba(0,0,0,0.06)',
+              gap: 6,
+            }}
           >
-            <Text variant="label" color="textMuted" className="mx-1">
-              Less
+            <Text variant="label" color="textMuted" style={{ marginRight: 4 }}>
+              Low
             </Text>
             {[1, 2, 3, 4, 5].map((mood) => (
               <View
                 key={mood}
-                className="w-4 h-4 rounded"
-                style={{ backgroundColor: colors.mood[mood] }}
+                style={{
+                  width: 16,
+                  height: 16,
+                  borderRadius: 4,
+                  backgroundColor: isDark ? darkColors.mood[mood as 1|2|3|4|5] : colors.mood[mood as 1|2|3|4|5],
+                }}
               />
             ))}
-            <Text variant="label" color="textMuted" className="mx-1">
-              Better
+            <Text variant="label" color="textMuted" style={{ marginLeft: 4 }}>
+              High
             </Text>
           </View>
 
           {monthStats && (
-            <View className="flex-row justify-around mt-4">
-              <View className="items-center">
-                <Text variant="bodyMedium" color="textPrimary">
+            <View className="flex-row mt-4" style={{ gap: 16 }}>
+              <View
+                className="flex-1 items-center py-3"
+                style={{
+                  backgroundColor: isDark ? themeColors.surface : themeColors.surfaceElevated,
+                  borderRadius: borderRadius.md,
+                }}
+              >
+                <Text variant="h3" color="textPrimary">
                   {monthStats.avg.toFixed(1)}
                 </Text>
-                <Text variant="label" color="textMuted">
-                  Avg
+                <Text variant="label" color="textMuted" className="mt-1">
+                  Average
                 </Text>
               </View>
-              <View className="items-center">
-                <Text variant="bodyMedium" color="textPrimary">
+              <View
+                className="flex-1 items-center py-3"
+                style={{
+                  backgroundColor: isDark ? themeColors.surface : themeColors.surfaceElevated,
+                  borderRadius: borderRadius.md,
+                }}
+              >
+                <Text variant="h3" color="textPrimary">
                   {monthStats.daysTracked}
                 </Text>
-                <Text variant="label" color="textMuted">
-                  Days
+                <Text variant="label" color="textMuted" className="mt-1">
+                  Days Tracked
                 </Text>
               </View>
             </View>

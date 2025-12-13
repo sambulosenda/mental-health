@@ -124,7 +124,7 @@ export function ChatBubble({
   };
 
   const assistantBubbleStyle = {
-    backgroundColor: isDark ? themeColors.surface : '#F0F2F5',
+    backgroundColor: themeColors.chatBubbleAssistant,
     borderRadius: 18,
     borderBottomLeftRadius: 4,
   };
