@@ -15,7 +15,7 @@ import { useMoodStore } from '@/src/stores';
 import { colors, darkColors, spacing, typography, borderRadius } from '@/src/constants/theme';
 import { useTheme } from '@/src/contexts/ThemeContext';
 
-const HEADER_EXPANDED_HEIGHT = 80;
+const HEADER_EXPANDED_HEIGHT = 110;
 
 export default function TrackScreen() {
   const router = useRouter();
@@ -106,8 +106,8 @@ export default function TrackScreen() {
           className="flex-1"
           contentContainerStyle={{
             paddingHorizontal: spacing.lg,
-            paddingBottom: spacing.xxl + 60,
-            paddingTop: HEADER_EXPANDED_HEIGHT + spacing.lg,
+            paddingBottom: spacing.xxl,
+            paddingTop: HEADER_EXPANDED_HEIGHT,
           }}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
@@ -128,12 +128,7 @@ export default function TrackScreen() {
               entering={FadeIn.duration(400).delay(100)}
               style={{ marginBottom: spacing.xl }}
             >
-              <Text
-                variant="label"
-                color="textMuted"
-                className="mb-4"
-                style={{ letterSpacing: 1.2, textTransform: 'uppercase' }}
-              >
+              <Text variant="h3" color="textPrimary" className="mb-4">
                 What have you been up to?
               </Text>
               <ActivityTags
@@ -148,13 +143,8 @@ export default function TrackScreen() {
             <Animated.View
               entering={FadeIn.duration(400).delay(200)}
             >
-              <Text
-                variant="label"
-                color="textMuted"
-                className="mb-4"
-                style={{ letterSpacing: 1.2, textTransform: 'uppercase' }}
-              >
-                Anything else?
+              <Text variant="h3" color="textPrimary" className="mb-4">
+                Add a note
               </Text>
               <View
                 style={{

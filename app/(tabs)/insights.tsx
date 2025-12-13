@@ -136,11 +136,11 @@ export default function InsightsScreen() {
           />
         </View>
 
-        <View style={{ marginBottom: 20 }}>
+        <View className="mb-6">
           <MoodTrendChart summaries={summaries} isLoading={isLoading} />
         </View>
 
-        <View style={{ marginBottom: 20 }}>
+        <View className="mb-6">
           <AssessmentTrendChart
             gad7History={gad7History}
             phq9History={phq9History}
@@ -148,14 +148,14 @@ export default function InsightsScreen() {
           />
         </View>
 
-        <View style={{ marginBottom: 24 }}>
+        <View className="mb-6">
           <Text variant="h3" color="textPrimary" className="mb-4">
             {selectedRange} Overview
           </Text>
           <MoodCalendar summaries={summaries} isLoading={isLoading} />
         </View>
 
-        <View style={{ marginBottom: 24 }}>
+        <View className="mb-6">
           <Text variant="h3" color="textPrimary" className="mb-4">
             Patterns & Insights
           </Text>
@@ -166,7 +166,7 @@ export default function InsightsScreen() {
         </View>
 
         {/* Exercise Stats */}
-        <View style={{ marginBottom: 24 }}>
+        <View className="mb-6">
           <Text variant="h3" color="textPrimary" className="mb-4">
             Exercise Activity
           </Text>
@@ -232,12 +232,12 @@ export default function InsightsScreen() {
           })()}
         </View>
 
-        <View style={{ marginBottom: 24 }}>
+        <View className="mb-6">
           <Text variant="h3" color="textPrimary" className="mb-4">
             AI Insights
           </Text>
           {!isModelReady ? (
-            <Card variant="outlined" className="p-4 items-center">
+            <Card variant="flat" className="p-4 items-center">
               <View className="flex-row items-center">
                 <ActivityIndicator size="small" color={themeColors.primary} />
                 <Text variant="body" color="textSecondary" className="ml-2">
@@ -249,7 +249,7 @@ export default function InsightsScreen() {
               </Text>
             </Card>
           ) : aiState === 'generating' ? (
-            <Card variant="outlined" className="p-4 items-center">
+            <Card variant="flat" className="p-4 items-center">
               <View className="flex-row items-center">
                 <ActivityIndicator size="small" color={themeColors.primary} />
                 <Text variant="body" color="textSecondary" className="ml-2">
@@ -270,7 +270,7 @@ export default function InsightsScreen() {
               </Button>
             </View>
           ) : (
-            <Card variant="outlined" className="p-4 items-center">
+            <Card variant="flat" className="p-4 items-center">
               <Ionicons name="sparkles" size={24} color={themeColors.primary} />
               <Text variant="body" color="textSecondary" className="mt-2 text-center">
                 {aiError || 'Generate personalized insights based on your mood and journal entries.'}

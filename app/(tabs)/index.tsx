@@ -76,7 +76,7 @@ export default function HomeScreen() {
       <AnimatedHeader scrollY={scrollY} title={greeting} showThemeToggle />
       <Animated.ScrollView
         className="flex-1"
-        contentContainerStyle={{ paddingHorizontal: spacing.lg, paddingBottom: spacing.xxl + 40, paddingTop: HEADER_EXPANDED_HEIGHT }}
+        contentContainerStyle={{ paddingHorizontal: spacing.lg, paddingBottom: spacing.xxl, paddingTop: HEADER_EXPANDED_HEIGHT }}
         showsVerticalScrollIndicator={false}
         onScroll={scrollHandler}
         scrollEventThrottle={16}

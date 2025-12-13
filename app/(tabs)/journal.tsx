@@ -14,7 +14,7 @@ import { useJournalStore } from '@/src/stores';
 import { colors, darkColors, spacing } from '@/src/constants/theme';
 import { useTheme } from '@/src/contexts/ThemeContext';
 
-const HEADER_EXPANDED_HEIGHT = 120;
+const HEADER_EXPANDED_HEIGHT = 110;
 
 const VIEW_MODES = ['Entries', 'Prompts'] as const;
 
