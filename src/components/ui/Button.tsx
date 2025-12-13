@@ -40,6 +40,8 @@ export function Button({
   className,
   children,
   onPress,
+  onPressIn,
+  onPressOut,
   ...props
 }: ButtonProps) {
   const { isDark } = useTheme();
@@ -54,12 +56,14 @@ export function Button({
     };
   });
 
-  const handlePressIn = () => {
+  const handlePressIn = (e: any) => {
     pressed.value = withSpring(1, { damping: 20, stiffness: 400 });
+    onPressIn?.(e);
   };
 
-  const handlePressOut = () => {
+  const handlePressOut = (e: any) => {
     pressed.value = withSpring(0, { damping: 20, stiffness: 400 });
+    onPressOut?.(e);
   };
 
   const handlePress = async (e: any) => {
@@ -121,6 +125,7 @@ export function Button({
 
   return (
     <AnimatedPressable
+      {...props}
       style={[
         {
           height: sizeConfig.height,
@@ -141,7 +146,6 @@ export function Button({
       onPressOut={handlePressOut}
       accessibilityRole="button"
       accessibilityState={{ disabled: isDisabled }}
-      {...props}
     >
       {loading ? (
         <ActivityIndicator

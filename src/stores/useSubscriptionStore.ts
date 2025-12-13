@@ -11,6 +11,10 @@ import { Platform } from 'react-native';
 
 const ENTITLEMENT_ID = 'premium';
 
+// In-flight initialization promise to prevent concurrent calls
+let initializationPromise: Promise<void> | null = null;
+let listenerUnsubscribe: (() => void) | null = null;
+
 interface SubscriptionState {
   // State
   isInitialized: boolean;
@@ -48,46 +52,60 @@ export const useSubscriptionStore = create<SubscriptionState>()(
       lastSyncTime: null,
 
       initialize: async () => {
+        // Already initialized
         if (get().isInitialized) return;
 
-        try {
-          const apiKey = Platform.select({
-            ios: Constants.expoConfig?.extra?.revenueCatApiKeyIOS,
-            android: Constants.expoConfig?.extra?.revenueCatApiKeyAndroid,
-          });
-
-          if (!apiKey) {
-            console.warn('RevenueCat API key not configured');
-            set({ isInitialized: true, isPremium: get().cachedPremiumStatus });
-            return;
-          }
-
-          await Purchases.configure({ apiKey });
-
-          // Listen for customer info updates
-          Purchases.addCustomerInfoUpdateListener((info) => {
-            const isPremium = !!info.entitlements.active[ENTITLEMENT_ID];
-            set({
-              customerInfo: info,
-              isPremium,
-              cachedPremiumStatus: isPremium,
-              lastSyncTime: Date.now(),
-            });
-          });
-
-          // Initial check
-          await get().checkPremiumStatus();
-          await get().loadOfferings();
-
-          set({ isInitialized: true });
-        } catch (error) {
-          console.error('Failed to initialize RevenueCat:', error);
-          // Fall back to cached status
-          set({
-            isInitialized: true,
-            isPremium: get().cachedPremiumStatus,
-          });
+        // Concurrent call - await existing initialization
+        if (initializationPromise) {
+          await initializationPromise;
+          return;
         }
+
+        // Start initialization - store promise before any async work
+        initializationPromise = (async () => {
+          try {
+            const apiKey = Platform.select({
+              ios: Constants.expoConfig?.extra?.revenueCatApiKeyIOS,
+              android: Constants.expoConfig?.extra?.revenueCatApiKeyAndroid,
+            });
+
+            if (!apiKey) {
+              console.warn('RevenueCat API key not configured');
+              set({ isInitialized: true, isPremium: get().cachedPremiumStatus });
+              return;
+            }
+
+            await Purchases.configure({ apiKey });
+
+            // Only add listener if not already registered
+            if (!listenerUnsubscribe) {
+              listenerUnsubscribe = Purchases.addCustomerInfoUpdateListener((info) => {
+                const isPremium = !!info.entitlements.active[ENTITLEMENT_ID];
+                set({
+                  customerInfo: info,
+                  isPremium,
+                  cachedPremiumStatus: isPremium,
+                  lastSyncTime: Date.now(),
+                });
+              });
+            }
+
+            // Initial check
+            await get().checkPremiumStatus();
+            await get().loadOfferings();
+
+            set({ isInitialized: true });
+          } catch (error) {
+            console.error('Failed to initialize RevenueCat:', error);
+            // Fall back to cached status
+            set({
+              isInitialized: true,
+              isPremium: get().cachedPremiumStatus,
+            });
+          }
+        })();
+
+        await initializationPromise;
       },
 
       checkPremiumStatus: async () => {
@@ -172,6 +190,13 @@ export const useSubscriptionStore = create<SubscriptionState>()(
       clearError: () => set({ error: null }),
 
       reset: () => {
+        // Clean up listener
+        if (listenerUnsubscribe) {
+          listenerUnsubscribe();
+          listenerUnsubscribe = null;
+        }
+        initializationPromise = null;
+
         set({
           isInitialized: false,
           isPremium: false,

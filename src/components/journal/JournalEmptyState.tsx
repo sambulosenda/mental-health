@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { View, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -42,6 +42,7 @@ export function JournalEmptyState({ onStartWriting }: JournalEmptyStateProps) {
   const float2 = useSharedValue(0);
   const float3 = useSharedValue(0);
   const promptOpacity = useSharedValue(1);
+  const promptTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     // Gentle floating animation for decorative elements
@@ -84,12 +85,20 @@ export function JournalEmptyState({ onStartWriting }: JournalEmptyStateProps) {
         withTiming(0, { duration: 300 }),
         withTiming(1, { duration: 300 })
       );
-      setTimeout(() => {
+      if (promptTimeoutRef.current) {
+        clearTimeout(promptTimeoutRef.current);
+      }
+      promptTimeoutRef.current = setTimeout(() => {
         setCurrentPromptIndex((prev) => (prev + 1) % INSPIRATIONAL_PROMPTS.length);
       }, 300);
     }, 5000);
 
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+      if (promptTimeoutRef.current) {
+        clearTimeout(promptTimeoutRef.current);
+      }
+    };
   }, []);
 
   const floatStyle1 = useAnimatedStyle(() => ({

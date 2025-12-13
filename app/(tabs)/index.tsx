@@ -31,7 +31,7 @@ export default function HomeScreen() {
     checkDueStatus,
   } = useAssessmentStore();
   const { isPremium } = useSubscriptionStore();
-  const { requirePremium } = usePremiumFeature('ai_chat');
+  const { requirePremium } = usePremiumFeature();
 
   const handleChatPress = useCallback(
     (type: 'checkin' | 'chat') => {

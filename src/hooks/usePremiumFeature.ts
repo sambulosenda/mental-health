@@ -1,35 +1,36 @@
 import { useCallback } from 'react';
 import { useRouter } from 'expo-router';
+import { useShallow } from 'zustand/react/shallow';
 import { useSubscriptionStore } from '@/src/stores';
 
 export type PremiumFeature = 'ai_chat' | 'exercises' | 'meditations' | 'export';
 
-export function usePremiumFeature(feature?: PremiumFeature) {
+export function usePremiumFeature() {
   const router = useRouter();
-  const { isPremium, isInitialized } = useSubscriptionStore();
+  const { isPremium, isInitialized, cachedPremiumStatus } = useSubscriptionStore(
+    useShallow((state) => ({
+      isPremium: state.isPremium,
+      isInitialized: state.isInitialized,
+      cachedPremiumStatus: state.cachedPremiumStatus,
+    }))
+  );
 
   const requirePremium = useCallback(
     (onAllowed: () => void) => {
-      if (!isInitialized) {
-        // Still loading, allow access (will re-check)
-        onAllowed();
-        return;
-      }
+      const effectiveStatus = isInitialized ? isPremium : cachedPremiumStatus;
 
-      if (isPremium) {
+      if (effectiveStatus) {
         onAllowed();
       } else {
-        // Show paywall
         router.push('/paywall');
       }
     },
-    [isPremium, isInitialized, router]
+    [isPremium, isInitialized, cachedPremiumStatus, router]
   );
 
   const checkPremium = useCallback((): boolean => {
-    if (!isInitialized) return true; // Allow while loading
-    return isPremium;
-  }, [isPremium, isInitialized]);
+    return isInitialized ? isPremium : cachedPremiumStatus;
+  }, [isPremium, isInitialized, cachedPremiumStatus]);
 
   return {
     isPremium,
