@@ -1,4 +1,4 @@
-import { Platform, Pressable, ScrollView, StyleSheet, Text, View, Alert, ActivityIndicator } from "react-native";
+import { Platform, Pressable, ScrollView, StyleSheet, Text, View, Alert, ActivityIndicator, Linking } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   Brain,
@@ -21,6 +21,9 @@ import { ProgressiveBlurView, GradientText } from "@/src/components/ui";
 import { FeaturesSection, FeatureItem, IconContainer, PeriodControl, PlanCard } from "@/src/components/paywall";
 
 type Period = "weekly" | "monthly" | "yearly";
+
+const TERMS_URL = "https://softmind.app/terms";
+const PRIVACY_URL = "https://softmind.app/privacy";
 
 export default function PaywallScreen() {
   const [period, setPeriod] = useState<Period>("yearly");
@@ -60,16 +63,22 @@ export default function PaywallScreen() {
     });
   }, [packages, period]);
 
-  // Pre-select annual package by default (best for conversions)
+  // Keep selection in sync with filtered packages (handles period changes)
   React.useEffect(() => {
-    if (filteredPackages.length > 0 && !selectedPackageId) {
+    if (filteredPackages.length === 0) return;
+
+    // Check if current selection exists in filtered packages
+    const selectionExists = selectedPackageId &&
+      filteredPackages.some((p) => p.identifier === selectedPackageId);
+
+    if (!selectionExists) {
       // Try to select annual/yearly first, otherwise select first package
       const annualPkg = filteredPackages.find(
         (p) => p.identifier.toLowerCase().includes("annual") || p.identifier.toLowerCase().includes("yearly")
       );
       setSelectedPackageId(annualPkg?.identifier || filteredPackages[0].identifier);
     }
-  }, [filteredPackages, selectedPackageId]);
+  }, [filteredPackages]);
 
   const selectedPackage = packages.find((p) => p.identifier === selectedPackageId);
 
@@ -311,11 +320,19 @@ export default function PaywallScreen() {
             <Text className="text-neutral-400 text-sm font-medium">Restore</Text>
           </Pressable>
           <Text className="text-neutral-600">•</Text>
-          <Pressable>
+          <Pressable
+            onPress={() => Linking.openURL(TERMS_URL).catch(() => {})}
+            accessibilityLabel="Terms of Service"
+            accessibilityRole="link"
+          >
             <Text className="text-neutral-400 text-sm font-medium">Terms</Text>
           </Pressable>
           <Text className="text-neutral-600">•</Text>
-          <Pressable>
+          <Pressable
+            onPress={() => Linking.openURL(PRIVACY_URL).catch(() => {})}
+            accessibilityLabel="Privacy Policy"
+            accessibilityRole="link"
+          >
             <Text className="text-neutral-400 text-sm font-medium">Privacy</Text>
           </Pressable>
         </View>
