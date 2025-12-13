@@ -9,6 +9,7 @@ import {
   deleteMoodEntry,
   deleteAllMoodEntries,
 } from '@/src/lib/database';
+import { formatErrorMessage, toDateKey } from '@/src/lib/utils';
 
 interface MoodState {
   // Data
@@ -74,7 +75,7 @@ export const useMoodStore = create<MoodState>((set, get) => ({
       set({ entries, isLoading: false });
     } catch (error) {
       set({
-        error: error instanceof Error ? error.message : 'Failed to load entries',
+        error: formatErrorMessage(error, 'Failed to load entries'),
         isLoading: false,
       });
     }
@@ -120,7 +121,7 @@ export const useMoodStore = create<MoodState>((set, get) => ({
       return entry;
     } catch (error) {
       set({
-        error: error instanceof Error ? error.message : 'Failed to save entry',
+        error: formatErrorMessage(error, 'Failed to save entry'),
         isLoading: false,
       });
       return null;
@@ -139,7 +140,7 @@ export const useMoodStore = create<MoodState>((set, get) => ({
       }));
     } catch (error) {
       set({
-        error: error instanceof Error ? error.message : 'Failed to delete entry',
+        error: formatErrorMessage(error, 'Failed to delete entry'),
         isLoading: false,
       });
     }
@@ -157,7 +158,7 @@ export const useMoodStore = create<MoodState>((set, get) => ({
 
     // Group by date
     entries.forEach((entry) => {
-      const dateKey = entry.timestamp.toISOString().split('T')[0];
+      const dateKey = toDateKey(entry.timestamp);
       if (!summaryMap.has(dateKey)) {
         summaryMap.set(dateKey, []);
       }
@@ -188,7 +189,7 @@ export const useMoodStore = create<MoodState>((set, get) => ({
       set({ entries: [], todayEntries: [], isLoading: false });
     } catch (error) {
       set({
-        error: error instanceof Error ? error.message : 'Failed to clear entries',
+        error: formatErrorMessage(error, 'Failed to clear entries'),
         isLoading: false,
       });
     }

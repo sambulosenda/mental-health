@@ -1,8 +1,4 @@
-import {
-  TextInput,
-  TextInputProps,
-  View,
-} from 'react-native';
+import { TextInput, TextInputProps, View } from 'react-native';
 import { useState } from 'react';
 import { typography, colors, darkColors, borderRadius } from '@/src/constants/theme';
 import { useTheme } from '@/src/contexts/ThemeContext';
@@ -29,12 +25,12 @@ export function Input({
   const themeColors = isDark ? darkColors : colors;
   const [isFocused, setIsFocused] = useState(false);
 
-  const handleFocus = (e: any) => {
+  const handleFocus: TextInputProps['onFocus'] = (e) => {
     setIsFocused(true);
     onFocus?.(e);
   };
 
-  const handleBlur = (e: any) => {
+  const handleBlur: TextInputProps['onBlur'] = (e) => {
     setIsFocused(false);
     onBlur?.(e);
   };

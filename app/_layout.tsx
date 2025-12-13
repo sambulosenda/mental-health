@@ -1,12 +1,12 @@
 import { BiometricLock } from '@/src/components/BiometricLock';
 import { AnimatedSplash } from '@/src/components/splash/AnimatedSplash';
+import { isValidReminderType, ROUTES } from '@/src/constants/config';
 import { colors, darkColors } from '@/src/constants/theme';
 import { ThemeProvider, useTheme } from '@/src/contexts/ThemeContext';
 import { initializeDatabase } from '@/src/lib/database';
 import { getNotificationService } from '@/src/lib/notifications';
 import { hasCompletedToday } from '@/src/lib/streaks';
 import { useSettingsStore, useSubscriptionStore } from '@/src/stores';
-import type { ReminderType } from '@/src/types/settings';
 import * as Notifications from 'expo-notifications';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
@@ -17,12 +17,6 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { KeyboardProvider } from 'react-native-keyboard-controller';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import '../global.css';
-
-const VALID_REMINDER_TYPES: readonly ReminderType[] = ['mood', 'exercise', 'journal'];
-
-function isValidReminderType(value: unknown): value is ReminderType {
-  return typeof value === 'string' && VALID_REMINDER_TYPES.includes(value as ReminderType);
-}
 
 function RootLayoutContent() {
   const [isReady, setIsReady] = useState(false);
@@ -101,13 +95,13 @@ function RootLayoutContent() {
           }
           switch (action) {
             case 'mood':
-              router.push('/(tabs)/track');
+              router.push(ROUTES.TRACK);
               break;
             case 'exercise':
-              router.push('/(tabs)');
+              router.push(ROUTES.TABS);
               break;
             case 'journal':
-              router.push('/(tabs)/journal');
+              router.push(ROUTES.JOURNAL);
               break;
           }
         }
@@ -133,11 +127,11 @@ function RootLayoutContent() {
     const forceOnboarding = __DEV__ && false;
 
     if (forceOnboarding && !inOnboarding && !hasCompletedOnboarding) {
-      router.replace('/onboarding');
+      router.replace(ROUTES.ONBOARDING);
     } else if (!hasCompletedOnboarding && !inOnboarding) {
-      router.replace('/onboarding');
+      router.replace(ROUTES.ONBOARDING);
     } else if (hasCompletedOnboarding && inOnboarding) {
-      router.replace('/(tabs)');
+      router.replace(ROUTES.TABS);
     }
   }, [isReady, hasCompletedOnboarding, segments]);
 

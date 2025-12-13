@@ -1,5 +1,4 @@
 import { eq, desc } from 'drizzle-orm';
-import * as Crypto from 'expo-crypto';
 import { db } from '../client';
 import {
   chatConversations,
@@ -20,10 +19,7 @@ import type {
   ConversationType,
   ChatConversationMetadata,
 } from '@/src/types/chat';
-
-function generateId(): string {
-  return Crypto.randomUUID();
-}
+import { generateId, parseJSONSafe } from '@/src/lib/utils';
 
 // Convert database row to app type
 function toConversation(row: ChatConversationRow): ChatConversation {
@@ -34,7 +30,7 @@ function toConversation(row: ChatConversationRow): ChatConversation {
     linkedMoodId: row.linkedMoodId ?? undefined,
     startedAt: row.startedAt,
     endedAt: row.endedAt ?? undefined,
-    metadata: row.metadata ? JSON.parse(row.metadata) : undefined,
+    metadata: parseJSONSafe<ChatConversationMetadata | undefined>(row.metadata, undefined),
   };
 }
 
@@ -164,7 +160,7 @@ function toMoodEntry(row: MoodEntryRow): MoodEntry {
     id: row.id,
     mood: row.mood as 1 | 2 | 3 | 4 | 5,
     timestamp: row.timestamp,
-    activities: row.activities ? JSON.parse(row.activities) : [],
+    activities: parseJSONSafe<ActivityTagId[]>(row.activities, []),
     note: row.note ?? undefined,
     createdAt: row.createdAt,
   };

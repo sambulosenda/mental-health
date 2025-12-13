@@ -1,9 +1,9 @@
 import { eq, desc, gte, lte, and } from 'drizzle-orm';
-import * as Crypto from 'expo-crypto';
 import { db } from '../client';
 import { moodEntries, type MoodEntryRow, type NewMoodEntry } from '../schema';
 import type { MoodEntry } from '@/src/types/mood';
 import type { ActivityTagId } from '@/src/constants/theme';
+import { generateId, parseJSONSafe } from '@/src/lib/utils';
 
 // Convert database row to app type
 function toMoodEntry(row: MoodEntryRow): MoodEntry {
@@ -11,14 +11,10 @@ function toMoodEntry(row: MoodEntryRow): MoodEntry {
     id: row.id,
     mood: row.mood as 1 | 2 | 3 | 4 | 5,
     timestamp: row.timestamp,
-    activities: row.activities ? JSON.parse(row.activities) : [],
+    activities: parseJSONSafe<ActivityTagId[]>(row.activities, []),
     note: row.note ?? undefined,
     createdAt: row.createdAt,
   };
-}
-
-function generateId(): string {
-  return Crypto.randomUUID();
 }
 
 // Create a new mood entry

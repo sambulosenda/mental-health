@@ -1,8 +1,8 @@
 import { eq, desc, like, or, gte } from 'drizzle-orm';
-import * as Crypto from 'expo-crypto';
 import { db } from '../client';
 import { journalEntries, prompts, type JournalEntryRow, type NewJournalEntry, type PromptRow } from '../schema';
 import type { JournalEntry, JournalPrompt } from '@/src/types/journal';
+import { generateId, parseJSONSafe } from '@/src/lib/utils';
 
 // Convert database row to app type
 function toJournalEntry(row: JournalEntryRow): JournalEntry {
@@ -12,7 +12,7 @@ function toJournalEntry(row: JournalEntryRow): JournalEntry {
     content: row.content,
     promptId: row.promptId ?? undefined,
     mood: row.mood as 1 | 2 | 3 | 4 | 5 | undefined,
-    tags: row.tags ? JSON.parse(row.tags) : [],
+    tags: parseJSONSafe<string[]>(row.tags, []),
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
   };
@@ -25,10 +25,6 @@ function toPrompt(row: PromptRow): JournalPrompt {
     text: row.text,
     usedAt: row.usedAt ?? undefined,
   };
-}
-
-function generateId(): string {
-  return Crypto.randomUUID();
 }
 
 // Create a new journal entry

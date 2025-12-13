@@ -8,8 +8,7 @@ import Purchases, {
 } from 'react-native-purchases';
 import Constants from 'expo-constants';
 import { Platform } from 'react-native';
-
-const ENTITLEMENT_ID = 'premium';
+import { ENTITLEMENT_ID } from '@/src/constants/config';
 
 // In-flight initialization promise to prevent concurrent calls
 let initializationPromise: Promise<void> | null = null;
@@ -144,13 +143,14 @@ export const useSubscriptionStore = create<SubscriptionState>()(
           });
 
           return isPremium;
-        } catch (error: any) {
-          if (error.userCancelled) {
+        } catch (error: unknown) {
+          const purchaseError = error as { userCancelled?: boolean; message?: string };
+          if (purchaseError.userCancelled) {
             set({ isLoading: false });
             return false;
           }
 
-          const message = error.message || 'Purchase failed';
+          const message = purchaseError.message || 'Purchase failed';
           set({ error: message, isLoading: false });
           return false;
         }
@@ -172,8 +172,9 @@ export const useSubscriptionStore = create<SubscriptionState>()(
           });
 
           return isPremium;
-        } catch (error: any) {
-          const message = error.message || 'Restore failed';
+        } catch (error: unknown) {
+          const restoreError = error as { message?: string };
+          const message = restoreError.message || 'Restore failed';
           set({ error: message, isLoading: false });
           return false;
         }

@@ -3,6 +3,7 @@ import {
   PressableProps,
   ViewStyle,
   ActivityIndicator,
+  GestureResponderEvent,
 } from 'react-native';
 import Animated, {
   useSharedValue,
@@ -56,17 +57,17 @@ export function Button({
     };
   });
 
-  const handlePressIn = (e: any) => {
+  const handlePressIn = (e: GestureResponderEvent) => {
     pressed.value = withSpring(1, { damping: 20, stiffness: 400 });
     onPressIn?.(e);
   };
 
-  const handlePressOut = (e: any) => {
+  const handlePressOut = (e: GestureResponderEvent) => {
     pressed.value = withSpring(0, { damping: 20, stiffness: 400 });
     onPressOut?.(e);
   };
 
-  const handlePress = async (e: any) => {
+  const handlePress = async (e: GestureResponderEvent) => {
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     onPress?.(e);
   };

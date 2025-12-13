@@ -6,17 +6,13 @@ import type {
 } from '@/src/types/assessment';
 import { calculateSeverity, getTemplateById } from '@/src/constants/assessments';
 import { desc, eq, and, gte } from 'drizzle-orm';
-import * as Crypto from 'expo-crypto';
 import { db } from '../client';
 import {
   assessmentSessions,
   type AssessmentSessionRow,
   type NewAssessmentSession,
 } from '../schema';
-
-function generateId(): string {
-  return Crypto.randomUUID();
-}
+import { generateId } from '@/src/lib/utils';
 
 type AssessmentSessionStatus = 'in_progress' | 'completed' | 'abandoned';
 

@@ -4,17 +4,13 @@ import type {
   MoodValue,
 } from '@/src/types/exercise';
 import { desc, eq } from 'drizzle-orm';
-import * as Crypto from 'expo-crypto';
 import { db } from '../client';
 import {
   exerciseSessions,
   type ExerciseSessionRow,
   type NewExerciseSession,
 } from '../schema';
-
-function generateId(): string {
-  return Crypto.randomUUID();
-}
+import { generateId } from '@/src/lib/utils';
 
 // Validate that a value is a string or array of strings
 function isValidResponseValue(value: unknown): value is string | string[] {
