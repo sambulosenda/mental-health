@@ -27,7 +27,7 @@ interface ButtonProps extends Omit<PressableProps, 'style'> {
   fullWidth?: boolean;
   style?: ViewStyle;
   className?: string;
-  children: string;
+  children: React.ReactNode;
 }
 
 export function Button({
@@ -148,7 +148,7 @@ export function Button({
           size="small"
           color={getTextColor()}
         />
-      ) : (
+      ) : typeof children === 'string' ? (
         <Text
           variant={sizeConfig.fontSize}
           style={{
@@ -158,6 +158,8 @@ export function Button({
         >
           {children}
         </Text>
+      ) : (
+        children
       )}
     </AnimatedPressable>
   );
