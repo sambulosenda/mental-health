@@ -1,6 +1,7 @@
-import { eq, desc, gte, lte, and } from 'drizzle-orm';
+import { eq, desc } from 'drizzle-orm';
 import { db } from '../client';
 import { moodEntries, type MoodEntryRow, type NewMoodEntry } from '../schema';
+import { dateRangeForDay, dateRangeFor, dateRangeForLastDays } from '../utils';
 import type { MoodEntry } from '@/src/types/mood';
 import type { ActivityTagId } from '@/src/constants/theme';
 import { generateId, parseJSONSafe } from '@/src/lib/utils';
@@ -48,21 +49,10 @@ export async function getAllMoodEntries(): Promise<MoodEntry[]> {
 
 // Get mood entries for a specific date
 export async function getMoodEntriesForDate(date: Date): Promise<MoodEntry[]> {
-  const startOfDay = new Date(date);
-  startOfDay.setHours(0, 0, 0, 0);
-
-  const endOfDay = new Date(date);
-  endOfDay.setHours(23, 59, 59, 999);
-
   const rows = await db
     .select()
     .from(moodEntries)
-    .where(
-      and(
-        gte(moodEntries.timestamp, startOfDay),
-        lte(moodEntries.timestamp, endOfDay)
-      )
-    )
+    .where(dateRangeForDay(moodEntries.timestamp, date))
     .orderBy(desc(moodEntries.timestamp));
 
   return rows.map(toMoodEntry);
@@ -76,12 +66,7 @@ export async function getMoodEntriesForRange(
   const rows = await db
     .select()
     .from(moodEntries)
-    .where(
-      and(
-        gte(moodEntries.timestamp, startDate),
-        lte(moodEntries.timestamp, endDate)
-      )
-    )
+    .where(dateRangeFor(moodEntries.timestamp, startDate, endDate))
     .orderBy(desc(moodEntries.timestamp));
 
   return rows.map(toMoodEntry);
@@ -89,11 +74,13 @@ export async function getMoodEntriesForRange(
 
 // Get entries for the last N days
 export async function getMoodEntriesForLastDays(days: number): Promise<MoodEntry[]> {
-  const startDate = new Date();
-  startDate.setDate(startDate.getDate() - days);
-  startDate.setHours(0, 0, 0, 0);
+  const rows = await db
+    .select()
+    .from(moodEntries)
+    .where(dateRangeForLastDays(moodEntries.timestamp, days))
+    .orderBy(desc(moodEntries.timestamp));
 
-  return getMoodEntriesForRange(startDate, new Date());
+  return rows.map(toMoodEntry);
 }
 
 // Delete a mood entry

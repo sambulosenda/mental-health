@@ -5,24 +5,22 @@ import type {
   SeverityLevel,
 } from '@/src/types/assessment';
 import { calculateSeverity, getTemplateById } from '@/src/constants/assessments';
-import { desc, eq, and, gte } from 'drizzle-orm';
+import { desc, eq, and } from 'drizzle-orm';
 import { db } from '../client';
 import {
   assessmentSessions,
   type AssessmentSessionRow,
   type NewAssessmentSession,
 } from '../schema';
+import {
+  parseAssessmentResponses,
+  castSessionStatus,
+  dateRangeForLastDays,
+} from '../utils';
 import { generateId } from '@/src/lib/utils';
 
-type AssessmentSessionStatus = 'in_progress' | 'completed' | 'abandoned';
-
-const VALID_STATUSES: AssessmentSessionStatus[] = ['in_progress', 'completed', 'abandoned'];
 const VALID_TYPES: AssessmentType[] = ['gad7', 'phq9'];
 const VALID_SEVERITIES: SeverityLevel[] = ['minimal', 'mild', 'moderate', 'severe'];
-
-function isValidStatus(status: string): status is AssessmentSessionStatus {
-  return VALID_STATUSES.includes(status as AssessmentSessionStatus);
-}
 
 function isValidType(type: string): type is AssessmentType {
   return VALID_TYPES.includes(type as AssessmentType);
@@ -30,37 +28,6 @@ function isValidType(type: string): type is AssessmentType {
 
 function isValidSeverity(severity: string): severity is SeverityLevel {
   return VALID_SEVERITIES.includes(severity as SeverityLevel);
-}
-
-function isValidLikertValue(value: unknown): value is LikertValue {
-  return typeof value === 'number' && [0, 1, 2, 3].includes(value);
-}
-
-// Safely parse JSON responses with validation
-function safeJsonParse(
-  json: string | null,
-  fallback: Record<string, LikertValue> = {}
-): Record<string, LikertValue> {
-  if (!json) return fallback;
-  try {
-    const parsed = JSON.parse(json);
-    if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
-      console.error('Invalid assessment responses JSON: not an object');
-      return fallback;
-    }
-    const validated: Record<string, LikertValue> = {};
-    for (const [key, value] of Object.entries(parsed)) {
-      if (isValidLikertValue(value)) {
-        validated[key] = value;
-      } else {
-        console.warn(`Invalid Likert value for key "${key}":`, value);
-      }
-    }
-    return validated;
-  } catch (error) {
-    console.error('Failed to parse assessment responses JSON:', error);
-    return fallback;
-  }
 }
 
 // Convert database row to app type
@@ -71,23 +38,16 @@ function toAssessmentSession(row: AssessmentSessionRow): AssessmentSession | nul
     return null;
   }
 
-  // Validate status
-  const status = isValidStatus(row.status) ? row.status : 'in_progress';
-  if (!isValidStatus(row.status)) {
-    console.warn(`Invalid session status "${row.status}", defaulting to "in_progress"`);
-  }
-
   // Validate severity
-  const severity =
-    row.severity && isValidSeverity(row.severity) ? row.severity : undefined;
+  const severity = row.severity && isValidSeverity(row.severity) ? row.severity : undefined;
 
   return {
     id: row.id,
     type: row.type as AssessmentType,
-    status,
+    status: castSessionStatus(row.status),
     startedAt: row.startedAt,
     completedAt: row.completedAt ?? undefined,
-    responses: safeJsonParse(row.responses),
+    responses: parseAssessmentResponses(row.responses),
     totalScore: row.totalScore ?? undefined,
     severity,
   };
@@ -228,9 +188,6 @@ export async function getAssessmentHistory(
   type: AssessmentType,
   days: number = 90
 ): Promise<AssessmentSession[]> {
-  const startDate = new Date();
-  startDate.setDate(startDate.getDate() - days);
-
   const rows = await db
     .select()
     .from(assessmentSessions)
@@ -238,7 +195,7 @@ export async function getAssessmentHistory(
       and(
         eq(assessmentSessions.type, type),
         eq(assessmentSessions.status, 'completed'),
-        gte(assessmentSessions.completedAt, startDate)
+        dateRangeForLastDays(assessmentSessions.completedAt, days)
       )
     )
     .orderBy(desc(assessmentSessions.completedAt));

@@ -1,6 +1,7 @@
-import { eq, desc, like, or, gte } from 'drizzle-orm';
+import { eq, desc, like, or } from 'drizzle-orm';
 import { db } from '../client';
 import { journalEntries, prompts, type JournalEntryRow, type NewJournalEntry, type PromptRow } from '../schema';
+import { dateRangeForLastDays } from '../utils';
 import type { JournalEntry, JournalPrompt } from '@/src/types/journal';
 import { generateId, parseJSONSafe } from '@/src/lib/utils';
 
@@ -85,14 +86,10 @@ export async function getAllJournalEntries(): Promise<JournalEntry[]> {
 
 // Get journal entries for the last N days
 export async function getJournalEntriesForLastDays(days: number): Promise<JournalEntry[]> {
-  const startDate = new Date();
-  startDate.setDate(startDate.getDate() - days);
-  startDate.setHours(0, 0, 0, 0);
-
   const rows = await db
     .select()
     .from(journalEntries)
-    .where(gte(journalEntries.createdAt, startDate))
+    .where(dateRangeForLastDays(journalEntries.createdAt, days))
     .orderBy(desc(journalEntries.createdAt));
   return rows.map(toJournalEntry);
 }

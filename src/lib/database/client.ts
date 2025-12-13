@@ -129,6 +129,18 @@ export async function initializeDatabase(): Promise<void> {
     ON assessment_sessions(type, started_at);
   `);
 
+  // Index for mood entries date range queries
+  await expo.execAsync(`
+    CREATE INDEX IF NOT EXISTS idx_mood_entries_timestamp
+    ON mood_entries(timestamp);
+  `);
+
+  // Index for journal entries date range queries
+  await expo.execAsync(`
+    CREATE INDEX IF NOT EXISTS idx_journal_entries_created_at
+    ON journal_entries(created_at);
+  `);
+
   // Seed default prompts if empty
   const result = await expo.getFirstAsync<{ count: number }>('SELECT COUNT(*) as count FROM prompts');
   if (result?.count === 0) {

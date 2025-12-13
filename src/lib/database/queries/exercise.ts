@@ -10,85 +10,25 @@ import {
   type ExerciseSessionRow,
   type NewExerciseSession,
 } from '../schema';
+import {
+  isValidMoodValue,
+  parseExerciseResponses,
+  castMoodValue,
+  castSessionStatus,
+} from '../utils';
 import { generateId } from '@/src/lib/utils';
-
-// Validate that a value is a string or array of strings
-function isValidResponseValue(value: unknown): value is string | string[] {
-  if (typeof value === 'string') return true;
-  if (Array.isArray(value)) return value.every((v) => typeof v === 'string');
-  return false;
-}
-
-// Safely parse JSON with fallback and validation
-function safeJsonParse(json: string | null, fallback: Record<string, string | string[]> = {}): Record<string, string | string[]> {
-  if (!json) return fallback;
-  try {
-    const parsed = JSON.parse(json);
-    if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
-      console.error('Invalid exercise responses JSON: not an object');
-      return fallback;
-    }
-    // Filter to only include valid string or string[] values
-    const validated: Record<string, string | string[]> = {};
-    for (const [key, value] of Object.entries(parsed)) {
-      if (isValidResponseValue(value)) {
-        validated[key] = value;
-      } else {
-        console.warn(`Invalid response value for key "${key}":`, value);
-      }
-    }
-    return validated;
-  } catch (error) {
-    console.error('Failed to parse exercise responses JSON:', error);
-    return fallback;
-  }
-}
-
-// Valid exercise session statuses
-const VALID_STATUSES: ExerciseSessionStatus[] = ['in_progress', 'completed', 'abandoned'];
-
-// Validate status is a valid ExerciseSessionStatus
-function isValidStatus(status: string): status is ExerciseSessionStatus {
-  return VALID_STATUSES.includes(status as ExerciseSessionStatus);
-}
-
-// Validate mood value is 1-5
-function isValidMoodValue(mood: number): mood is MoodValue {
-  return Number.isInteger(mood) && mood >= 1 && mood <= 5;
-}
 
 // Convert database row to app type
 function toExerciseSession(row: ExerciseSessionRow): ExerciseSession {
-  // Validate status
-  const status = isValidStatus(row.status) ? row.status : 'in_progress';
-  if (!isValidStatus(row.status)) {
-    console.warn(`Invalid session status "${row.status}", defaulting to "in_progress"`);
-  }
-
-  // Validate mood values: null → undefined, invalid number → undefined with warning
-  const moodBefore = row.moodBefore === null
-    ? undefined
-    : isValidMoodValue(row.moodBefore) ? row.moodBefore : undefined;
-  const moodAfter = row.moodAfter === null
-    ? undefined
-    : isValidMoodValue(row.moodAfter) ? row.moodAfter : undefined;
-
-  if (row.moodBefore !== null && !isValidMoodValue(row.moodBefore)) {
-    console.warn(`Invalid moodBefore value "${row.moodBefore}", ignoring`);
-  }
-  if (row.moodAfter !== null && !isValidMoodValue(row.moodAfter)) {
-    console.warn(`Invalid moodAfter value "${row.moodAfter}", ignoring`);
-  }
-
   return {
     id: row.id,
     templateId: row.templateId,
-    status,
+    status: castSessionStatus(row.status) as ExerciseSessionStatus,
     startedAt: row.startedAt,
     completedAt: row.completedAt ?? undefined,
-    responses: safeJsonParse(row.responses),
-    moodBefore,
-    moodAfter,
+    responses: parseExerciseResponses(row.responses),
+    moodBefore: castMoodValue(row.moodBefore, 'moodBefore'),
+    moodAfter: castMoodValue(row.moodAfter, 'moodAfter'),
   };
 }
 
