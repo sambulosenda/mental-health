@@ -19,7 +19,9 @@
       "Bash(npx eslint:*)",
       "Bash(git -C /Users/sambulosenda/Documents/zen-mobile-app status)",
       "Bash(git -C /Users/sambulosenda/Documents/zen-mobile-app log --oneline -5)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(git -C /Users/sambulosenda/Documents/zen-mobile-app diff --stat)",
+      "Bash(git -C /Users/sambulosenda/Documents/zen-mobile-app log --oneline -3)"
     ],
     "deny": [],
     "ask": []

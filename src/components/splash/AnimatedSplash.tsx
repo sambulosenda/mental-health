@@ -122,7 +122,7 @@ export function AnimatedSplash({ onAnimationComplete, isAppReady }: AnimatedSpla
             <Animated.View style={[styles.glow, glowStyle]} />
             {/* Main logo */}
             <AnimatedImage
-              source={require('@/assets/images/icon.png')}
+              source={require('@/assets/images/circle_image.png')}
               style={[styles.logo, logoStyle]}
               resizeMode="contain"
             />
