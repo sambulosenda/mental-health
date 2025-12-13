@@ -63,6 +63,16 @@ function ExerciseSessionContent() {
     }
   }, [templateId, exerciseFlow, isLoading, error, startExercise]);
 
+  // Clean up on unmount if still loading (user navigated away)
+  useEffect(() => {
+    return () => {
+      const { isLoading: stillLoading, exerciseFlow: flow } = useExerciseStore.getState();
+      if (stillLoading && !flow) {
+        reset();
+      }
+    };
+  }, [reset]);
+
   const handleClose = useCallback(() => {
     if (exerciseFlow && exerciseFlow.currentStepIndex > 0) {
       Alert.alert(

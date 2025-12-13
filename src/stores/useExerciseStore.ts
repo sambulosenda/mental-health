@@ -239,13 +239,19 @@ export const useExerciseStore = create<ExerciseState>((set, get) => ({
   // Abandon the exercise
   abandonExercise: async () => {
     const { activeSession } = get();
-    if (!activeSession) return;
+
+    // Always reset loading state, even if no active session
+    if (!activeSession) {
+      set({ isLoading: false, exerciseFlow: null });
+      return;
+    }
 
     try {
       await abandonExerciseSession(activeSession.id);
       set({
         activeSession: null,
         exerciseFlow: null,
+        isLoading: false,
       });
     } catch (error) {
       console.error('Failed to abandon exercise:', error);
@@ -253,6 +259,7 @@ export const useExerciseStore = create<ExerciseState>((set, get) => ({
       set({
         activeSession: null,
         exerciseFlow: null,
+        isLoading: false,
       });
     }
   },
