@@ -18,6 +18,7 @@ import {
   isAssessmentDue as checkIsAssessmentDue,
 } from '@/src/lib/database';
 import { ASSESSMENT_TEMPLATES, getTemplateById } from '@/src/constants/assessments';
+import { asyncAction, silentAction } from './utils';
 
 interface AssessmentState {
   // Templates
@@ -81,23 +82,17 @@ export const useAssessmentStore = create<AssessmentState>((set, get) => ({
   startAssessment: async (type) => {
     const template = getTemplateById(type);
 
-    set({ isLoading: true, error: null });
-
-    try {
+    await asyncAction(set, { errorFallback: 'Failed to start assessment' }, async () => {
       const session = await createAssessmentSession(type);
-      set({
+      return {
         activeSession: session,
         assessmentFlow: {
           template,
           currentQuestionIndex: -1, // -1 = intro screen, 0+ = questions
           responses: {},
         },
-        isLoading: false,
-      });
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to start assessment';
-      set({ error: message, isLoading: false });
-    }
+      };
+    });
   },
 
   // Set response for a question
@@ -233,52 +228,44 @@ export const useAssessmentStore = create<AssessmentState>((set, get) => ({
 
   // Load recent assessments
   loadRecentAssessments: async () => {
-    try {
-      const assessments = await getRecentAssessments(undefined, 20);
-      set({ recentAssessments: assessments });
-    } catch (error) {
-      console.error('Failed to load assessments:', error);
-    }
+    await silentAction(async () => {
+      const recentAssessments = await getRecentAssessments(undefined, 20);
+      set({ recentAssessments });
+    }, 'loadRecentAssessments');
   },
 
   // Load assessment history for a specific type
   loadAssessmentHistory: async (type, days = 90) => {
-    try {
+    await silentAction(async () => {
       const history = await getAssessmentHistory(type, days);
       if (type === 'gad7') {
         set({ gad7History: history });
       } else {
         set({ phq9History: history });
       }
-    } catch (error) {
-      console.error('Failed to load assessment history:', error);
-    }
+    }, 'loadAssessmentHistory');
   },
 
   // Load last completed assessments
   loadLastAssessments: async () => {
-    try {
+    await silentAction(async () => {
       const [lastGad7, lastPhq9] = await Promise.all([
         getLastAssessment('gad7'),
         getLastAssessment('phq9'),
       ]);
       set({ lastGad7, lastPhq9 });
-    } catch (error) {
-      console.error('Failed to load last assessments:', error);
-    }
+    }, 'loadLastAssessments');
   },
 
   // Check if assessments are due
   checkDueStatus: async () => {
-    try {
+    await silentAction(async () => {
       const [gad7IsDue, phq9IsDue] = await Promise.all([
         checkIsAssessmentDue('gad7'),
         checkIsAssessmentDue('phq9'),
       ]);
       set({ gad7IsDue, phq9IsDue });
-    } catch (error) {
-      console.error('Failed to check assessment due status:', error);
-    }
+    }, 'checkDueStatus');
   },
 
   // Reset state

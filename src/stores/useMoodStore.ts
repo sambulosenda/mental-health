@@ -9,7 +9,8 @@ import {
   deleteMoodEntry,
   deleteAllMoodEntries,
 } from '@/src/lib/database';
-import { formatErrorMessage, toDateKey } from '@/src/lib/utils';
+import { toDateKey } from '@/src/lib/utils';
+import { asyncAction, silentAction } from './utils';
 
 interface MoodState {
   // Data
@@ -69,26 +70,18 @@ export const useMoodStore = create<MoodState>((set, get) => ({
 
   // Load all entries
   loadEntries: async () => {
-    set({ isLoading: true, error: null });
-    try {
+    await asyncAction(set, { errorFallback: 'Failed to load entries' }, async () => {
       const entries = await getAllMoodEntries();
-      set({ entries, isLoading: false });
-    } catch (error) {
-      set({
-        error: formatErrorMessage(error, 'Failed to load entries'),
-        isLoading: false,
-      });
-    }
+      return { entries };
+    });
   },
 
   // Load today's entries
   loadTodayEntries: async () => {
-    try {
+    await silentAction(async () => {
       const todayEntries = await getMoodEntriesForDate(new Date());
       set({ todayEntries });
-    } catch (error) {
-      console.error('Failed to load today entries:', error);
-    }
+    }, 'loadTodayEntries');
   },
 
   // Save a new mood entry from draft
@@ -100,50 +93,42 @@ export const useMoodStore = create<MoodState>((set, get) => ({
       return null;
     }
 
-    set({ isLoading: true, error: null });
-    try {
-      const entry = await createMoodEntry({
-        mood: draftMood,
-        activities: draftActivities.length > 0 ? draftActivities : undefined,
-        note: draftNote || undefined,
-      });
+    let savedEntry: MoodEntry | null = null;
 
-      // Update state
-      set((state) => ({
-        entries: [entry, ...state.entries],
-        todayEntries: [entry, ...state.todayEntries],
-        isLoading: false,
-        draftMood: null,
-        draftActivities: [],
-        draftNote: '',
-      }));
+    const success = await asyncAction(
+      set,
+      { errorFallback: 'Failed to save entry' },
+      async () => {
+        const entry = await createMoodEntry({
+          mood: draftMood,
+          activities: draftActivities.length > 0 ? draftActivities : undefined,
+          note: draftNote || undefined,
+        });
+        savedEntry = entry;
 
-      return entry;
-    } catch (error) {
-      set({
-        error: formatErrorMessage(error, 'Failed to save entry'),
-        isLoading: false,
-      });
-      return null;
-    }
+        return {
+          entries: [entry, ...get().entries],
+          todayEntries: [entry, ...get().todayEntries],
+          draftMood: null,
+          draftActivities: [],
+          draftNote: '',
+        };
+      }
+    );
+
+    return success ? savedEntry : null;
   },
 
   // Remove an entry
   removeEntry: async (id) => {
-    set({ isLoading: true, error: null });
-    try {
+    await asyncAction(set, { errorFallback: 'Failed to delete entry' }, async () => {
       await deleteMoodEntry(id);
-      set((state) => ({
+      const state = get();
+      return {
         entries: state.entries.filter((e) => e.id !== id),
         todayEntries: state.todayEntries.filter((e) => e.id !== id),
-        isLoading: false,
-      }));
-    } catch (error) {
-      set({
-        error: formatErrorMessage(error, 'Failed to delete entry'),
-        isLoading: false,
-      });
-    }
+      };
+    });
   },
 
   // Get entries for last N days
@@ -183,15 +168,9 @@ export const useMoodStore = create<MoodState>((set, get) => ({
 
   // Clear all entries
   clearEntries: async () => {
-    set({ isLoading: true, error: null });
-    try {
+    await asyncAction(set, { errorFallback: 'Failed to clear entries' }, async () => {
       await deleteAllMoodEntries();
-      set({ entries: [], todayEntries: [], isLoading: false });
-    } catch (error) {
-      set({
-        error: formatErrorMessage(error, 'Failed to clear entries'),
-        isLoading: false,
-      });
-    }
+      return { entries: [], todayEntries: [] };
+    });
   },
 }));

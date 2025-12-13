@@ -12,6 +12,7 @@ import {
   getRandomPrompt,
   markPromptUsed,
 } from '@/src/lib/database';
+import { asyncAction, silentAction } from './utils';
 
 interface JournalState {
   // Data
@@ -115,26 +116,18 @@ export const useJournalStore = create<JournalState>((set, get) => ({
 
   // Load all entries
   loadEntries: async () => {
-    set({ isLoading: true, error: null });
-    try {
+    await asyncAction(set, { errorFallback: 'Failed to load entries' }, async () => {
       const entries = await getAllJournalEntries();
-      set({ entries, isLoading: false });
-    } catch (error) {
-      set({
-        error: error instanceof Error ? error.message : 'Failed to load entries',
-        isLoading: false,
-      });
-    }
+      return { entries };
+    });
   },
 
   // Load prompts
   loadPrompts: async () => {
-    try {
+    await silentAction(async () => {
       const prompts = await getAllPrompts();
       set({ prompts });
-    } catch (error) {
-      console.error('Failed to load prompts:', error);
-    }
+    }, 'loadPrompts');
   },
 
   // Save entry (create or update)
@@ -146,72 +139,61 @@ export const useJournalStore = create<JournalState>((set, get) => ({
       return null;
     }
 
-    set({ isLoading: true, error: null });
-    try {
-      let entry: JournalEntry | null;
+    let savedEntry: JournalEntry | null = null;
 
-      if (editingId) {
-        // Update existing
-        entry = await updateJournalEntry(editingId, {
-          title: draftTitle || undefined,
-          content: draftContent,
-          mood: draftMood ?? undefined,
-          tags: draftTags,
-        });
-      } else {
-        // Create new
-        entry = await createJournalEntry({
-          title: draftTitle || undefined,
-          content: draftContent,
-          promptId: draftPromptId ?? undefined,
-          mood: draftMood ?? undefined,
-          tags: draftTags,
-        });
+    const success = await asyncAction(
+      set,
+      { errorFallback: 'Failed to save entry' },
+      async () => {
+        let entry: JournalEntry | null;
 
-        // Mark prompt as used
-        if (draftPromptId) {
-          await markPromptUsed(draftPromptId);
+        if (editingId) {
+          entry = await updateJournalEntry(editingId, {
+            title: draftTitle || undefined,
+            content: draftContent,
+            mood: draftMood ?? undefined,
+            tags: draftTags,
+          });
+        } else {
+          entry = await createJournalEntry({
+            title: draftTitle || undefined,
+            content: draftContent,
+            promptId: draftPromptId ?? undefined,
+            mood: draftMood ?? undefined,
+            tags: draftTags,
+          });
+
+          if (draftPromptId) {
+            await markPromptUsed(draftPromptId);
+          }
         }
+
+        savedEntry = entry;
+        const entries = await getAllJournalEntries();
+
+        return {
+          entries,
+          draftTitle: '',
+          draftContent: '',
+          draftPromptId: null,
+          draftMood: null,
+          draftTags: [],
+          editingId: null,
+        };
       }
+    );
 
-      // Reload entries
-      const entries = await getAllJournalEntries();
-      set({
-        entries,
-        isLoading: false,
-        draftTitle: '',
-        draftContent: '',
-        draftPromptId: null,
-        draftMood: null,
-        draftTags: [],
-        editingId: null,
-      });
-
-      return entry;
-    } catch (error) {
-      set({
-        error: error instanceof Error ? error.message : 'Failed to save entry',
-        isLoading: false,
-      });
-      return null;
-    }
+    return success ? savedEntry : null;
   },
 
   // Remove entry
   removeEntry: async (id) => {
-    set({ isLoading: true, error: null });
-    try {
+    await asyncAction(set, { errorFallback: 'Failed to delete entry' }, async () => {
       await deleteJournalEntry(id);
-      set((state) => ({
-        entries: state.entries.filter((e) => e.id !== id),
-        isLoading: false,
-      }));
-    } catch (error) {
-      set({
-        error: error instanceof Error ? error.message : 'Failed to delete entry',
-        isLoading: false,
-      });
-    }
+      return {
+        entries: get().entries.filter((e) => e.id !== id),
+      };
+    });
   },
 
   // Search
@@ -224,12 +206,10 @@ export const useJournalStore = create<JournalState>((set, get) => ({
       return;
     }
 
-    try {
+    await silentAction(async () => {
       const results = await searchJournalEntries(searchQuery);
       set({ searchResults: results });
-    } catch (error) {
-      console.error('Search failed:', error);
-    }
+    }, 'performSearch');
   },
 
   clearSearch: () => set({ searchQuery: '', searchResults: [] }),
@@ -241,15 +221,9 @@ export const useJournalStore = create<JournalState>((set, get) => ({
 
   // Clear all entries
   clearEntries: async () => {
-    set({ isLoading: true, error: null });
-    try {
+    await asyncAction(set, { errorFallback: 'Failed to clear entries' }, async () => {
       await deleteAllJournalEntries();
-      set({ entries: [], searchResults: [], isLoading: false });
-    } catch (error) {
-      set({
-        error: error instanceof Error ? error.message : 'Failed to clear entries',
-        isLoading: false,
-      });
-    }
+      return { entries: [], searchResults: [] };
+    });
   },
 }));
