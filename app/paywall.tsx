@@ -109,16 +109,31 @@ export default function PaywallScreen() {
     const price = selectedPackage.product.priceString;
     const priceNum = selectedPackage.product.price;
     const id = selectedPackage.identifier.toLowerCase();
+    const intro = selectedPackage.product.introPrice;
+
+    // Get currency symbol from price string
+    const currencySymbol = price.replace(/[\d.,\s]/g, '').charAt(0) || '$';
+
+    // Build trial text from actual introductory offer
+    let trialText = "";
+    if (intro && intro.price === 0) {
+      const units = intro.periodNumberOfUnits;
+      const period = intro.periodUnit;
+      if (period === "DAY") trialText = `${units} days free, then `;
+      else if (period === "WEEK") trialText = `${units} week free, then `;
+      else if (period === "MONTH") trialText = `${units} month free, then `;
+      else trialText = "Free trial, then ";
+    }
 
     if (id.includes("lifetime")) {
       return `${price} one-time. Forever access.`;
     } else if (id.includes("annual") || id.includes("yearly")) {
       const perDay = (priceNum / 365).toFixed(2);
-      return `7 days free, then just $${perDay}/day. Cancel anytime.`;
+      return `${trialText}just ${currencySymbol}${perDay}/day. Cancel anytime.`;
     } else if (id.includes("weekly")) {
-      return `3 days free, then ${price}/week. Cancel anytime.`;
+      return `${trialText}${price}/week. Cancel anytime.`;
     } else {
-      return `7 days free, then ${price}/month. Cancel anytime.`;
+      return `${trialText}${price}/month. Cancel anytime.`;
     }
   };
 
@@ -250,13 +265,30 @@ export default function PaywallScreen() {
             {filteredPackages.map((pkg) => {
               const id = pkg.identifier.toLowerCase();
               const isAnnual = id.includes("annual") || id.includes("yearly");
+
+              // Calculate actual discount for annual plan
+              let discountBadge: string | undefined;
+              if (isAnnual) {
+                const monthlyPkg = packages.find((p) =>
+                  p.identifier.toLowerCase().includes("monthly")
+                );
+                if (monthlyPkg) {
+                  const monthlyYearCost = monthlyPkg.product.price * 12;
+                  const yearlyPrice = pkg.product.price;
+                  const discount = Math.round(
+                    ((monthlyYearCost - yearlyPrice) / monthlyYearCost) * 100
+                  );
+                  if (discount > 0) discountBadge = `${discount}% OFF`;
+                }
+              }
+
               return (
                 <PlanCard
                   key={pkg.identifier}
                   pkg={pkg}
                   isSelected={selectedPackageId === pkg.identifier}
                   onSelect={() => setSelectedPackageId(pkg.identifier)}
-                  showBadge={isAnnual ? "58% OFF" : undefined}
+                  showBadge={discountBadge}
                 />
               );
             })}

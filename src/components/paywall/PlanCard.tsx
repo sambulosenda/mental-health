@@ -26,23 +26,37 @@ function getPackageSubtitle(pkg: PurchasesPackage): string {
   if (id.includes("lifetime")) return "One-time purchase";
   if (id.includes("annual") || id.includes("yearly")) {
     const perDay = (pkg.product.price / 365).toFixed(2);
-    return `Just $${perDay}/day`;
+    const currencySymbol = pkg.product.priceString.replace(/[\d.,\s]/g, '').charAt(0) || '$';
+    return `Just ${currencySymbol}${perDay}/day`;
   }
-  if (id.includes("weekly")) return "3 days free";
-  if (id.includes("monthly")) return "7 days free";
+  // Show trial info if available
+  const trial = getTrialText(pkg);
+  if (trial) return trial;
   return "";
 }
 
-function getTrialText(identifier: string): string | null {
-  if (identifier.includes("lifetime")) return null;
-  if (identifier.includes("weekly")) return "3-day trial";
-  return "7-day trial";
+function getTrialText(pkg: PurchasesPackage): string | null {
+  const id = pkg.identifier.toLowerCase();
+  if (id.includes("lifetime")) return null;
+
+  const intro = pkg.product.introPrice;
+  if (intro && intro.price === 0) {
+    const units = intro.periodNumberOfUnits;
+    const period = intro.periodUnit;
+
+    if (period === "DAY") return `${units}-day free trial`;
+    if (period === "WEEK") return `${units}-week free trial`;
+    if (period === "MONTH") return `${units}-month free trial`;
+    return "Free trial";
+  }
+
+  return null;
 }
 
 export const PlanCard = ({ pkg, isSelected, onSelect, showBadge }: PlanCardProps) => {
   const title = getPackageTitle(pkg.identifier);
   const subtitle = getPackageSubtitle(pkg);
-  const trialText = getTrialText(pkg.identifier.toLowerCase());
+  const trialText = getTrialText(pkg);
   const price = pkg.product.priceString;
 
   const handlePress = () => {

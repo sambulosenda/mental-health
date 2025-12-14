@@ -6,7 +6,6 @@ export { AnimatedHeader } from './AnimatedHeader';
 export { AnimatedListItem } from './AnimatedListItem';
 export { SwipeableRow } from './SwipeableRow';
 export { NativeSwitch } from './NativeSwitch';
-export { NativeSlider } from './NativeSlider';
 export { NativeContextMenu, showContextMenuFallback } from './NativeContextMenu';
 export type { ContextMenuAction } from './NativeContextMenu';
 export { NativePicker } from './NativePicker';
