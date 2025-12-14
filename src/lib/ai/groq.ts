@@ -141,7 +141,7 @@ export async function callGroqAPI(
 
   // Word limit enforcement by truncation
   if (wordLimit?.enforceLimit && !validateWordLimit(content, wordLimit.maxWords)) {
-    console.warn(`Truncating response from ${countWords(content)} to ${wordLimit.maxWords} words`);
+    if (__DEV__) console.warn(`Truncating response from ${countWords(content)} to ${wordLimit.maxWords} words`);
     return truncateToWordLimit(content, wordLimit.maxWords);
   }
 

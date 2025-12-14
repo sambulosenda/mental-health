@@ -18,7 +18,7 @@ export async function initializeApp(): Promise<void> {
       useSubscriptionStore.getState().initialize(),
     ]);
   } catch (error) {
-    console.error('Failed to initialize app:', error);
+    if (__DEV__) console.error('Failed to initialize app:', error);
     throw error;
   }
 }

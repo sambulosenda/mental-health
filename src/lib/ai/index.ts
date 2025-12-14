@@ -176,7 +176,7 @@ export function useAIInsights(options: UseAIInsightsOptions): UseAIInsightsRetur
       }
       setState('ready');
     } catch (err) {
-      console.warn('AI insights generation failed, using fallback:', err);
+      if (__DEV__) console.warn('AI insights generation failed, using fallback:', err);
       const fallbackInsights = getFallbackInsights(moodEntries);
       setInsights(fallbackInsights);
       setState('ready');

@@ -34,7 +34,7 @@ function isValidSeverity(severity: string): severity is SeverityLevel {
 function toAssessmentSession(row: AssessmentSessionRow): AssessmentSession | null {
   // Validate type
   if (!isValidType(row.type)) {
-    console.warn(`Invalid assessment type "${row.type}", skipping`);
+    if (__DEV__) console.warn(`Invalid assessment type "${row.type}", skipping`);
     return null;
   }
 

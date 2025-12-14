@@ -111,7 +111,7 @@ export function useAIChat(options: UseAIChatOptions = {}): UseAIChatReturn {
         setState('ready');
         return response;
       } catch (err) {
-        console.error('Groq API error:', err);
+        if (__DEV__) console.error('Groq API error:', err);
         const errorMessage = err instanceof Error ? err.message : 'Failed to get response';
         setError(errorMessage);
 

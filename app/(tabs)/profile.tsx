@@ -483,6 +483,51 @@ export default function ProfileScreen() {
           </Card>
         </View>
 
+        {/* Support */}
+        <View style={styles.section}>
+          <Text variant="h3" color="textPrimary" style={styles.sectionTitle}>
+            Support
+          </Text>
+          <Card variant="flat" padding="sm" style={styles.groupedCard}>
+            <SettingsRow
+              icon="mail-outline"
+              iconColor="#fff"
+              iconBg="#5856D6"
+              label="Contact Us"
+              value="support@getsoftmind.com"
+              onPress={() => Linking.openURL('mailto:support@getsoftmind.com')}
+              themeColors={themeColors}
+              isLast
+            />
+          </Card>
+        </View>
+
+        {/* Legal */}
+        <View style={styles.section}>
+          <Text variant="h3" color="textPrimary" style={styles.sectionTitle}>
+            Legal
+          </Text>
+          <Card variant="flat" padding="sm" style={styles.groupedCard}>
+            <SettingsRow
+              icon="document-text-outline"
+              iconColor="#fff"
+              iconBg="#8E8E93"
+              label="Privacy Policy"
+              onPress={() => Linking.openURL('https://getsoftmind.com/privacy')}
+              themeColors={themeColors}
+            />
+            <SettingsRow
+              icon="newspaper-outline"
+              iconColor="#fff"
+              iconBg="#8E8E93"
+              label="Terms of Service"
+              onPress={() => Linking.openURL('https://getsoftmind.com/terms')}
+              themeColors={themeColors}
+              isLast
+            />
+          </Card>
+        </View>
+
         {/* About */}
         <View style={styles.section}>
           <Text variant="h3" color="textPrimary" style={styles.sectionTitle}>

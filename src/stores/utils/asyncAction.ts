@@ -56,7 +56,7 @@ export async function silentAction<T>(
   try {
     return await action();
   } catch (error) {
-    console.error(`[${context}]`, error);
+    if (__DEV__) console.error(`[${context}]`, error);
     return null;
   }
 }

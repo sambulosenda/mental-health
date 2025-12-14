@@ -9,8 +9,8 @@ export function formatErrorMessage(error: unknown, fallback: string): string {
 }
 
 /**
- * Log error to console with context
+ * Log error to console with context (dev only)
  */
 export function logError(context: string, error: unknown): void {
-  console.error(`[${context}]`, error);
+  if (__DEV__) console.error(`[${context}]`, error);
 }

@@ -109,7 +109,7 @@ export function TimedSpeechStep({ step, onComplete, accentColor }: TimedSpeechSt
           playBell('end');
         },
         onError: (err) => {
-          console.error('Speech error:', err);
+          if (__DEV__) console.error('Speech error:', err);
           setIsPlaying(false);
           setError('Voice guidance unavailable. You can still continue manually.');
           stopBreathAnimation();

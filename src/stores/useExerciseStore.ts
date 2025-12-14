@@ -67,34 +67,28 @@ export const useExerciseStore = create<ExerciseState>((set, get) => ({
 
   // Start a new exercise
   startExercise: async (templateId, key) => {
-    console.log('[ExerciseStore] startExercise called with:', templateId, 'key:', key);
     const template = get().templates.find((t) => t.id === templateId);
     if (!template) {
-      console.log('[ExerciseStore] Template not found:', templateId);
       set({ error: 'Exercise template not found' });
       return;
     }
-    console.log('[ExerciseStore] Found template:', template.name);
 
     set({ isLoading: true, error: null, sessionKey: key });
 
     try {
-      console.log('[ExerciseStore] Creating session in database...');
       const session = await createExerciseSession(templateId);
 
       // Check if this session is still current (user may have navigated away or abandoned)
       if (get().sessionKey !== key) {
-        console.log('[ExerciseStore] Session key mismatch, abandoning created session');
         // Session was created but user abandoned - mark it as abandoned in DB
         try {
           await abandonExerciseSession(session.id);
-        } catch (abandonError) {
-          console.error('[ExerciseStore] Failed to abandon orphaned session:', abandonError);
+        } catch {
+          // Silently ignore - orphaned session cleanup is best-effort
         }
         return;
       }
 
-      console.log('[ExerciseStore] Session created:', session.id);
       set({
         activeSession: session,
         exerciseFlow: {
@@ -106,14 +100,11 @@ export const useExerciseStore = create<ExerciseState>((set, get) => ({
         },
         isLoading: false,
       });
-      console.log('[ExerciseStore] Exercise flow set successfully');
     } catch (error) {
       // Check if this session is still current before setting error
       if (get().sessionKey !== key) {
-        console.log('[ExerciseStore] Session key mismatch on error, ignoring');
         return;
       }
-      console.log('[ExerciseStore] Error starting exercise:', error);
       const message = error instanceof Error ? error.message : 'Failed to start exercise';
       set({ error: message, isLoading: false });
     }
@@ -135,8 +126,8 @@ export const useExerciseStore = create<ExerciseState>((set, get) => ({
     // Update database
     try {
       await setSessionMoodBefore(activeSession.id, mood);
-    } catch (error) {
-      console.error('Failed to save mood before:', error);
+    } catch {
+      // Best-effort save - UI already updated
     }
   },
 
@@ -156,8 +147,8 @@ export const useExerciseStore = create<ExerciseState>((set, get) => ({
     // Update database
     try {
       await setSessionMoodAfter(activeSession.id, mood);
-    } catch (error) {
-      console.error('Failed to save mood after:', error);
+    } catch {
+      // Best-effort save - UI already updated
     }
   },
 
@@ -217,8 +208,8 @@ export const useExerciseStore = create<ExerciseState>((set, get) => ({
     // Update database
     try {
       await updateSessionResponses(activeSession.id, newResponses);
-    } catch (error) {
-      console.error('Failed to save step response:', error);
+    } catch {
+      // Best-effort save - UI already updated
     }
   },
 
@@ -245,7 +236,6 @@ export const useExerciseStore = create<ExerciseState>((set, get) => ({
         isLoading: false,
       });
     } catch (error) {
-      console.error('Failed to complete exercise:', error);
       const message = error instanceof Error ? error.message : 'Failed to complete exercise';
       // Clear activeSession and exerciseFlow to prevent user from being stuck
       // The error state will show and allow the user to start fresh
@@ -276,14 +266,9 @@ export const useExerciseStore = create<ExerciseState>((set, get) => ({
 
     try {
       await abandonExerciseSession(activeSession.id);
-      set({
-        activeSession: null,
-        exerciseFlow: null,
-        isLoading: false,
-      });
-    } catch (error) {
-      console.error('Failed to abandon exercise:', error);
-      // Still clear the state
+    } catch {
+      // Best-effort cleanup
+    } finally {
       set({
         activeSession: null,
         exerciseFlow: null,
@@ -297,8 +282,8 @@ export const useExerciseStore = create<ExerciseState>((set, get) => ({
     try {
       const sessions = await getRecentExerciseSessions(10);
       set({ recentSessions: sessions });
-    } catch (error) {
-      console.error('Failed to load exercise sessions:', error);
+    } catch {
+      // Best-effort load - keep existing state
     }
   },
 

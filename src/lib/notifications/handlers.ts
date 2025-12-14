@@ -23,7 +23,7 @@ export async function handleNotificationReceived(
 
   if (data?.isFollowUp && data?.action) {
     if (!isValidReminderType(data.action)) {
-      console.warn(`Invalid reminder type in notification: ${data.action}`);
+      if (__DEV__) console.warn(`Invalid reminder type in notification: ${data.action}`);
       return;
     }
 
@@ -46,7 +46,7 @@ export function handleNotificationResponse(
 
   if (action) {
     if (!isValidReminderType(action)) {
-      console.warn(`Invalid reminder type in notification response: ${action}`);
+      if (__DEV__) console.warn(`Invalid reminder type in notification response: ${action}`);
       return;
     }
 

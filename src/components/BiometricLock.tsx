@@ -59,7 +59,7 @@ export function BiometricLock({ children }: BiometricLockProps) {
         setIsLocked(false);
       }
     } catch (error) {
-      console.error('Authentication error:', error);
+      if (__DEV__) console.error('Authentication error:', error);
     } finally {
       setIsAuthenticating(false);
     }

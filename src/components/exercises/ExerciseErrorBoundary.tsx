@@ -25,7 +25,7 @@ export class ExerciseErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error('Exercise error boundary caught:', error, errorInfo);
+    if (__DEV__) console.error('Exercise error boundary caught:', error, errorInfo);
   }
 
   handleReset = () => {

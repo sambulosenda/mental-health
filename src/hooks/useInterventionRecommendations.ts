@@ -44,7 +44,7 @@ export function useInterventionRecommendations(
       const data = await getExerciseEffectiveness();
       setEffectiveness(data);
     } catch (error) {
-      console.error('Failed to load exercise effectiveness:', error);
+      if (__DEV__) console.error('Failed to load exercise effectiveness:', error);
     }
   }, []);
 

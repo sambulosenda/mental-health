@@ -11,6 +11,7 @@ export default {
     ios: {
       supportsTablet: true,
       bundleIdentifier: "com.sambulosendas1.softmind",
+      associatedDomains: ["applinks:getsoftmind.com", "applinks:www.getsoftmind.com"],
       infoPlist: {
         NSSpeechRecognitionUsageDescription:
           "Softmind uses speech recognition to transcribe your voice journal entries.",
@@ -32,6 +33,17 @@ export default {
       predictiveBackGestureEnabled: false,
       package: "com.sambulosendas1.softmind",
       permissions: ["android.permission.RECORD_AUDIO"],
+      intentFilters: [
+        {
+          action: "VIEW",
+          autoVerify: true,
+          data: [
+            { scheme: "https", host: "getsoftmind.com", pathPrefix: "/" },
+            { scheme: "https", host: "www.getsoftmind.com", pathPrefix: "/" },
+          ],
+          category: ["BROWSABLE", "DEFAULT"],
+        },
+      ],
     },
     web: {
       output: "static",

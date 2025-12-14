@@ -139,7 +139,7 @@ export function parseAssessmentResponses(
 export function castMoodValue(value: number | null, context?: string): MoodValue | undefined {
   if (value === null) return undefined;
   if (isValidMoodValue(value)) return value;
-  if (context) {
+  if (__DEV__ && context) {
     console.warn(`Invalid mood value "${value}" in ${context}, ignoring`);
   }
   return undefined;
@@ -150,6 +150,6 @@ export function castMoodValue(value: number | null, context?: string): MoodValue
  */
 export function castSessionStatus(value: string, defaultStatus: SessionStatus = 'in_progress'): SessionStatus {
   if (isValidSessionStatus(value)) return value;
-  console.warn(`Invalid session status "${value}", defaulting to "${defaultStatus}"`);
+  if (__DEV__) console.warn(`Invalid session status "${value}", defaulting to "${defaultStatus}"`);
   return defaultStatus;
 }

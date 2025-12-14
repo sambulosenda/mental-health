@@ -203,14 +203,14 @@ export function createExpoNotificationService(): NotificationService {
         try {
           streak = (await calculateStreaks())[type];
         } catch (streakError) {
-          console.warn(`Failed to calculate streak for ${type}:`, streakError);
+          if (__DEV__) console.warn(`Failed to calculate streak for ${type}:`, streakError);
         }
       }
 
       await scheduleReminderWithFollowUp(type, config, streak);
       return true;
     } catch (error) {
-      console.error(`Failed to schedule ${type} reminder:`, error);
+      if (__DEV__) console.error(`Failed to schedule ${type} reminder:`, error);
       return false;
     }
   };
@@ -228,7 +228,7 @@ export function createExpoNotificationService(): NotificationService {
       try {
         streaks = await calculateStreaks();
       } catch (error) {
-        console.warn('Failed to calculate streaks:', error);
+        if (__DEV__) console.warn('Failed to calculate streaks:', error);
       }
     }
 
@@ -244,7 +244,7 @@ export function createExpoNotificationService(): NotificationService {
             streaks ? streaks[type] : 0
           );
         } catch (error) {
-          console.error(`Failed to schedule ${type} reminder:`, error);
+          if (__DEV__) console.error(`Failed to schedule ${type} reminder:`, error);
           failed.push(type);
         }
       }
