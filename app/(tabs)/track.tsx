@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { View, TextInput, KeyboardAvoidingView, Platform, Pressable } from 'react-native';
+import { View, TextInput, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import Animated, {
   useSharedValue,
   useAnimatedScrollHandler,
@@ -98,22 +99,20 @@ export default function TrackScreen() {
           </Pressable>
         }
       />
-      <KeyboardAvoidingView
-        className="flex-1"
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      <KeyboardAwareScrollView
+        style={{ flex: 1 }}
+        contentContainerStyle={{
+          paddingHorizontal: spacing.lg,
+          paddingBottom: spacing.xxl,
+          paddingTop: HEADER_EXPANDED_HEIGHT,
+        }}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="interactive"
+        onScroll={scrollHandler}
+        scrollEventThrottle={16}
+        bottomOffset={20}
       >
-        <Animated.ScrollView
-          className="flex-1"
-          contentContainerStyle={{
-            paddingHorizontal: spacing.lg,
-            paddingBottom: spacing.xxl,
-            paddingTop: HEADER_EXPANDED_HEIGHT,
-          }}
-          showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled"
-          onScroll={scrollHandler}
-          scrollEventThrottle={16}
-        >
           {/* Mood Gradient Slider */}
           <View style={{ marginBottom: spacing.xxl }}>
             <MoodGradientSlider
@@ -185,8 +184,7 @@ export default function TrackScreen() {
               </View>
             </Animated.View>
           )}
-        </Animated.ScrollView>
-      </KeyboardAvoidingView>
+      </KeyboardAwareScrollView>
 
       {/* Post check-in suggestion modal */}
       {savedMood !== null && (
