@@ -1,35 +1,34 @@
-import { Stack } from 'expo-router';
-import { colors, darkColors } from '@/src/constants/theme';
-import { useTheme } from '@/src/contexts/ThemeContext';
+import { TransitionStack, Transition } from '@/src/components/navigation/TransitionStack';
 
 export default function ModalsLayout() {
-  const { isDark } = useTheme();
-  const themeColors = isDark ? darkColors : colors;
-
   return (
-    <Stack
-      screenOptions={{
-        headerShown: false,
-        contentStyle: { backgroundColor: themeColors.background },
-        presentation: 'modal',
-      }}
-    >
-      <Stack.Screen name="journal-entry" />
-      <Stack.Screen name="chat" />
-      <Stack.Screen
+    <TransitionStack>
+      <TransitionStack.Screen
+        name="journal-entry"
+        options={{
+          ...Transition.Presets.SlideFromBottom(),
+        }}
+      />
+      <TransitionStack.Screen
+        name="chat"
+        options={{
+          ...Transition.Presets.SlideFromBottom(),
+        }}
+      />
+      <TransitionStack.Screen
         name="exercise-session"
         options={{
-          presentation: 'fullScreenModal',
-          gestureEnabled: false, // Prevent accidental swipe dismiss during exercises
+          ...Transition.Presets.SlideFromBottom(),
+          gestureEnabled: false,
         }}
       />
-      <Stack.Screen
+      <TransitionStack.Screen
         name="assessment-session"
         options={{
-          presentation: 'fullScreenModal',
-          gestureEnabled: false, // Prevent accidental swipe dismiss during assessments
+          ...Transition.Presets.SlideFromBottom(),
+          gestureEnabled: false,
         }}
       />
-    </Stack>
+    </TransitionStack>
   );
 }

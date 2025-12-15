@@ -1,11 +1,12 @@
 import { BiometricLock } from '@/src/components/BiometricLock';
+import { TransitionStack, Transition } from '@/src/components/navigation/TransitionStack';
 import { AnimatedSplash } from '@/src/components/splash/AnimatedSplash';
 import { colors, darkColors } from '@/src/constants/theme';
 import { ThemeProvider, useTheme } from '@/src/contexts/ThemeContext';
 import { useRouteProtection } from '@/src/hooks/useRouteProtection';
 import { initializeApp, hideSplash } from '@/src/lib/app/initialization';
 import { setupNotificationListeners } from '@/src/lib/notifications/handlers';
-import { Stack, useRouter } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useCallback, useEffect, useState } from 'react';
 import { View } from 'react-native';
@@ -55,45 +56,28 @@ function RootLayoutContent() {
           <BiometricLock>
             <StatusBar style={isDark ? 'light' : 'dark'} />
             <View style={{ flex: 1 }}>
-              <Stack
-                screenOptions={{
-                  headerShown: false,
-                  contentStyle: { backgroundColor: themeColors.background },
-                  animation: 'slide_from_right',
-                  animationDuration: 250,
-                  gestureEnabled: true,
-                  gestureDirection: 'horizontal',
-                }}
-              >
-                <Stack.Screen name="onboarding" options={{ headerShown: false }} />
-                <Stack.Screen name="(tabs)" options={{ headerShown: false, animation: 'fade' }} />
-                <Stack.Screen
+              <TransitionStack>
+                <TransitionStack.Screen name="onboarding" />
+                <TransitionStack.Screen name="(tabs)" />
+                <TransitionStack.Screen
                   name="chat"
                   options={{
-                    headerShown: false,
-                    animation: 'slide_from_right',
-                    gestureEnabled: true,
-                    gestureDirection: 'horizontal',
+                    ...Transition.Presets.SlideFromBottom(),
                   }}
                 />
-                <Stack.Screen
+                <TransitionStack.Screen
                   name="(modals)"
                   options={{
-                    presentation: 'modal',
-                    headerShown: false,
-                    animation: 'slide_from_bottom',
-                    gestureEnabled: true,
-                    gestureDirection: 'vertical',
+                    ...Transition.Presets.SlideFromBottom(),
                   }}
                 />
-                <Stack.Screen
+                <TransitionStack.Screen
                   name="paywall"
                   options={{
-                    headerShown: false,
-                    animation: 'slide_from_bottom',
+                    ...Transition.Presets.ElasticCard(),
                   }}
                 />
-              </Stack>
+              </TransitionStack>
               {showSplash && (
                 <AnimatedSplash
                   isAppReady={isReady}
