@@ -1,11 +1,11 @@
-import { View, Modal, ScrollView, Pressable } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
-import * as Haptics from 'expo-haptics';
 import { Text } from '@/src/components/ui';
-import { colors, darkColors, spacing, borderRadius } from '@/src/constants/theme';
+import { borderRadius, colors, darkColors, spacing } from '@/src/constants/theme';
 import { useTheme } from '@/src/contexts/ThemeContext';
 import { useSettingsStore } from '@/src/stores';
+import { Ionicons } from '@expo/vector-icons';
+import * as Haptics from 'expo-haptics';
+import { Modal, ScrollView, TouchableOpacity, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 interface DisclaimerModalProps {
   visible: boolean;
@@ -47,6 +47,7 @@ export function DisclaimerModal({ visible }: DisclaimerModalProps) {
             backgroundColor: themeColors.surface,
             borderRadius: borderRadius.xl,
             maxWidth: 400,
+            maxHeight: '85%',
             width: '100%',
             overflow: 'hidden',
           }}
@@ -54,8 +55,10 @@ export function DisclaimerModal({ visible }: DisclaimerModalProps) {
           <ScrollView
             contentContainerStyle={{
               padding: spacing.lg,
+              paddingBottom: spacing.sm,
             }}
-            showsVerticalScrollIndicator={false}
+            showsVerticalScrollIndicator={true}
+            bounces={true}
           >
             {/* Icon & Title */}
             <View style={{ alignItems: 'center', marginBottom: spacing.md }}>
@@ -120,25 +123,28 @@ export function DisclaimerModal({ visible }: DisclaimerModalProps) {
             </View>
 
             {/* Privacy Note */}
-            <Text variant="caption" color="textMuted" center style={{ marginBottom: spacing.md }}>
+            <Text variant="caption" color="textMuted" center>
               Data stored locally. By continuing, you agree to our Privacy Policy.
             </Text>
+          </ScrollView>
 
-            {/* Accept Button */}
-            <Pressable
+          {/* Accept Button - Outside ScrollView */}
+          <View style={{ padding: spacing.lg, paddingTop: spacing.sm }}>
+            <TouchableOpacity
               onPress={handleAccept}
-              style={({ pressed }) => ({
-                backgroundColor: pressed ? themeColors.primaryDark : themeColors.primary,
+              activeOpacity={0.8}
+              style={{
+                backgroundColor: themeColors.primary,
                 borderRadius: borderRadius.lg,
-                paddingVertical: 14,
+                paddingVertical: 16,
                 alignItems: 'center',
-              })}
+              }}
             >
-              <Text variant="bodyMedium" style={{ color: themeColors.textOnPrimary }}>
+              <Text variant="bodyMedium" style={{ color: '#FFFFFF', fontWeight: '600' }}>
                 I Understand, Continue
               </Text>
-            </Pressable>
-          </ScrollView>
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
     </Modal>
