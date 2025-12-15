@@ -493,8 +493,7 @@ export default function ProfileScreen() {
               icon="mail-outline"
               iconColor="#fff"
               iconBg="#5856D6"
-              label="Contact Us"
-              value="support@getsoftmind.com"
+              label="Contact"
               onPress={() => Linking.openURL('mailto:support@getsoftmind.com')}
               themeColors={themeColors}
               isLast
@@ -576,7 +575,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   content: {
-    paddingHorizontal: spacing.md,
+    paddingHorizontal: spacing.lg,
   },
   section: {
     marginBottom: spacing.lg,

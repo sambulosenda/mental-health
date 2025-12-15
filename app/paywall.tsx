@@ -22,8 +22,8 @@ import { FeaturesSection, FeatureItem, IconContainer, PeriodControl, PlanCard } 
 
 type Period = "weekly" | "monthly" | "yearly";
 
-const TERMS_URL = "https://softmind.app/terms";
-const PRIVACY_URL = "https://softmind.app/privacy";
+const TERMS_URL = "https://getsoftmind.com/terms";
+const PRIVACY_URL = "https://getsoftmind.com/privacy";
 
 export default function PaywallScreen() {
   const [period, setPeriod] = useState<Period>("yearly");
