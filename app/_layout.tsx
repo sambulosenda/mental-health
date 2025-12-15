@@ -1,4 +1,5 @@
 import { BiometricLock } from '@/src/components/BiometricLock';
+import { DisclaimerModal } from '@/src/components/DisclaimerModal';
 import { ErrorBoundary } from '@/src/components/ErrorBoundary';
 import { TransitionStack, CalmPresets, DimOverlay } from '@/src/components/navigation/TransitionStack';
 import { AnimatedSplash } from '@/src/components/splash/AnimatedSplash';
@@ -8,6 +9,7 @@ import { useRouteProtection } from '@/src/hooks/useRouteProtection';
 import { initializeApp, hideSplash } from '@/src/lib/app/initialization';
 import { setupNotificationListeners } from '@/src/lib/notifications/handlers';
 import { initSentry, captureException } from '@/src/lib/sentry';
+import { useSettingsStore } from '@/src/stores';
 import { useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useCallback, useEffect, useState } from 'react';
@@ -26,6 +28,7 @@ function RootLayoutContent() {
   const router = useRouter();
   const { isDark } = useTheme();
   const themeColors = isDark ? darkColors : colors;
+  const hasAcceptedDisclaimer = useSettingsStore((s) => s.hasAcceptedDisclaimer);
 
   const onSplashAnimationComplete = useCallback(() => {
     setShowSplash(false);
@@ -105,6 +108,7 @@ function RootLayoutContent() {
                   onAnimationComplete={onSplashAnimationComplete}
                 />
               )}
+              <DisclaimerModal visible={isReady && !showSplash && !hasAcceptedDisclaimer} />
             </View>
           </BiometricLock>
         </SafeAreaProvider>

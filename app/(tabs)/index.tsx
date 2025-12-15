@@ -198,6 +198,34 @@ export default function HomeScreen() {
           </View>
         </View>
 
+        {/* Crisis Support - Quick Access */}
+        <Pressable
+          onPress={() => router.push('/crisis')}
+          className="mb-6"
+          style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+        >
+          <View
+            className="flex-row items-center px-4 py-3 rounded-xl"
+            style={{ backgroundColor: isDark ? `${themeColors.error}15` : `${themeColors.error}08` }}
+          >
+            <View
+              className="w-8 h-8 rounded-full items-center justify-center mr-3"
+              style={{ backgroundColor: `${themeColors.error}20` }}
+            >
+              <Ionicons name="heart" size={16} color={themeColors.error} />
+            </View>
+            <View className="flex-1">
+              <Text variant="caption" style={{ color: themeColors.error }}>
+                Need support right now?
+              </Text>
+              <Text variant="caption" color="textSecondary">
+                View crisis resources
+              </Text>
+            </View>
+            <Ionicons name="chevron-forward" size={18} color={themeColors.error} />
+          </View>
+        </Pressable>
+
         {/* Self-Assessments */}
         <View className="mb-6">
           <View className="flex-row items-center justify-between mb-4">

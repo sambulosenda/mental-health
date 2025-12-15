@@ -30,6 +30,7 @@ interface SettingsState extends AppSettings {
   setTheme: (theme: 'light' | 'dark' | 'system') => void;
   completeOnboarding: (profile: UserProfile) => void;
   setUserProfile: (profile: UserProfile) => void;
+  acceptDisclaimer: () => void;
   setInsightDepth: (depth: 'brief' | 'detailed') => void;
   setInsightTone: (tone: 'empathetic' | 'professional') => void;
   resetSettings: () => Promise<void>;
@@ -42,6 +43,7 @@ const defaultSettings: AppSettings = {
   theme: 'system',
   hasCompletedOnboarding: false,
   userProfile: null,
+  hasAcceptedDisclaimer: false,
   insightDepth: 'brief',
   insightTone: 'empathetic',
 };
@@ -129,6 +131,7 @@ export const useSettingsStore = create<SettingsState>()(
       setTheme: (theme) => set({ theme }),
       completeOnboarding: (profile) => set({ hasCompletedOnboarding: true, userProfile: profile }),
       setUserProfile: (profile) => set({ userProfile: profile }),
+      acceptDisclaimer: () => set({ hasAcceptedDisclaimer: true }),
       setInsightDepth: (depth) => set({ insightDepth: depth }),
       setInsightTone: (tone) => set({ insightTone: tone }),
       resetSettings: async () => {
@@ -138,7 +141,7 @@ export const useSettingsStore = create<SettingsState>()(
     }),
     {
       name: 'softmind-settings',
-      version: 3,
+      version: 4,
       storage: createJSONStorage(() => AsyncStorage),
       migrate: (persistedState: unknown, version: number) => {
 
@@ -166,6 +169,13 @@ export const useSettingsStore = create<SettingsState>()(
           // Add userProfile field
           if (state.userProfile === undefined) {
             state.userProfile = null;
+          }
+        }
+
+        if (version < 4) {
+          // Add disclaimer acceptance field
+          if (state.hasAcceptedDisclaimer === undefined) {
+            state.hasAcceptedDisclaimer = false;
           }
         }
 

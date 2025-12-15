@@ -44,6 +44,9 @@ export interface AppSettings {
   hasCompletedOnboarding: boolean;
   userProfile: UserProfile | null;
 
+  // Legal
+  hasAcceptedDisclaimer: boolean;
+
   // Insights
   insightDepth: 'brief' | 'detailed';
   insightTone: 'empathetic' | 'professional';
