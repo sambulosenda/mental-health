@@ -1,4 +1,4 @@
-import { TransitionStack, Transition } from '@/src/components/navigation/TransitionStack';
+import { TransitionStack, CalmPresets } from '@/src/components/navigation/TransitionStack';
 
 export default function ModalsLayout() {
   return (
@@ -6,26 +6,26 @@ export default function ModalsLayout() {
       <TransitionStack.Screen
         name="journal-entry"
         options={{
-          ...Transition.Presets.SlideFromBottom(),
+          ...CalmPresets.SlideFromBottom(),
         }}
       />
       <TransitionStack.Screen
         name="chat"
         options={{
-          ...Transition.Presets.SlideFromBottom(),
+          ...CalmPresets.SlideHorizontal(),
         }}
       />
       <TransitionStack.Screen
         name="exercise-session"
         options={{
-          ...Transition.Presets.SlideFromBottom(),
+          ...CalmPresets.SlideFromBottom(),
           gestureEnabled: false,
         }}
       />
       <TransitionStack.Screen
         name="assessment-session"
         options={{
-          ...Transition.Presets.SlideFromBottom(),
+          ...CalmPresets.SlideFromBottom(),
           gestureEnabled: false,
         }}
       />

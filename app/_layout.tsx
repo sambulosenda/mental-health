@@ -1,5 +1,5 @@
 import { BiometricLock } from '@/src/components/BiometricLock';
-import { TransitionStack, Transition } from '@/src/components/navigation/TransitionStack';
+import { TransitionStack, CalmPresets, DimOverlay } from '@/src/components/navigation/TransitionStack';
 import { AnimatedSplash } from '@/src/components/splash/AnimatedSplash';
 import { colors, darkColors } from '@/src/constants/theme';
 import { ThemeProvider, useTheme } from '@/src/contexts/ThemeContext';
@@ -56,25 +56,41 @@ function RootLayoutContent() {
           <BiometricLock>
             <StatusBar style={isDark ? 'light' : 'dark'} />
             <View style={{ flex: 1 }}>
-              <TransitionStack>
-                <TransitionStack.Screen name="onboarding" />
-                <TransitionStack.Screen name="(tabs)" />
+              <TransitionStack
+                screenOptions={{
+                  overlay: DimOverlay,
+                  overlayMode: 'screen',
+                }}
+              >
+                <TransitionStack.Screen
+                  name="onboarding"
+                  options={{
+                    ...CalmPresets.SlideHorizontal(),
+                    overlayShown: false,
+                  }}
+                />
+                <TransitionStack.Screen
+                  name="(tabs)"
+                  options={{
+                    overlayShown: false,
+                  }}
+                />
                 <TransitionStack.Screen
                   name="chat"
                   options={{
-                    ...Transition.Presets.SlideFromBottom(),
+                    ...CalmPresets.SlideHorizontal(),
                   }}
                 />
                 <TransitionStack.Screen
                   name="(modals)"
                   options={{
-                    ...Transition.Presets.SlideFromBottom(),
+                    ...CalmPresets.SlideFromBottom(),
                   }}
                 />
                 <TransitionStack.Screen
                   name="paywall"
                   options={{
-                    ...Transition.Presets.ElasticCard(),
+                    ...CalmPresets.ElasticCard(),
                   }}
                 />
               </TransitionStack>
