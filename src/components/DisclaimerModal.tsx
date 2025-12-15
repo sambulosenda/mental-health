@@ -1,6 +1,4 @@
-import { memo, useCallback } from 'react';
 import { View, Modal, ScrollView, Pressable } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { Text } from '@/src/components/ui';
@@ -12,16 +10,15 @@ interface DisclaimerModalProps {
   visible: boolean;
 }
 
-export const DisclaimerModal = memo(function DisclaimerModal({ visible }: DisclaimerModalProps) {
+export function DisclaimerModal({ visible }: DisclaimerModalProps) {
   const { isDark } = useTheme();
   const themeColors = isDark ? darkColors : colors;
-  const insets = useSafeAreaInsets();
   const acceptDisclaimer = useSettingsStore((s) => s.acceptDisclaimer);
 
-  const handleAccept = useCallback(async () => {
+  const handleAccept = async () => {
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     acceptDisclaimer();
-  }, [acceptDisclaimer]);
+  };
 
   return (
     <Modal
@@ -152,13 +149,13 @@ export const DisclaimerModal = memo(function DisclaimerModal({ visible }: Discla
       </View>
     </Modal>
   );
-});
+}
 
 interface DisclaimerPointProps {
   icon: keyof typeof Ionicons.glyphMap;
   title: string;
   description: string;
-  themeColors: typeof colors;
+  themeColors: typeof colors | typeof darkColors;
 }
 
 function DisclaimerPoint({ icon, title, description, themeColors }: DisclaimerPointProps) {
