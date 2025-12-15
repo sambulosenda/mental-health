@@ -3,7 +3,7 @@ import { getJournalEntriesForLastDays } from './database/queries/journal';
 import { getRecentExerciseSessions } from './database/queries/exercise';
 import type { ReminderType } from '@/src/types/settings';
 
-const STREAK_WINDOW_DAYS = 30;
+export const STREAK_WINDOW_DAYS = 30;
 
 export interface StreakInfo {
   mood: number;
@@ -12,14 +12,14 @@ export interface StreakInfo {
 }
 
 // Normalize date to start of day for comparison
-function normalizeToDay(date: Date): Date {
+export function normalizeToDay(date: Date): Date {
   const normalized = new Date(date);
   normalized.setHours(0, 0, 0, 0);
   return normalized;
 }
 
 // Calculate consecutive days from array of timestamps
-function calculateConsecutiveDays(timestamps: Date[]): number {
+export function calculateConsecutiveDays(timestamps: Date[]): number {
   if (timestamps.length === 0) return 0;
 
   // Get unique dates (normalized to day)
