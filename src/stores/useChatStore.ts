@@ -230,7 +230,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
       const conversations = await getRecentConversations(10);
       set({ recentConversations: conversations });
     } catch (error) {
-      if (__DEV__) console.error('Failed to load conversations:', error);
+      console.error('Failed to load conversations:', error);
     }
   },
 

@@ -96,7 +96,7 @@ export const useSubscriptionStore = create<SubscriptionState>()(
 
             set({ isInitialized: true });
           } catch (error) {
-            if (__DEV__) console.error('Failed to initialize RevenueCat:', error);
+            console.error('Failed to initialize RevenueCat:', error);
             // Fall back to cached status
             set({
               isInitialized: true,
@@ -122,7 +122,7 @@ export const useSubscriptionStore = create<SubscriptionState>()(
 
           return isPremium;
         } catch (error) {
-          if (__DEV__) console.error('Failed to check premium status:', error);
+          console.error('Failed to check premium status:', error);
           return get().cachedPremiumStatus;
         }
       },
@@ -185,7 +185,7 @@ export const useSubscriptionStore = create<SubscriptionState>()(
           const offerings = await Purchases.getOfferings();
           set({ currentOffering: offerings.current });
         } catch (error) {
-          if (__DEV__) console.error('Failed to load offerings:', error);
+          console.error('Failed to load offerings:', error);
         }
       },
 

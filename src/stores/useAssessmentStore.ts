@@ -123,7 +123,7 @@ export const useAssessmentStore = create<AssessmentState>((set, get) => ({
       } catch (error) {
         retries--;
         if (retries === 0) {
-          if (__DEV__) console.error('Failed to save assessment response after retries:', error);
+          console.error('Failed to save assessment response after retries:', error);
           set({
             saveError: 'Failed to save response. Your answer is stored locally and will be saved when you complete.',
           });
@@ -197,7 +197,7 @@ export const useAssessmentStore = create<AssessmentState>((set, get) => ({
 
       return result;
     } catch (error) {
-      if (__DEV__) console.error('Failed to complete assessment:', error);
+      console.error('Failed to complete assessment:', error);
       const message = error instanceof Error ? error.message : 'Failed to complete assessment';
       set({
         error: message,
@@ -217,7 +217,7 @@ export const useAssessmentStore = create<AssessmentState>((set, get) => ({
     try {
       await abandonAssessmentSession(activeSession.id);
     } catch (error) {
-      if (__DEV__) console.error('Failed to abandon assessment:', error);
+      console.error('Failed to abandon assessment:', error);
     }
 
     set({

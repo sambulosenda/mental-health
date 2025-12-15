@@ -94,7 +94,7 @@ export async function scheduleDailyReminder(
 
     return identifier;
   } catch (error) {
-    if (__DEV__) console.error('Failed to schedule daily reminder:', error);
+    console.error('Failed to schedule daily reminder:', error);
     return null;
   }
 }

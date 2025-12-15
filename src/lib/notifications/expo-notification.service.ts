@@ -210,7 +210,7 @@ export function createExpoNotificationService(): NotificationService {
       await scheduleReminderWithFollowUp(type, config, streak);
       return true;
     } catch (error) {
-      if (__DEV__) console.error(`Failed to schedule ${type} reminder:`, error);
+      console.error(`Failed to schedule ${type} reminder:`, error);
       return false;
     }
   };
@@ -244,7 +244,7 @@ export function createExpoNotificationService(): NotificationService {
             streaks ? streaks[type] : 0
           );
         } catch (error) {
-          if (__DEV__) console.error(`Failed to schedule ${type} reminder:`, error);
+          console.error(`Failed to schedule ${type} reminder:`, error);
           failed.push(type);
         }
       }
