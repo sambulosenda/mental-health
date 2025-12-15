@@ -64,6 +64,13 @@ export default {
       "expo-sqlite",
       "expo-secure-store",
       ["expo-updates", { username: "sambulosendas1" }],
+      [
+        "@sentry/react-native/expo",
+        {
+          organization: process.env.SENTRY_ORG,
+          project: process.env.SENTRY_PROJECT,
+        },
+      ],
     ],
     experiments: {
       typedRoutes: true,
@@ -73,6 +80,7 @@ export default {
       groqApiKey: process.env.GROQ_API_KEY,
       revenueCatApiKeyIOS: process.env.REVENUECAT_API_KEY_IOS,
       revenueCatApiKeyAndroid: process.env.REVENUECAT_API_KEY_ANDROID,
+      sentryDsn: process.env.SENTRY_DSN,
       router: {},
       eas: {
         projectId: "b7a89065-39ec-4a55-9e5d-af703806e0f5",

@@ -1,4 +1,5 @@
 import { BiometricLock } from '@/src/components/BiometricLock';
+import { ErrorBoundary } from '@/src/components/ErrorBoundary';
 import { TransitionStack, CalmPresets, DimOverlay } from '@/src/components/navigation/TransitionStack';
 import { AnimatedSplash } from '@/src/components/splash/AnimatedSplash';
 import { colors, darkColors } from '@/src/constants/theme';
@@ -6,6 +7,7 @@ import { ThemeProvider, useTheme } from '@/src/contexts/ThemeContext';
 import { useRouteProtection } from '@/src/hooks/useRouteProtection';
 import { initializeApp, hideSplash } from '@/src/lib/app/initialization';
 import { setupNotificationListeners } from '@/src/lib/notifications/handlers';
+import { initSentry, captureException } from '@/src/lib/sentry';
 import { useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useCallback, useEffect, useState } from 'react';
@@ -14,6 +16,9 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { KeyboardProvider } from 'react-native-keyboard-controller';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import '../global.css';
+
+// Initialize Sentry as early as possible
+initSentry();
 
 function RootLayoutContent() {
   const [isReady, setIsReady] = useState(false);
@@ -32,7 +37,7 @@ function RootLayoutContent() {
       try {
         await initializeApp();
       } catch (error) {
-        console.error('Failed to initialize app:', error);
+        captureException(error as Error, { context: 'app_initialization' });
       } finally {
         setIsReady(true);
         await hideSplash();
@@ -110,9 +115,11 @@ function RootLayoutContent() {
 
 export default function RootLayout() {
   return (
-    <ThemeProvider>
-      <RootLayoutContent />
-    </ThemeProvider>
+    <ErrorBoundary>
+      <ThemeProvider>
+        <RootLayoutContent />
+      </ThemeProvider>
+    </ErrorBoundary>
   );
 }
 
