@@ -42,42 +42,36 @@ export function DisclaimerModal({ visible }: DisclaimerModalProps) {
             borderRadius: borderRadius.xl,
             maxWidth: 400,
             width: '100%',
-            maxHeight: '80%',
-            overflow: 'hidden',
+            maxHeight: '85%',
           }}
         >
           <ScrollView
+            style={{ flexGrow: 0, flexShrink: 1 }}
             contentContainerStyle={{
               padding: spacing.xl,
-              paddingBottom: spacing.lg,
+              paddingBottom: spacing.sm,
             }}
             showsVerticalScrollIndicator={false}
           >
-            {/* Icon */}
-            <View
-              style={{
-                alignItems: 'center',
-                marginBottom: spacing.lg,
-              }}
-            >
+            {/* Icon & Title */}
+            <View style={{ alignItems: 'center', marginBottom: spacing.md }}>
               <View
                 style={{
-                  width: 64,
-                  height: 64,
-                  borderRadius: 32,
+                  width: 56,
+                  height: 56,
+                  borderRadius: 28,
                   backgroundColor: `${themeColors.primary}15`,
                   justifyContent: 'center',
                   alignItems: 'center',
+                  marginBottom: spacing.sm,
                 }}
               >
-                <Ionicons name="heart" size={32} color={themeColors.primary} />
+                <Ionicons name="heart" size={28} color={themeColors.primary} />
               </View>
+              <Text variant="h2" center>
+                Welcome to Softmind
+              </Text>
             </View>
-
-            {/* Title */}
-            <Text variant="h2" center style={{ marginBottom: spacing.md }}>
-              Welcome to Softmind
-            </Text>
 
             {/* Important Notice */}
             <View
@@ -85,7 +79,7 @@ export function DisclaimerModal({ visible }: DisclaimerModalProps) {
                 backgroundColor: `${themeColors.warning}15`,
                 borderRadius: borderRadius.lg,
                 padding: spacing.md,
-                marginBottom: spacing.lg,
+                marginBottom: spacing.md,
               }}
             >
               <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: spacing.sm }}>
@@ -101,7 +95,7 @@ export function DisclaimerModal({ visible }: DisclaimerModalProps) {
             </View>
 
             {/* Key Points */}
-            <View style={{ gap: spacing.md, marginBottom: spacing.lg }}>
+            <View style={{ gap: spacing.sm, marginBottom: spacing.md }}>
               <DisclaimerPoint
                 icon="medical"
                 title="Not Medical Advice"
@@ -123,20 +117,19 @@ export function DisclaimerModal({ visible }: DisclaimerModalProps) {
             </View>
 
             {/* Privacy Note */}
-            <Text variant="caption" color="textMuted" center style={{ marginBottom: spacing.lg }}>
-              Your data is stored locally on your device. By continuing, you agree to our
-              Privacy Policy and Terms of Service.
+            <Text variant="caption" color="textMuted" center>
+              Your data is stored locally on your device. By continuing, you agree to our Privacy Policy and Terms of Service.
             </Text>
           </ScrollView>
 
           {/* Accept Button */}
-          <View style={{ padding: spacing.lg, paddingTop: 0 }}>
+          <View style={{ padding: spacing.lg, paddingTop: spacing.md }}>
             <Pressable
               onPress={handleAccept}
               style={({ pressed }) => ({
                 backgroundColor: pressed ? themeColors.primaryDark : themeColors.primary,
                 borderRadius: borderRadius.lg,
-                paddingVertical: spacing.md,
+                paddingVertical: 14,
                 alignItems: 'center',
               })}
             >
