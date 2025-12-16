@@ -1,6 +1,12 @@
-import { Platform, View, StyleSheet } from 'react-native';
-import { Host, Picker } from '@expo/ui/swift-ui';
-import { colors, borderRadius, spacing } from '@/src/constants/theme';
+import { View, StyleSheet, Pressable, LayoutChangeEvent } from 'react-native';
+import Animated, {
+  useAnimatedStyle,
+  withSpring,
+  useSharedValue,
+} from 'react-native-reanimated';
+import { useEffect, useState } from 'react';
+import { borderRadius, spacing } from '@/src/constants/theme';
+import { useTheme } from '@/src/contexts/ThemeContext';
 import { Text } from './Text';
 
 interface NativePickerProps {
@@ -14,73 +20,117 @@ export function NativePicker({
   options,
   selectedIndex,
   onSelect,
-  variant = 'segmented',
 }: NativePickerProps) {
-  // Use native Picker on iOS
-  if (Platform.OS === 'ios') {
-    return (
-      <Host matchContents>
-        <Picker
-          options={options}
-          selectedIndex={selectedIndex}
-          onOptionSelected={({ nativeEvent: { index } }) => {
-            onSelect(index);
-          }}
-          variant={variant}
-        />
-      </Host>
-    );
-  }
+  const { isDark } = useTheme();
+  const [containerWidth, setContainerWidth] = useState(0);
 
-  // Fallback segmented control for Android
+  const optionWidth = containerWidth > 0 ? (containerWidth - 4) / options.length : 0;
+  const indicatorPosition = useSharedValue(0);
+
+  useEffect(() => {
+    if (optionWidth > 0) {
+      indicatorPosition.value = withSpring(selectedIndex * optionWidth, {
+        damping: 20,
+        stiffness: 300,
+        mass: 0.8,
+      });
+    }
+  }, [selectedIndex, optionWidth]);
+
+  const animatedIndicatorStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ translateX: indicatorPosition.value }],
+      width: optionWidth,
+    };
+  });
+
+  const handleLayout = (event: LayoutChangeEvent) => {
+    setContainerWidth(event.nativeEvent.layout.width);
+  };
+
   return (
-    <View style={styles.fallbackContainer}>
-      {options.map((option, index) => (
-        <View
-          key={index}
+    <View
+      style={[
+        styles.container,
+        {
+          backgroundColor: isDark ? '#1e293b' : '#f1f5f9',
+          borderColor: isDark ? '#334155' : '#e2e8f0',
+        },
+      ]}
+      onLayout={handleLayout}
+    >
+      {/* Animated selection indicator */}
+      {containerWidth > 0 && (
+        <Animated.View
           style={[
-            styles.fallbackOption,
-            index === selectedIndex && styles.fallbackOptionSelected,
-            index === 0 && styles.fallbackOptionFirst,
-            index === options.length - 1 && styles.fallbackOptionLast,
+            styles.indicator,
+            {
+              backgroundColor: isDark ? '#475569' : '#fff',
+              shadowColor: isDark ? '#000' : '#64748b',
+            },
+            animatedIndicatorStyle,
           ]}
-          onTouchEnd={() => onSelect(index)}
-        >
-          <Text
-            variant="captionMedium"
-            color={index === selectedIndex ? 'white' : 'textSecondary'}
+        />
+      )}
+
+      {/* Options */}
+      {options.map((option, index) => {
+        const isSelected = index === selectedIndex;
+
+        return (
+          <Pressable
+            key={index}
+            style={styles.option}
+            onPress={() => onSelect(index)}
           >
-            {option}
-          </Text>
-        </View>
-      ))}
+            <Text
+              variant="bodyMedium"
+              style={[
+                styles.optionText,
+                {
+                  color: isSelected
+                    ? isDark ? '#f1f5f9' : '#1e293b'
+                    : isDark ? '#94a3b8' : '#64748b',
+                  fontWeight: isSelected ? '600' : '500',
+                },
+              ]}
+            >
+              {option}
+            </Text>
+          </Pressable>
+        );
+      })}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  fallbackContainer: {
+  container: {
     flexDirection: 'row',
-    backgroundColor: colors.surfaceElevated,
-    borderRadius: borderRadius.md,
+    borderRadius: 8,
     padding: 2,
+    position: 'relative',
+    borderWidth: 0,
   },
-  fallbackOption: {
+  indicator: {
+    position: 'absolute',
+    top: 2,
+    bottom: 2,
+    left: 2,
+    borderRadius: 6,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 1,
+    elevation: 1,
+  },
+  option: {
     flex: 1,
-    paddingVertical: spacing.sm,
+    paddingVertical: 4,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: borderRadius.sm,
+    zIndex: 1,
   },
-  fallbackOptionSelected: {
-    backgroundColor: colors.primary,
-  },
-  fallbackOptionFirst: {
-    borderTopLeftRadius: borderRadius.md - 2,
-    borderBottomLeftRadius: borderRadius.md - 2,
-  },
-  fallbackOptionLast: {
-    borderTopRightRadius: borderRadius.md - 2,
-    borderBottomRightRadius: borderRadius.md - 2,
+  optionText: {
+    fontSize: 13,
   },
 });
