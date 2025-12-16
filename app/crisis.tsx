@@ -3,8 +3,10 @@ import { View, StyleSheet, ScrollView, Pressable, Linking, Alert } from 'react-n
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { Text, Card } from '@/src/components/ui';
-import { colors, darkColors, spacing, borderRadius } from '@/src/constants/theme';
+import { LinearGradient } from 'expo-linear-gradient';
+import Animated, { FadeInDown, FadeIn } from 'react-native-reanimated';
+import { Text } from '@/src/components/ui';
+import { spacing, borderRadius } from '@/src/constants/theme';
 import { useTheme } from '@/src/contexts/ThemeContext';
 import {
   getAllResourcesSorted,
@@ -14,13 +16,88 @@ import {
   type CountryResources,
 } from '@/src/constants/crisisResources';
 
-function ResourceCard({ resource, themeColors }: { resource: CrisisResource; themeColors: typeof colors | typeof darkColors }) {
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+
+function EmergencyBanner({ isDark }: { isDark: boolean }) {
+  const handleEmergencyCall = useCallback(async () => {
+    const phoneUrl = 'tel:999';
+    const canOpen = await Linking.canOpenURL(phoneUrl);
+    if (canOpen) {
+      Linking.openURL(phoneUrl);
+    }
+  }, []);
+
+  return (
+    <Animated.View entering={FadeIn.duration(400)}>
+      <LinearGradient
+        colors={isDark ? ['#1a1a2e', '#16213e'] : ['#fff5f5', '#ffe8e8']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.emergencyBanner}
+      >
+        <View style={styles.emergencyContent}>
+          <View style={[styles.emergencyIconContainer, { backgroundColor: isDark ? '#3d1f1f' : '#fee2e2' }]}>
+            <Ionicons name="warning" size={20} color="#ef4444" />
+          </View>
+          <View style={styles.emergencyText}>
+            <Text variant="bodyMedium" style={{ fontWeight: '600', color: isDark ? '#fca5a5' : '#dc2626' }}>
+              In immediate danger?
+            </Text>
+            <Text variant="caption" color="textSecondary">
+              Call emergency services now
+            </Text>
+          </View>
+          <Pressable
+            style={[styles.emergencyButton]}
+            onPress={handleEmergencyCall}
+          >
+            <Ionicons name="call" size={18} color="#fff" />
+            <Text variant="caption" style={styles.emergencyButtonText}>
+              999
+            </Text>
+          </Pressable>
+        </View>
+      </LinearGradient>
+    </Animated.View>
+  );
+}
+
+function HeroSection({ isDark }: { isDark: boolean }) {
+  return (
+    <Animated.View entering={FadeInDown.duration(500).delay(100)} style={styles.heroSection}>
+      <LinearGradient
+        colors={isDark ? ['#1e293b', '#0f172a'] : ['#f0fdf4', '#dcfce7']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.heroGradient}
+      >
+        <View style={[styles.heroIconContainer, { backgroundColor: isDark ? '#166534' : '#bbf7d0' }]}>
+          <Ionicons name="heart" size={28} color={isDark ? '#86efac' : '#16a34a'} />
+        </View>
+        <Text variant="h3" style={[styles.heroTitle, { color: isDark ? '#86efac' : '#166534' }]}>
+          You matter
+        </Text>
+        <Text variant="body" style={[styles.heroSubtitle, { color: isDark ? '#94a3b8' : '#4b5563' }]}>
+          Help is available, and reaching out is a sign of strength. These resources are here for you.
+        </Text>
+      </LinearGradient>
+    </Animated.View>
+  );
+}
+
+function ResourceCard({
+  resource,
+  isDark,
+  index
+}: {
+  resource: CrisisResource;
+  isDark: boolean;
+  index: number;
+}) {
   const handlePhonePress = useCallback(async () => {
     if (!resource.phone) return;
-
     const phoneUrl = `tel:${resource.phone.replace(/\s/g, '')}`;
     const canOpen = await Linking.canOpenURL(phoneUrl);
-
     if (canOpen) {
       Linking.openURL(phoneUrl);
     } else {
@@ -30,10 +107,8 @@ function ResourceCard({ resource, themeColors }: { resource: CrisisResource; the
 
   const handleTextPress = useCallback(async () => {
     if (!resource.text) return;
-
     const smsUrl = `sms:${resource.text.number}${resource.text.message ? `?body=${encodeURIComponent(resource.text.message)}` : ''}`;
     const canOpen = await Linking.canOpenURL(smsUrl);
-
     if (canOpen) {
       Linking.openURL(smsUrl);
     } else {
@@ -43,43 +118,52 @@ function ResourceCard({ resource, themeColors }: { resource: CrisisResource; the
 
   const handleWebsitePress = useCallback(async () => {
     if (!resource.website) return;
-
     try {
       const canOpen = await Linking.canOpenURL(resource.website);
-
       if (canOpen) {
         await Linking.openURL(resource.website);
       } else {
         Alert.alert('Unable to Open', `Please visit ${resource.website} in your browser.`);
       }
     } catch (error) {
-      console.error('Failed to open website:', error);
       Alert.alert('Unable to Open', `Please visit ${resource.website} in your browser.`);
     }
   }, [resource.website]);
 
   return (
-    <Card variant="outlined" style={styles.resourceCard}>
+    <AnimatedPressable
+      entering={FadeInDown.duration(400).delay(index * 50)}
+      style={[
+        styles.resourceCard,
+        {
+          backgroundColor: isDark ? '#1e293b' : '#fff',
+          borderColor: isDark ? '#334155' : '#e5e7eb',
+        },
+      ]}
+    >
       <View style={styles.resourceHeader}>
-        <Text variant="bodyMedium" color="textPrimary" style={styles.resourceName}>
-          {resource.name}
-        </Text>
-        <Text variant="caption" color="textMuted">
-          {resource.available}
+        <View style={styles.resourceTitleRow}>
+          <Text variant="bodyMedium" style={[styles.resourceName, { color: isDark ? '#f1f5f9' : '#1f2937' }]}>
+            {resource.name}
+          </Text>
+          <View style={[styles.availabilityBadge, { backgroundColor: isDark ? '#1e3a5f' : '#dbeafe' }]}>
+            <Text variant="caption" style={{ color: isDark ? '#93c5fd' : '#1d4ed8', fontSize: 10 }}>
+              {resource.available}
+            </Text>
+          </View>
+        </View>
+        <Text variant="caption" style={{ color: isDark ? '#94a3b8' : '#6b7280', marginTop: 4 }}>
+          {resource.description}
         </Text>
       </View>
-
-      <Text variant="caption" color="textSecondary" style={styles.resourceDescription}>
-        {resource.description}
-      </Text>
 
       <View style={styles.resourceActions}>
         {resource.phone && (
           <Pressable
-            style={[styles.actionButton, { backgroundColor: themeColors.success }]}
+            style={[styles.actionButton, styles.callButton]}
             onPress={handlePhonePress}
           >
-            <Ionicons name="call" size={18} color="#fff" />
+            <Ionicons name="call" size={16} color="#fff" />
             <Text variant="caption" style={styles.actionText}>
               {resource.phone}
             </Text>
@@ -88,10 +172,10 @@ function ResourceCard({ resource, themeColors }: { resource: CrisisResource; the
 
         {resource.text && (
           <Pressable
-            style={[styles.actionButton, { backgroundColor: themeColors.primary }]}
+            style={[styles.actionButton, styles.textButton]}
             onPress={handleTextPress}
           >
-            <Ionicons name="chatbubble" size={18} color="#fff" />
+            <Ionicons name="chatbubble" size={16} color="#fff" />
             <Text variant="caption" style={styles.actionText}>
               Text {resource.text.message}
             </Text>
@@ -100,43 +184,69 @@ function ResourceCard({ resource, themeColors }: { resource: CrisisResource; the
 
         {resource.website && (
           <Pressable
-            style={[styles.actionButton, { backgroundColor: themeColors.textMuted }]}
+            style={[styles.actionButton, styles.webButton, { backgroundColor: isDark ? '#475569' : '#6b7280' }]}
             onPress={handleWebsitePress}
           >
-            <Ionicons name="globe-outline" size={18} color="#fff" />
+            <Ionicons name="globe-outline" size={16} color="#fff" />
             <Text variant="caption" style={styles.actionText}>
               Website
             </Text>
           </Pressable>
         )}
       </View>
-    </Card>
+    </AnimatedPressable>
   );
 }
 
-function CountrySection({ country, themeColors }: { country: CountryResources; themeColors: typeof colors | typeof darkColors }) {
-  const [expanded, setExpanded] = useState(true);
+function CountrySection({
+  country,
+  isDark,
+  defaultExpanded = false,
+  startIndex = 0,
+}: {
+  country: CountryResources;
+  isDark: boolean;
+  defaultExpanded?: boolean;
+  startIndex?: number;
+}) {
+  const [expanded, setExpanded] = useState(defaultExpanded);
 
   return (
     <View style={styles.countrySection}>
       <Pressable
-        style={styles.countryHeader}
+        style={[
+          styles.countryHeader,
+          { backgroundColor: isDark ? '#1e293b' : '#f9fafb', borderColor: isDark ? '#334155' : '#e5e7eb' },
+        ]}
         onPress={() => setExpanded(!expanded)}
       >
-        <Text variant="h3" color="textPrimary">
-          {country.flag} {country.country}
-        </Text>
+        <View style={styles.countryTitleRow}>
+          <Text style={styles.countryFlag}>{country.flag}</Text>
+          <Text variant="bodyMedium" style={{ fontWeight: '600', color: isDark ? '#f1f5f9' : '#1f2937' }}>
+            {country.country}
+          </Text>
+          <View style={[styles.countBadge, { backgroundColor: isDark ? '#334155' : '#e5e7eb' }]}>
+            <Text variant="caption" style={{ color: isDark ? '#94a3b8' : '#6b7280', fontSize: 11 }}>
+              {country.resources.length}
+            </Text>
+          </View>
+        </View>
         <Ionicons
           name={expanded ? 'chevron-up' : 'chevron-down'}
           size={20}
-          color={themeColors.textSecondary}
+          color={isDark ? '#94a3b8' : '#6b7280'}
         />
       </Pressable>
 
       {expanded && (
         <View style={styles.resourceList}>
           {country.resources.map((resource, index) => (
-            <ResourceCard key={index} resource={resource} themeColors={themeColors} />
+            <ResourceCard
+              key={index}
+              resource={resource}
+              isDark={isDark}
+              index={startIndex + index}
+            />
           ))}
         </View>
       )}
@@ -147,21 +257,22 @@ function CountrySection({ country, themeColors }: { country: CountryResources; t
 export default function CrisisScreen() {
   const router = useRouter();
   const { isDark } = useTheme();
-  const themeColors = isDark ? darkColors : colors;
-
   const sortedResources = getAllResourcesSorted();
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: themeColors.background }]} edges={['top']}>
+    <SafeAreaView style={[styles.container, { backgroundColor: isDark ? '#0f172a' : '#f8fafc' }]} edges={['top']}>
       {/* Header */}
-      <View style={[styles.header, { borderBottomColor: themeColors.border }]}>
-        <Pressable onPress={() => router.back()} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color={themeColors.textPrimary} />
+      <View style={[styles.header, { backgroundColor: isDark ? '#0f172a' : '#f8fafc' }]}>
+        <Pressable
+          onPress={() => router.back()}
+          style={[styles.backButton, { backgroundColor: isDark ? '#1e293b' : '#fff' }]}
+        >
+          <Ionicons name="close" size={22} color={isDark ? '#f1f5f9' : '#1f2937'} />
         </Pressable>
-        <Text variant="h2" color="textPrimary">
+        <Text variant="h3" style={{ fontWeight: '600', color: isDark ? '#f1f5f9' : '#1f2937' }}>
           Crisis Support
         </Text>
-        <View style={styles.backButton} />
+        <View style={styles.headerSpacer} />
       </View>
 
       <ScrollView
@@ -169,44 +280,34 @@ export default function CrisisScreen() {
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
-        {/* Important message */}
-        <Card
-          variant="flat"
-          style={[styles.importantCard, { backgroundColor: themeColors.primaryLight }]}
-        >
-          <View style={styles.importantContent}>
-            <Ionicons name="heart" size={24} color={themeColors.primary} />
-            <View style={styles.importantText}>
-              <Text variant="bodyMedium" color="textPrimary">
-                You matter, and help is available
-              </Text>
-              <Text variant="caption" color="textSecondary">
-                {"If you're in immediate danger, please call emergency services (999/911/112)"}
-              </Text>
-            </View>
-          </View>
-        </Card>
+        {/* Emergency Banner */}
+        <EmergencyBanner isDark={isDark} />
+
+        {/* Hero Section */}
+        <HeroSection isDark={isDark} />
 
         {/* Country sections */}
-        {sortedResources.map((country) => (
+        {sortedResources.map((country, countryIndex) => (
           <CountrySection
             key={country.countryCode}
             country={country}
-            themeColors={themeColors}
+            isDark={isDark}
+            defaultExpanded={countryIndex === 0}
+            startIndex={countryIndex * 10}
           />
         ))}
 
-        {/* International */}
-        <View style={styles.countrySection}>
-          <Text variant="h3" color="textPrimary" style={styles.sectionTitle}>
-            🌍 International
+        {/* International Section */}
+        <View style={styles.internationalSection}>
+          <Text variant="bodyMedium" style={{ fontWeight: '600', color: isDark ? '#f1f5f9' : '#1f2937', marginBottom: 12 }}>
+            🌍 International Resources
           </Text>
-          <ResourceCard resource={INTERNATIONAL_RESOURCE} themeColors={themeColors} />
-          <ResourceCard resource={BEFRIENDERS_RESOURCE} themeColors={themeColors} />
+          <ResourceCard resource={INTERNATIONAL_RESOURCE} isDark={isDark} index={0} />
+          <ResourceCard resource={BEFRIENDERS_RESOURCE} isDark={isDark} index={1} />
         </View>
 
-        {/* Footer note */}
-        <Text variant="caption" color="textMuted" style={styles.footerNote}>
+        {/* Footer */}
+        <Text variant="caption" style={[styles.footerNote, { color: isDark ? '#64748b' : '#9ca3af' }]}>
           These resources are provided for informational purposes. In an emergency, always contact local emergency services.
         </Text>
       </ScrollView>
@@ -224,84 +325,177 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
-    borderBottomWidth: 1,
   },
   backButton: {
     width: 40,
     height: 40,
+    borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
+  },
+  headerSpacer: {
+    width: 40,
   },
   scrollView: {
     flex: 1,
   },
   content: {
     padding: spacing.md,
-    paddingBottom: spacing.xxl,
-  },
-  importantCard: {
-    marginBottom: spacing.lg,
-  },
-  importantContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    paddingBottom: spacing.xxl + 40,
     gap: spacing.md,
   },
-  importantText: {
+  emergencyBanner: {
+    borderRadius: borderRadius.lg,
+    padding: spacing.md,
+    overflow: 'hidden',
+  },
+  emergencyContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  emergencyIconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  emergencyText: {
     flex: 1,
-    gap: 2,
+  },
+  emergencyButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: '#dc2626',
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: borderRadius.full,
+  },
+  emergencyButtonText: {
+    color: '#fff',
+    fontWeight: '700',
+    fontSize: 15,
+  },
+  heroSection: {
+    borderRadius: borderRadius.lg,
+    overflow: 'hidden',
+  },
+  heroGradient: {
+    padding: spacing.lg,
+    alignItems: 'center',
+  },
+  heroIconContainer: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: spacing.sm,
+  },
+  heroTitle: {
+    fontWeight: '700',
+    marginBottom: 8,
+  },
+  heroSubtitle: {
+    textAlign: 'center',
+    lineHeight: 22,
   },
   countrySection: {
-    marginBottom: spacing.lg,
+    gap: spacing.sm,
   },
   countryHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: spacing.sm,
+    padding: spacing.md,
+    borderRadius: borderRadius.lg,
+    borderWidth: 1,
   },
-  sectionTitle: {
-    marginBottom: spacing.sm,
+  countryTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  countryFlag: {
+    fontSize: 20,
+  },
+  countBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 10,
   },
   resourceList: {
     gap: spacing.sm,
+    paddingLeft: spacing.xs,
   },
   resourceCard: {
-    marginBottom: spacing.xs,
+    borderRadius: borderRadius.lg,
+    borderWidth: 1,
+    padding: spacing.md,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.03,
+    shadowRadius: 3,
+    elevation: 1,
   },
   resourceHeader: {
+    marginBottom: spacing.sm,
+  },
+  resourceTitleRow: {
     flexDirection: 'row',
+    alignItems: 'center',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 2,
   },
   resourceName: {
-    flex: 1,
     fontWeight: '600',
+    flex: 1,
   },
-  resourceDescription: {
-    marginBottom: spacing.sm,
+  availabilityBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
   },
   resourceActions: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: spacing.xs,
+    gap: 8,
   },
   actionButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
-    paddingVertical: spacing.xs,
-    paddingHorizontal: spacing.sm,
-    borderRadius: borderRadius.full,
+    gap: 6,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: borderRadius.md,
+  },
+  callButton: {
+    backgroundColor: '#16a34a',
+  },
+  textButton: {
+    backgroundColor: '#2563eb',
+  },
+  webButton: {
+    backgroundColor: '#6b7280',
   },
   actionText: {
     color: '#fff',
-    fontWeight: '500',
+    fontWeight: '600',
+    fontSize: 13,
+  },
+  internationalSection: {
+    marginTop: spacing.sm,
   },
   footerNote: {
     textAlign: 'center',
     marginTop: spacing.lg,
-    paddingHorizontal: spacing.lg,
+    paddingHorizontal: spacing.md,
+    lineHeight: 18,
   },
 });
