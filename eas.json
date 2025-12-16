@@ -16,11 +16,17 @@
     "testflight": {
       "distribution": "store",
       "autoIncrement": true,
-      "channel": "testflight"
+      "channel": "testflight",
+      "env": {
+        "SENTRY_DISABLE_AUTO_UPLOAD": "true"
+      }
     },
     "production": {
       "autoIncrement": true,
-      "channel": "production"
+      "channel": "production",
+      "env": {
+        "SENTRY_DISABLE_AUTO_UPLOAD": "true"
+      }
     }
   },
   "submit": {
