@@ -20,11 +20,11 @@ export function useRouteProtection(isReady: boolean) {
     // Dev mode: set to true to force onboarding for testing
     const forceOnboarding = __DEV__ && false;
 
-    if (forceOnboarding && !inOnboarding && !hasCompletedOnboarding) {
+    const shouldShowOnboarding = forceOnboarding || !hasCompletedOnboarding;
+
+    if (shouldShowOnboarding && !inOnboarding) {
       router.replace(ROUTES.ONBOARDING);
-    } else if (!hasCompletedOnboarding && !inOnboarding) {
-      router.replace(ROUTES.ONBOARDING);
-    } else if (hasCompletedOnboarding && inOnboarding) {
+    } else if (!shouldShowOnboarding && inOnboarding) {
       router.replace(ROUTES.TABS);
     }
   }, [isReady, hasCompletedOnboarding, segments, router]);

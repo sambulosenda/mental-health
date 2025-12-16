@@ -25,7 +25,11 @@
       "Bash(git -C /Users/sambulosenda/Documents/zen-mobile-app ls-files:*)",
       "Bash(git -C /Users/sambulosenda/Documents/zen-mobile-app log --all --full-history -- .env)",
       "Bash(git -C /Users/sambulosenda/Documents/zen-mobile-app commit -m \"fix: Enable error logging in production for observability\")",
-      "Bash(git -C /Users/sambulosenda/Documents/zen-mobile-app commit -m \"fix: Rewrite disclaimer modal with button inside scroll\")"
+      "Bash(git -C /Users/sambulosenda/Documents/zen-mobile-app commit -m \"fix: Rewrite disclaimer modal with button inside scroll\")",
+      "Bash(git -C /Users/sambulosenda/Documents/zen-mobile-app diff app/_layout.tsx src/components/navigation/TransitionStack.tsx app/\\(modals\\)/_layout.tsx --stat)",
+      "Bash(git -C /Users/sambulosenda/Documents/zen-mobile-app diff --stat -- app/_layout.tsx \"app/(modals)/_layout.tsx\" src/components/navigation/TransitionStack.tsx)",
+      "Bash(git -C /Users/sambulosenda/Documents/zen-mobile-app add app/_layout.tsx \"app/(modals)/_layout.tsx\" src/components/navigation/TransitionStack.tsx)",
+      "Bash(git -C /Users/sambulosenda/Documents/zen-mobile-app commit:*)"
     ],
     "deny": [],
     "ask": []

@@ -1,6 +1,6 @@
 import {
-  Pressable,
-  PressableProps,
+  TouchableOpacity,
+  TouchableOpacityProps,
   ViewStyle,
   ActivityIndicator,
   GestureResponderEvent,
@@ -9,19 +9,18 @@ import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withSpring,
-  interpolate,
 } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 import { useTheme } from '@/src/contexts/ThemeContext';
 import { colors, darkColors, borderRadius } from '@/src/constants/theme';
 import { Text } from './Text';
 
-const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+const AnimatedTouchable = Animated.createAnimatedComponent(TouchableOpacity);
 
 type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger';
 type ButtonSize = 'sm' | 'md' | 'lg';
 
-interface ButtonProps extends Omit<PressableProps, 'style'> {
+interface ButtonProps extends Omit<TouchableOpacityProps, 'style'> {
   variant?: ButtonVariant;
   size?: ButtonSize;
   loading?: boolean;
@@ -38,7 +37,6 @@ export function Button({
   fullWidth = false,
   disabled,
   style,
-  className,
   children,
   onPress,
   onPressIn,
@@ -46,24 +44,19 @@ export function Button({
   ...props
 }: ButtonProps) {
   const { isDark } = useTheme();
-  const pressed = useSharedValue(0);
+  const scale = useSharedValue(1);
 
-  const animatedStyle = useAnimatedStyle(() => {
-    const scale = interpolate(pressed.value, [0, 1], [1, 0.97]);
-    const opacity = interpolate(pressed.value, [0, 1], [1, 0.9]);
-    return {
-      transform: [{ scale }],
-      opacity,
-    };
-  });
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
 
   const handlePressIn = (e: GestureResponderEvent) => {
-    pressed.value = withSpring(1, { damping: 20, stiffness: 400 });
+    scale.value = withSpring(0.97, { damping: 20, stiffness: 400 });
     onPressIn?.(e);
   };
 
   const handlePressOut = (e: GestureResponderEvent) => {
-    pressed.value = withSpring(0, { damping: 20, stiffness: 400 });
+    scale.value = withSpring(1, { damping: 20, stiffness: 400 });
     onPressOut?.(e);
   };
 
@@ -77,9 +70,9 @@ export function Button({
 
   // Size configurations with refined proportions
   const sizeConfig = {
-    sm: { height: 40, paddingHorizontal: 16, fontSize: 'captionMedium' as const },
-    md: { height: 48, paddingHorizontal: 20, fontSize: 'bodyMedium' as const },
-    lg: { height: 56, paddingHorizontal: 28, fontSize: 'bodyMedium' as const },
+    sm: { height: 44, paddingHorizontal: 18, fontSize: 'captionMedium' as const },
+    md: { height: 52, paddingHorizontal: 24, fontSize: 'bodyMedium' as const },
+    lg: { height: 58, paddingHorizontal: 32, fontSize: 'bodyMedium' as const },
   }[size];
 
   // Variant styles with refined visuals
@@ -88,12 +81,11 @@ export function Button({
       case 'primary':
         return {
           backgroundColor: themeColors.primary,
-          // Subtle shadow for depth
           shadowColor: themeColors.primary,
           shadowOffset: { width: 0, height: 4 },
-          shadowOpacity: isDark ? 0.3 : 0.2,
-          shadowRadius: 8,
-          elevation: 3,
+          shadowOpacity: isDark ? 0.4 : 0.25,
+          shadowRadius: 12,
+          elevation: 4,
         };
       case 'secondary':
         return {
@@ -110,28 +102,29 @@ export function Button({
           backgroundColor: themeColors.error,
           shadowColor: themeColors.error,
           shadowOffset: { width: 0, height: 4 },
-          shadowOpacity: 0.2,
-          shadowRadius: 8,
-          elevation: 3,
+          shadowOpacity: 0.25,
+          shadowRadius: 12,
+          elevation: 4,
         };
     }
   };
 
   const getTextColor = () => {
     if (variant === 'primary' || variant === 'danger') {
-      return themeColors.textInverse;
+      return '#FFFFFF';
     }
     return themeColors.primary;
   };
 
   return (
-    <AnimatedPressable
+    <AnimatedTouchable
       {...props}
+      activeOpacity={0.9}
       style={[
         {
           height: sizeConfig.height,
           paddingHorizontal: sizeConfig.paddingHorizontal,
-          borderRadius: borderRadius.md,
+          borderRadius: borderRadius.lg,
           alignItems: 'center',
           justifyContent: 'center',
           opacity: isDisabled ? 0.5 : 1,
@@ -158,7 +151,8 @@ export function Button({
           variant={sizeConfig.fontSize}
           style={{
             color: getTextColor(),
-            letterSpacing: 0.3,
+            fontWeight: '600',
+            letterSpacing: 0.2,
           }}
         >
           {children}
@@ -166,6 +160,6 @@ export function Button({
       ) : (
         children
       )}
-    </AnimatedPressable>
+    </AnimatedTouchable>
   );
 }

@@ -11,6 +11,7 @@ export default {
     ios: {
       supportsTablet: true,
       bundleIdentifier: "com.sambulosendas1.softmind",
+      appleTeamId: "Y53KNKBDS8",
       associatedDomains: ["applinks:getsoftmind.com", "applinks:www.getsoftmind.com"],
       infoPlist: {
         NSSpeechRecognitionUsageDescription:

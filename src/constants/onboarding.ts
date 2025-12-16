@@ -47,6 +47,6 @@ export const GOALS: GoalDefinition[] = [
   },
 ];
 
-export type OnboardingStep = 'welcome' | 'name' | 'goals' | 'reminders' | 'complete';
+export type OnboardingStep = 'welcome' | 'benefits' | 'name' | 'goals' | 'reminders' | 'complete';
 
-export const ONBOARDING_STEPS: OnboardingStep[] = ['welcome', 'name', 'goals', 'reminders', 'complete'];
+export const ONBOARDING_STEPS: OnboardingStep[] = ['welcome', 'benefits', 'name', 'goals', 'reminders', 'complete'];

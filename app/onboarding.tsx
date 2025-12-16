@@ -1,200 +1,225 @@
 import { useState, useCallback } from 'react';
-import { KeyboardAvoidingView, Platform, Alert } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { View, useWindowDimensions, StyleSheet, Pressable, Text, Alert } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
+import Animated, {
+  useAnimatedScrollHandler,
+  useSharedValue,
+  useAnimatedStyle,
+  interpolate,
+  Extrapolation,
+  FadeIn,
+} from 'react-native-reanimated';
 import { useSettingsStore } from '@/src/stores';
 import { colors, darkColors } from '@/src/constants/theme';
 import { useTheme } from '@/src/contexts/ThemeContext';
 import { requestNotificationPermissions } from '@/src/lib/notifications';
-import { ONBOARDING_STEPS } from '@/src/constants/onboarding';
-import type { OnboardingStep } from '@/src/constants/onboarding';
 import type { UserGoal } from '@/src/types/settings';
+
 import {
-  WelcomeStep,
-  NameStep,
-  GoalsStep,
-  RemindersStep,
-  CompletionStep,
-  OnboardingProgress,
-} from '@/src/components/onboarding';
+  AnimatedIndexContext,
+  IntroSlideContainer,
+  PaginationDots,
+  // BottomGlow,
+  TOTAL_INTRO_SLIDES,
+  // INTRO_PALETTE,
+  WelcomeSlide,
+  BenefitsSlide,
+  PrivacySlide,
+} from '@/src/components/onboarding/intro';
+import { OnboardingForm } from '@/src/components/onboarding/form/OnboardingForm';
 
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
-interface OnboardingData {
-  name: string;
-  goals: UserGoal[];
-  reminders: {
-    moodEnabled: boolean;
-    moodTime: string;
-    journalEnabled: boolean;
-    journalTime: string;
-  };
-}
+type Phase = 'intro' | 'form';
 
 export default function OnboardingScreen() {
   const router = useRouter();
   const { isDark } = useTheme();
   const themeColors = isDark ? darkColors : colors;
-  const {
-    completeOnboarding,
-    setReminderEnabled,
-    setReminderTime,
-  } = useSettingsStore();
+  const { width } = useWindowDimensions();
+  const insets = useSafeAreaInsets();
 
-  const [currentStep, setCurrentStep] = useState<OnboardingStep>('welcome');
-  const [data, setData] = useState<OnboardingData>({
-    name: '',
-    goals: [],
-    reminders: {
-      moodEnabled: false,
-      moodTime: '09:00',
-      journalEnabled: false,
-      journalTime: '20:00',
-    },
+  const { completeOnboarding, setReminderEnabled, setReminderTime } = useSettingsStore();
+
+  const [phase, setPhase] = useState<Phase>('intro');
+  const activeIndex = useSharedValue(0);
+
+  const scrollHandler = useAnimatedScrollHandler((event) => {
+    activeIndex.set(event.contentOffset.x / width);
   });
 
-  const currentStepIndex = ONBOARDING_STEPS.indexOf(currentStep);
+  // Button fades in on last slide
+  const rButtonStyle = useAnimatedStyle(() => {
+    const lastIndex = TOTAL_INTRO_SLIDES - 1;
+    const beforeLastIndex = TOTAL_INTRO_SLIDES - 2;
 
-  const goNext = useCallback(() => {
-    const nextIndex = currentStepIndex + 1;
-    if (nextIndex < ONBOARDING_STEPS.length) {
-      setCurrentStep(ONBOARDING_STEPS[nextIndex]);
-    }
-  }, [currentStepIndex]);
-
-  const goBack = useCallback(() => {
-    const prevIndex = currentStepIndex - 1;
-    if (prevIndex >= 0) {
-      setCurrentStep(ONBOARDING_STEPS[prevIndex]);
-    }
-  }, [currentStepIndex]);
-
-  const handleNameChange = useCallback((name: string) => {
-    setData((prev) => ({ ...prev, name }));
+    return {
+      opacity: interpolate(
+        activeIndex.get(),
+        [beforeLastIndex, lastIndex],
+        [0, 1],
+        Extrapolation.CLAMP
+      ),
+      pointerEvents: activeIndex.get() >= lastIndex - 0.2 ? 'auto' : 'none',
+    };
   }, []);
 
-  const handleGoalsChange = useCallback((goals: UserGoal[]) => {
-    setData((prev) => ({ ...prev, goals }));
+  const handleGetStarted = useCallback(() => {
+    setPhase('form');
   }, []);
 
-  const handleRemindersChange = useCallback((reminders: OnboardingData['reminders']) => {
-    setData((prev) => ({ ...prev, reminders }));
+  const handleBackToIntro = useCallback(() => {
+    setPhase('intro');
   }, []);
 
-  const handleComplete = useCallback(async () => {
-    try {
-      // Save user profile
-      completeOnboarding({
-        name: data.name.trim(),
-        goals: data.goals,
-      });
+  const handleComplete = useCallback(
+    async (data: {
+      name: string;
+      goals: UserGoal[];
+      reminders: {
+        moodEnabled: boolean;
+        moodTime: string;
+        journalEnabled: boolean;
+        journalTime: string;
+      };
+    }) => {
+      try {
+        // Save user profile
+        completeOnboarding({
+          name: data.name,
+          goals: data.goals,
+        });
 
-      // Set up reminders if enabled
-      const needsPermissions = data.reminders.moodEnabled || data.reminders.journalEnabled;
+        // Set up reminders if enabled
+        const needsPermissions = data.reminders.moodEnabled || data.reminders.journalEnabled;
 
-      if (needsPermissions) {
-        const hasPermission = await requestNotificationPermissions();
+        if (needsPermissions) {
+          const hasPermission = await requestNotificationPermissions();
 
-        if (hasPermission) {
-          if (data.reminders.moodEnabled) {
-            await setReminderTime('mood', data.reminders.moodTime);
-            await setReminderEnabled('mood', true);
-          }
+          if (hasPermission) {
+            if (data.reminders.moodEnabled) {
+              await setReminderTime('mood', data.reminders.moodTime);
+              await setReminderEnabled('mood', true);
+            }
 
-          if (data.reminders.journalEnabled) {
-            await setReminderTime('journal', data.reminders.journalTime);
-            await setReminderEnabled('journal', true);
+            if (data.reminders.journalEnabled) {
+              await setReminderTime('journal', data.reminders.journalTime);
+              await setReminderEnabled('journal', true);
+            }
           }
         }
-        // If no permission, we still continue - reminders just won't be set
+
+        // Navigate to main app
+        router.replace('/(tabs)');
+      } catch (error) {
+        console.error('Failed to complete onboarding:', error);
+        Alert.alert('Something went wrong', 'Please try again.', [{ text: 'OK' }]);
       }
+    },
+    [completeOnboarding, setReminderEnabled, setReminderTime, router]
+  );
 
-      // Navigate to main app
-      router.replace('/(tabs)');
-    } catch (error) {
-      console.error('Failed to complete onboarding:', error);
-      Alert.alert(
-        'Something went wrong',
-        'Please try again.',
-        [{ text: 'OK' }]
-      );
-    }
-  }, [data, completeOnboarding, setReminderEnabled, setReminderTime, router]);
-
-  const renderStep = () => {
-    switch (currentStep) {
-      case 'welcome':
-        return (
-          <Animated.View key="welcome" entering={FadeIn.duration(300)} exiting={FadeOut.duration(150)} className="flex-1">
-            <WelcomeStep onNext={goNext} />
-          </Animated.View>
-        );
-      case 'name':
-        return (
-          <Animated.View key="name" entering={FadeIn.duration(300)} exiting={FadeOut.duration(150)} className="flex-1">
-            <NameStep
-              name={data.name}
-              onNameChange={handleNameChange}
-              onNext={goNext}
-              onBack={goBack}
-            />
-          </Animated.View>
-        );
-      case 'goals':
-        return (
-          <Animated.View key="goals" entering={FadeIn.duration(300)} exiting={FadeOut.duration(150)} className="flex-1">
-            <GoalsStep
-              name={data.name}
-              goals={data.goals}
-              onGoalsChange={handleGoalsChange}
-              onNext={goNext}
-              onBack={goBack}
-            />
-          </Animated.View>
-        );
-      case 'reminders':
-        return (
-          <Animated.View key="reminders" entering={FadeIn.duration(300)} exiting={FadeOut.duration(150)} className="flex-1">
-            <RemindersStep
-              reminders={data.reminders}
-              onRemindersChange={handleRemindersChange}
-              onNext={goNext}
-              onBack={goBack}
-            />
-          </Animated.View>
-        );
-      case 'complete':
-        return (
-          <Animated.View key="complete" entering={FadeIn.duration(400)} exiting={FadeOut.duration(150)} className="flex-1">
-            <CompletionStep name={data.name} onComplete={handleComplete} />
-          </Animated.View>
-        );
-      default:
-        return null;
-    }
-  };
+  if (phase === 'form') {
+    return (
+      <View style={{ flex: 1, backgroundColor: themeColors.background }}>
+        <Animated.View entering={FadeIn.duration(300)} style={{ flex: 1 }}>
+          <OnboardingForm
+            onComplete={handleComplete}
+            onBack={handleBackToIntro}
+            title="Personalize"
+          />
+        </Animated.View>
+      </View>
+    );
+  }
 
   return (
-    <SafeAreaView
-      className="flex-1"
-      style={{ backgroundColor: themeColors.background }}
-    >
-      <KeyboardAvoidingView
-        className="flex-1"
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    <AnimatedIndexContext.Provider value={{ activeIndex }}>
+      <View
+        style={[
+          styles.container,
+          {
+            backgroundColor: isDark ? '#0f0f14' : themeColors.background,
+            paddingBottom: insets.bottom + 8,
+          },
+        ]}
       >
-        {/* Progress indicator - hide on welcome and complete steps */}
-        {currentStep !== 'welcome' && currentStep !== 'complete' && (
-          <Animated.View entering={FadeIn.duration(300)}>
-            <OnboardingProgress
-              currentStep={currentStepIndex - 1}
-              totalSteps={ONBOARDING_STEPS.length - 2}
-            />
-          </Animated.View>
-        )}
+        {/* Temporarily disabled to debug crash */}
+        {/* <BottomGlow
+          palette={INTRO_PALETTE}
+          width={width}
+          height={height}
+          activeIndex={activeIndex}
+        /> */}
 
-        {renderStep()}
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+        <Animated.ScrollView
+          style={{ flex: 1 }}
+          contentContainerStyle={{ paddingTop: insets.top + 40 }}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          pagingEnabled
+          onScroll={scrollHandler}
+          scrollEventThrottle={16}
+        >
+          <IntroSlideContainer
+            title={'Welcome to\nSoftmind'}
+            description="Your gentle companion for emotional wellness and self-discovery. Track your mood, journal your thoughts, and find calm."
+          >
+            <WelcomeSlide />
+          </IntroSlideContainer>
+
+          <IntroSlideContainer
+            title={'Tools for your\nwellbeing'}
+            description="Track patterns in your mood, practice guided journaling, and build mindful habits that stick."
+          >
+            <BenefitsSlide />
+          </IntroSlideContainer>
+
+          <IntroSlideContainer
+            title={'Private &\nsecure'}
+            description="Your thoughts stay on your device. No cloud uploads, no tracking. Just you and your journey to better mental wellness."
+          >
+            <PrivacySlide />
+          </IntroSlideContainer>
+        </Animated.ScrollView>
+
+        <View style={styles.bottomContainer}>
+          <PaginationDots numberOfDots={TOTAL_INTRO_SLIDES} activeIndex={activeIndex} />
+          <AnimatedPressable
+            onPress={handleGetStarted}
+            style={[
+              styles.button,
+              { backgroundColor: themeColors.primary },
+              rButtonStyle,
+            ]}
+          >
+            <Text style={styles.buttonText}>Get Started</Text>
+          </AnimatedPressable>
+        </View>
+      </View>
+    </AnimatedIndexContext.Provider>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  bottomContainer: {
+    gap: 20,
+    paddingHorizontal: 20,
+    paddingTop: 20,
+  },
+  button: {
+    height: 56,
+    borderRadius: 28,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: '600',
+  },
+});

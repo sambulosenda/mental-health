@@ -1,4 +1,4 @@
-import { Pressable, View } from 'react-native';
+import { Pressable, View, StyleSheet } from 'react-native';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -15,11 +15,13 @@ interface GoalCardProps {
   goal: GoalDefinition;
   selected: boolean;
   onToggle: () => void;
+  isFirst?: boolean;
+  isLast?: boolean;
 }
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
-export function GoalCard({ goal, selected, onToggle }: GoalCardProps) {
+export function GoalCard({ goal, selected, onToggle, isFirst, isLast }: GoalCardProps) {
   const { isDark } = useTheme();
   const themeColors = isDark ? darkColors : colors;
   const scale = useSharedValue(1);
@@ -29,11 +31,11 @@ export function GoalCard({ goal, selected, onToggle }: GoalCardProps) {
   }));
 
   const handlePressIn = () => {
-    scale.value = withSpring(0.96, { damping: 15, stiffness: 300 });
+    scale.value = withSpring(0.98, { damping: 15, stiffness: 400 });
   };
 
   const handlePressOut = () => {
-    scale.value = withSpring(1, { damping: 15, stiffness: 300 });
+    scale.value = withSpring(1, { damping: 15, stiffness: 400 });
   };
 
   const handlePress = () => {
@@ -50,57 +52,120 @@ export function GoalCard({ goal, selected, onToggle }: GoalCardProps) {
       accessibilityState={{ checked: selected }}
       accessibilityLabel={`${goal.label}: ${goal.description}`}
       style={[
+        styles.row,
         animatedStyle,
         {
-          flex: 1,
-          backgroundColor: selected
-            ? isDark
-              ? themeColors.primaryDark
-              : themeColors.mood[1]
-            : themeColors.surfaceElevated,
-          borderWidth: 2,
-          borderColor: selected ? themeColors.primary : themeColors.border,
-          borderRadius: 16,
-          padding: 16,
-          minHeight: 120,
+          backgroundColor: isDark ? themeColors.surfaceElevated : '#FFFFFF',
+          borderTopLeftRadius: isFirst ? 12 : 0,
+          borderTopRightRadius: isFirst ? 12 : 0,
+          borderBottomLeftRadius: isLast ? 12 : 0,
+          borderBottomRightRadius: isLast ? 12 : 0,
         },
       ]}
     >
-      <View className="flex-row justify-between items-start mb-2">
-        <View
-          className="w-10 h-10 rounded-full justify-center items-center"
-          style={{
-            backgroundColor: selected
-              ? themeColors.primary
-              : isDark
-                ? themeColors.surfaceElevated
-                : themeColors.background,
-          }}
+      {/* Icon */}
+      <View
+        style={[
+          styles.iconContainer,
+          {
+            backgroundColor: isDark
+              ? 'rgba(123, 163, 147, 0.15)'
+              : 'rgba(91, 138, 114, 0.1)',
+          },
+        ]}
+      >
+        <Ionicons
+          name={goal.icon}
+          size={20}
+          color={themeColors.primary}
+        />
+      </View>
+
+      {/* Content */}
+      <View style={styles.content}>
+        <Text
+          style={[
+            styles.label,
+            { color: themeColors.textPrimary },
+          ]}
         >
+          {goal.label}
+        </Text>
+        <Text
+          style={[
+            styles.description,
+            { color: themeColors.textSecondary },
+          ]}
+        >
+          {goal.description}
+        </Text>
+      </View>
+
+      {/* Checkmark */}
+      <View style={styles.checkContainer}>
+        {selected ? (
           <Ionicons
-            name={goal.icon}
-            size={20}
-            color={selected ? themeColors.background : themeColors.textSecondary}
-          />
-        </View>
-        {selected && (
-          <Ionicons
-            name="checkmark-circle"
+            name="checkmark-circle-sharp"
             size={24}
             color={themeColors.primary}
           />
+        ) : (
+          <View
+            style={[
+              styles.emptyCheck,
+              {
+                borderColor: isDark
+                  ? 'rgba(255,255,255,0.2)'
+                  : 'rgba(0,0,0,0.15)',
+              },
+            ]}
+          />
         )}
       </View>
-      <Text
-        variant="bodyMedium"
-        color={selected ? 'primary' : 'textPrimary'}
-        className="mb-1"
-      >
-        {goal.label}
-      </Text>
-      <Text variant="caption" color="textSecondary">
-        {goal.description}
-      </Text>
     </AnimatedPressable>
   );
 }
+
+const styles = StyleSheet.create({
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    minHeight: 72,
+  },
+  iconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 14,
+  },
+  content: {
+    flex: 1,
+    marginRight: 12,
+  },
+  label: {
+    fontSize: 17,
+    fontWeight: '500',
+    letterSpacing: -0.4,
+    marginBottom: 2,
+  },
+  description: {
+    fontSize: 14,
+    letterSpacing: -0.15,
+  },
+  checkContainer: {
+    width: 24,
+    height: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  emptyCheck: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    borderWidth: 1.5,
+  },
+});

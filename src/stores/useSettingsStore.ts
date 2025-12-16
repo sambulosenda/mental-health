@@ -141,7 +141,7 @@ export const useSettingsStore = create<SettingsState>()(
     }),
     {
       name: 'softmind-settings',
-      version: 4,
+      version: 5,
       storage: createJSONStorage(() => AsyncStorage),
       migrate: (persistedState: unknown, version: number) => {
 
@@ -174,9 +174,12 @@ export const useSettingsStore = create<SettingsState>()(
 
         if (version < 4) {
           // Add disclaimer acceptance field
-          if (state.hasAcceptedDisclaimer === undefined) {
-            state.hasAcceptedDisclaimer = false;
-          }
+          state.hasAcceptedDisclaimer = false;
+        }
+
+        if (version < 5) {
+          // Reset disclaimer for testing
+          state.hasAcceptedDisclaimer = false;
         }
 
         return state;
