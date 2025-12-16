@@ -68,9 +68,9 @@ export default {
       [
         "@sentry/react-native/expo",
         {
-          organization: process.env.SENTRY_ORG,
-          project: process.env.SENTRY_PROJECT,
-          uploadSourceMaps: false,
+          organization: "slotavio",
+          project: "softmind-app",
+          uploadSourceMaps: true,
         },
       ],
     ],
@@ -91,3 +91,4 @@ export default {
     owner: "sambulosendas1",
   },
 };
+
