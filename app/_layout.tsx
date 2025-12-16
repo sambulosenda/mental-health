@@ -63,7 +63,7 @@ function RootLayoutContent() {
         <SafeAreaProvider>
           <BiometricLock>
             <StatusBar style={isDark ? 'light' : 'dark'} />
-            <View style={{ flex: 1 }}>
+            <View style={{ flex: 1, backgroundColor: themeColors.background }}>
               <TransitionStack
                 screenOptions={{
                   overlay: DimOverlay,
@@ -80,6 +80,7 @@ function RootLayoutContent() {
                 <TransitionStack.Screen
                   name="(tabs)"
                   options={{
+                    ...CalmPresets.None(),
                     overlayShown: false,
                   }}
                 />
@@ -98,7 +99,13 @@ function RootLayoutContent() {
                 <TransitionStack.Screen
                   name="paywall"
                   options={{
-                    ...CalmPresets.ElasticCard(),
+                    ...CalmPresets.Modal(),
+                  }}
+                />
+                <TransitionStack.Screen
+                  name="crisis"
+                  options={{
+                    ...CalmPresets.SlideFromBottom(),
                   }}
                 />
               </TransitionStack>
