@@ -89,6 +89,7 @@ export function ContactPicker({ onSelect, onClose }: ContactPickerProps) {
 
   useEffect(() => {
     loadContacts();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {

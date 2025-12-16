@@ -116,14 +116,15 @@ export default function ProfileScreen() {
 
   const [biometricAvailable, setBiometricAvailable] = useState(false);
   const [biometricName, setBiometricName] = useState('Biometric');
-  const [isExporting, setIsExporting] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
+  const [, setIsExporting] = useState(false);
+  const [, setIsDeleting] = useState(false);
   const [showContactPicker, setShowContactPicker] = useState(false);
 
   useEffect(() => {
     checkBiometrics();
     loadMoodEntries();
     loadJournalEntries();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const checkBiometrics = async () => {

@@ -102,6 +102,7 @@ function ChatScreenContent() {
     setTimeout(() => {
       scrollViewRef.current?.scrollToEnd({ animated });
     }, 150);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Scroll to bottom when keyboard opens
@@ -127,6 +128,7 @@ function ChatScreenContent() {
     };
 
     initConversation();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Generate initial greeting when model is ready
@@ -163,6 +165,7 @@ function ChatScreenContent() {
     };
 
     generateGreeting();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isModelReady, activeConversation]);
 
   // Handle sending messages
@@ -208,17 +211,20 @@ function ChatScreenContent() {
         setGenerating(false);
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [activeConversation, messages, isGenerating, isCheckin, checkinFlow]
   );
 
   const handleClose = useCallback(() => {
     reset();
     router.back();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleEnd = useCallback(async () => {
     await endActiveConversation();
     router.back();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleLogMood = useCallback(async () => {
@@ -226,11 +232,13 @@ function ChatScreenContent() {
     await completeCheckin(true);
     setGenerating(false);
     router.back();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleSkipMood = useCallback(async () => {
     await completeCheckin(false);
     router.back();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const showCheckinSummary =

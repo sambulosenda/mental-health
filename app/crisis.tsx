@@ -125,7 +125,7 @@ function ResourceCard({
       } else {
         Alert.alert('Unable to Open', `Please visit ${resource.website} in your browser.`);
       }
-    } catch (error) {
+    } catch {
       Alert.alert('Unable to Open', `Please visit ${resource.website} in your browser.`);
     }
   }, [resource.website]);

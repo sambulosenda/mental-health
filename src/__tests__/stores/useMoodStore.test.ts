@@ -1,3 +1,4 @@
+/* eslint-disable import/first */
 // Mock all external dependencies
 jest.mock('@/src/lib/database', () => ({
   createMoodEntry: jest.fn(),

@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useRef } from 'react';
+import { useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import { View, Pressable } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import Animated, {
@@ -43,7 +43,7 @@ export function TimedSpeechStep({ step, onComplete, accentColor }: TimedSpeechSt
 
   const controllerRef = useRef<SpeechController | null>(null);
 
-  const segments = step.speechSegments || [];
+  const segments = useMemo(() => step.speechSegments || [], [step.speechSegments]);
   const totalSegments = segments.length;
 
   // Breathing animation for pause cues

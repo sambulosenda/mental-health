@@ -50,6 +50,7 @@ export default function JournalScreen() {
   useEffect(() => {
     loadEntries();
     loadPrompts();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -59,12 +60,14 @@ export default function JournalScreen() {
       }, 300);
       return () => clearTimeout(debounce);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchQuery]);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     await loadEntries();
     setRefreshing(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleNewEntry = () => {

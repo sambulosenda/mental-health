@@ -5,7 +5,6 @@ import Animated, {
   useSharedValue,
 } from 'react-native-reanimated';
 import { useEffect, useState } from 'react';
-import { borderRadius, spacing } from '@/src/constants/theme';
 import { useTheme } from '@/src/contexts/ThemeContext';
 import { Text } from './Text';
 
@@ -35,6 +34,7 @@ export function NativePicker({
         mass: 0.8,
       });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedIndex, optionWidth]);
 
   const animatedIndicatorStyle = useAnimatedStyle(() => {

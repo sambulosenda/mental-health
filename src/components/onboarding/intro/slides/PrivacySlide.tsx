@@ -15,7 +15,6 @@ import { useTheme } from '@/src/contexts/ThemeContext';
 const SLIDE_INDEX = 2;
 
 const ShieldIcon: FC = () => {
-  const { width: screenWidth } = useWindowDimensions();
   const { activeIndex } = useContext(AnimatedIndexContext);
   const { isDark } = useTheme();
 

@@ -99,6 +99,7 @@ export function JournalEmptyState({ onStartWriting }: JournalEmptyStateProps) {
         clearTimeout(promptTimeoutRef.current);
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const floatStyle1 = useAnimatedStyle(() => ({

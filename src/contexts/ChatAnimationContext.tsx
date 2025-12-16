@@ -3,7 +3,7 @@ import React, { createContext, useContext, useRef, useCallback, useState } from 
 interface AnimationEntry {
   role: 'user' | 'assistant';
   completed: boolean;
-  resolvers: Array<() => void>;
+  resolvers: (() => void)[];
 }
 
 // Keep only last N completed animations to prevent unbounded growth

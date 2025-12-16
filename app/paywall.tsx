@@ -43,7 +43,10 @@ export default function PaywallScreen() {
     clearError,
   } = useSubscriptionStore();
 
-  const packages = currentOffering?.availablePackages || [];
+  const packages = useMemo(
+    () => currentOffering?.availablePackages || [],
+    [currentOffering?.availablePackages]
+  );
 
   // Check if weekly packages exist
   const hasWeeklyPackage = packages.some((p) => p.identifier.toLowerCase().includes("weekly"));
@@ -78,6 +81,7 @@ export default function PaywallScreen() {
       );
       setSelectedPackageId(annualPkg?.identifier || filteredPackages[0].identifier);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filteredPackages]);
 
   const selectedPackage = packages.find((p) => p.identifier === selectedPackageId);

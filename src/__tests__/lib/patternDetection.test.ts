@@ -1,3 +1,4 @@
+/* eslint-disable import/first */
 // Mock the theme constants
 jest.mock('@/src/constants/theme', () => ({
   activityTags: [
@@ -238,9 +239,6 @@ describe('patternDetection', () => {
       const result = detectPatterns({ entries, summaries });
 
       // Should find some day-related pattern
-      const dayInsight = result.find(
-        (i) => i.id === 'best-day' || i.id === 'worst-day' || i.title?.includes('Are Your')
-      );
       // This might not always match depending on current day of week
       // Just verify the function runs without errors
       expect(Array.isArray(result)).toBe(true);

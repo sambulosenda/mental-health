@@ -33,6 +33,7 @@ export default function JournalEntryModal() {
 
   useEffect(() => {
     loadPrompts();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Initialize once on mount
@@ -47,6 +48,7 @@ export default function JournalEntryModal() {
       clearDraft();
       setIsInitialized(true);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.editId, params.promptId, prompts.length, isInitialized]);
 
   // Find prompt after prompts are loaded

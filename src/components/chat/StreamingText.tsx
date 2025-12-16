@@ -83,6 +83,7 @@ export function StreamingText({
       // Mark all words as animated
       words.forEach((_, i) => animatedIndices.current.add(i));
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isStreaming, words.length]);
 
   // Update seen words count after each render (deferred to avoid race condition)

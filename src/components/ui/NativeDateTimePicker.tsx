@@ -1,5 +1,5 @@
 import { Platform, View, StyleSheet, Modal, Pressable } from 'react-native';
-import { useState, useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { Host, DateTimePicker } from '@expo/ui/swift-ui';
 import DateTimePickerRN from '@react-native-community/datetimepicker';
 import { colors, darkColors, spacing, borderRadius } from '@/src/constants/theme';

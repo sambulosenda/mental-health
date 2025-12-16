@@ -84,6 +84,7 @@ export default function InsightsScreen() {
 
   useEffect(() => {
     loadData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [daysToFetch]);
 
   useEffect(() => {

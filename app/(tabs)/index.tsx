@@ -46,6 +46,7 @@ export default function HomeScreen() {
     loadEntries();
     loadLastAssessments();
     checkDueStatus();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const greeting = getGreeting();

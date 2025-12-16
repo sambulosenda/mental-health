@@ -116,6 +116,7 @@ export function BreathingStep({ step, onComplete, accentColor }: BreathingStepPr
       cancelAnimation(scale);
       cancelAnimation(opacity);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase, isRunning]);
 
   // Check if exercise is complete

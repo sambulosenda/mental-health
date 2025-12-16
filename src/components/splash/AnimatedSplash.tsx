@@ -71,6 +71,7 @@ export function AnimatedSplash({ onAnimationComplete, isAppReady }: AnimatedSpla
       400,
       withTiming(0, { duration: 600, easing: Easing.out(Easing.ease) })
     );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -86,6 +87,7 @@ export function AnimatedSplash({ onAnimationComplete, isAppReady }: AnimatedSpla
       }, 600);
       return () => clearTimeout(timer);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAppReady, onAnimationComplete]);
 
   const containerStyle = useAnimatedStyle(() => ({

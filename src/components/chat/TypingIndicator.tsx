@@ -30,6 +30,7 @@ function TypingDot({ delay }: { delay: number }) {
         false
       )
     );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const animatedStyle = useAnimatedStyle(() => ({

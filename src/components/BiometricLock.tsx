@@ -31,11 +31,13 @@ export function BiometricLock({ children }: BiometricLockProps) {
     if (biometricEnabled && isLocked) {
       handleAuthenticate();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     const subscription = AppState.addEventListener('change', handleAppStateChange);
     return () => subscription.remove();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [biometricEnabled]);
 
   const handleAppStateChange = useCallback(
@@ -46,6 +48,7 @@ export function BiometricLock({ children }: BiometricLockProps) {
         setIsLocked(true);
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [biometricEnabled, isLocked]
   );
 

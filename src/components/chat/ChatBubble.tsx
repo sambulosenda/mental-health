@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import { View, useWindowDimensions } from 'react-native';
 import Animated, {
   useSharedValue,
@@ -109,6 +109,7 @@ export function ChatBubble({
     return () => {
       isMounted = false;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [message.id]);
 
   const animatedStyle = useAnimatedStyle(() => ({

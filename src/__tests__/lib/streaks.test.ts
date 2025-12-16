@@ -1,3 +1,4 @@
+/* eslint-disable import/first */
 // Mock database queries before importing
 jest.mock('../../lib/database/queries/mood', () => ({
   getMoodEntriesForDate: jest.fn(),
