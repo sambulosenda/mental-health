@@ -9,7 +9,7 @@ export default {
     userInterfaceStyle: "automatic",
     newArchEnabled: true,
     ios: {
-      supportsTablet: true,
+      supportsTablet: false,
       bundleIdentifier: "com.sambulosendas1.softmind",
       appleTeamId: "Y53KNKBDS8",
       associatedDomains: ["applinks:getsoftmind.com", "applinks:www.getsoftmind.com"],
