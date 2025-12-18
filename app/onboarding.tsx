@@ -1,13 +1,11 @@
-import { useState, useCallback } from 'react';
-import { View, useWindowDimensions, StyleSheet, Pressable, Text, Alert } from 'react-native';
+import { useState, useCallback, useRef } from 'react';
+import { View, useWindowDimensions, StyleSheet, Text, Alert, Pressable } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import Animated, {
   useAnimatedScrollHandler,
   useSharedValue,
-  useAnimatedStyle,
-  interpolate,
-  Extrapolation,
+  runOnJS,
   FadeIn,
 } from 'react-native-reanimated';
 import { useSettingsStore } from '@/src/stores';
@@ -29,8 +27,6 @@ import {
 } from '@/src/components/onboarding/intro';
 import { OnboardingForm } from '@/src/components/onboarding/form/OnboardingForm';
 
-const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
-
 type Phase = 'intro' | 'form';
 
 export default function OnboardingScreen() {
@@ -39,35 +35,34 @@ export default function OnboardingScreen() {
   const themeColors = isDark ? darkColors : colors;
   const { width } = useWindowDimensions();
   const insets = useSafeAreaInsets();
+  const scrollViewRef = useRef<Animated.ScrollView>(null);
 
   const { completeOnboarding, setReminderEnabled, setReminderTime } = useSettingsStore();
 
   const [phase, setPhase] = useState<Phase>('intro');
+  const [currentIndex, setCurrentIndex] = useState(0);
   const activeIndex = useSharedValue(0);
 
+  const updateCurrentIndex = useCallback((index: number) => {
+    setCurrentIndex(Math.round(index));
+  }, []);
+
   const scrollHandler = useAnimatedScrollHandler((event) => {
-    activeIndex.set(event.contentOffset.x / width);
+    const index = event.contentOffset.x / width;
+    activeIndex.set(index);
+    runOnJS(updateCurrentIndex)(index);
   });
 
-  // Button fades in on last slide
-  const rButtonStyle = useAnimatedStyle(() => {
-    const lastIndex = TOTAL_INTRO_SLIDES - 1;
-    const beforeLastIndex = TOTAL_INTRO_SLIDES - 2;
+  const isLastSlide = currentIndex >= TOTAL_INTRO_SLIDES - 1;
 
-    return {
-      opacity: interpolate(
-        activeIndex.get(),
-        [beforeLastIndex, lastIndex],
-        [0, 1],
-        Extrapolation.CLAMP
-      ),
-      pointerEvents: activeIndex.get() >= lastIndex - 0.2 ? 'auto' : 'none',
-    };
-  }, []);
-
-  const handleGetStarted = useCallback(() => {
-    setPhase('form');
-  }, []);
+  const handleButtonPress = useCallback(() => {
+    if (isLastSlide) {
+      setPhase('form');
+    } else {
+      const nextIndex = currentIndex + 1;
+      scrollViewRef.current?.scrollTo({ x: nextIndex * width, animated: true });
+    }
+  }, [isLastSlide, currentIndex, width]);
 
   const handleBackToIntro = useCallback(() => {
     setPhase('intro');
@@ -154,6 +149,7 @@ export default function OnboardingScreen() {
         /> */}
 
         <Animated.ScrollView
+          ref={scrollViewRef}
           style={{ flex: 1 }}
           contentContainerStyle={{ paddingTop: insets.top + 40 }}
           horizontal
@@ -186,16 +182,17 @@ export default function OnboardingScreen() {
 
         <View style={styles.bottomContainer}>
           <PaginationDots numberOfDots={TOTAL_INTRO_SLIDES} activeIndex={activeIndex} />
-          <AnimatedPressable
-            onPress={handleGetStarted}
+          <Pressable
+            onPress={handleButtonPress}
             style={[
               styles.button,
               { backgroundColor: themeColors.primary },
-              rButtonStyle,
             ]}
           >
-            <Text style={styles.buttonText}>Get Started</Text>
-          </AnimatedPressable>
+            <Text style={styles.buttonText}>
+              {isLastSlide ? 'Get Started' : 'Next'}
+            </Text>
+          </Pressable>
         </View>
       </View>
     </AnimatedIndexContext.Provider>
