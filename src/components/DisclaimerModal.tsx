@@ -1,11 +1,11 @@
-import { Text } from '@/src/components/ui';
-import { borderRadius, colors, darkColors, spacing } from '@/src/constants/theme';
-import { useTheme } from '@/src/contexts/ThemeContext';
-import { useSettingsStore } from '@/src/stores';
+import { View, Modal, ScrollView, Pressable } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
-import { Modal, ScrollView, TouchableOpacity, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Text } from '@/src/components/ui';
+import { colors, darkColors, spacing, borderRadius } from '@/src/constants/theme';
+import { useTheme } from '@/src/contexts/ThemeContext';
+import { useSettingsStore } from '@/src/stores';
 
 interface DisclaimerModalProps {
   visible: boolean;
@@ -47,7 +47,6 @@ export function DisclaimerModal({ visible }: DisclaimerModalProps) {
             backgroundColor: themeColors.surface,
             borderRadius: borderRadius.xl,
             maxWidth: 400,
-            maxHeight: '85%',
             width: '100%',
             overflow: 'hidden',
           }}
@@ -55,7 +54,7 @@ export function DisclaimerModal({ visible }: DisclaimerModalProps) {
           <ScrollView
             contentContainerStyle={{
               padding: spacing.lg,
-              paddingBottom: spacing.sm,
+              paddingBottom: spacing.xl,
             }}
             showsVerticalScrollIndicator={true}
             bounces={true}
@@ -123,28 +122,32 @@ export function DisclaimerModal({ visible }: DisclaimerModalProps) {
             </View>
 
             {/* Privacy Note */}
-            <Text variant="caption" color="textMuted" center>
+            <Text variant="caption" color="textMuted" center style={{ marginBottom: spacing.md }}>
               Data stored locally. By continuing, you agree to our Privacy Policy.
             </Text>
-          </ScrollView>
 
-          {/* Accept Button - Outside ScrollView */}
-          <View style={{ padding: spacing.lg, paddingTop: spacing.sm }}>
-            <TouchableOpacity
-              onPress={handleAccept}
-              activeOpacity={0.8}
-              style={{
-                backgroundColor: themeColors.primary,
-                borderRadius: borderRadius.lg,
-                paddingVertical: 16,
-                alignItems: 'center',
-              }}
-            >
-              <Text variant="bodyMedium" style={{ color: '#FFFFFF', fontWeight: '600' }}>
-                I Understand, Continue
-              </Text>
-            </TouchableOpacity>
-          </View>
+            {/* Accept Button */}
+            <View style={{ marginTop: spacing.sm, marginBottom: spacing.md }}>
+              <Pressable
+                onPress={handleAccept}
+                style={({ pressed }) => ({
+                  backgroundColor: pressed ? themeColors.primaryDark : themeColors.primary,
+                  borderRadius: borderRadius.lg,
+                  paddingVertical: 16,
+                  alignItems: 'center',
+                  shadowColor: '#000',
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: 0.1,
+                  shadowRadius: 4,
+                  elevation: 3,
+                })}
+              >
+                <Text variant="bodyMedium" style={{ color: '#FFFFFF', fontWeight: '600' }}>
+                  I Understand, Continue
+                </Text>
+              </Pressable>
+            </View>
+          </ScrollView>
         </View>
       </View>
     </Modal>

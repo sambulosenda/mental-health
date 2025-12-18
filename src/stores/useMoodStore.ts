@@ -9,8 +9,6 @@ import {
   deleteMoodEntry,
   deleteAllMoodEntries,
 } from '@/src/lib/database';
-import { toDateKey } from '@/src/lib/utils';
-import { asyncAction, silentAction } from './utils';
 
 interface MoodState {
   // Data
@@ -70,18 +68,26 @@ export const useMoodStore = create<MoodState>((set, get) => ({
 
   // Load all entries
   loadEntries: async () => {
-    await asyncAction(set, { errorFallback: 'Failed to load entries' }, async () => {
+    set({ isLoading: true, error: null });
+    try {
       const entries = await getAllMoodEntries();
-      return { entries };
-    });
+      set({ entries, isLoading: false });
+    } catch (error) {
+      set({
+        error: error instanceof Error ? error.message : 'Failed to load entries',
+        isLoading: false,
+      });
+    }
   },
 
   // Load today's entries
   loadTodayEntries: async () => {
-    await silentAction(async () => {
+    try {
       const todayEntries = await getMoodEntriesForDate(new Date());
       set({ todayEntries });
-    }, 'loadTodayEntries');
+    } catch (error) {
+      console.error('Failed to load today entries:', error);
+    }
   },
 
   // Save a new mood entry from draft
@@ -93,42 +99,50 @@ export const useMoodStore = create<MoodState>((set, get) => ({
       return null;
     }
 
-    let savedEntry: MoodEntry | null = null;
+    set({ isLoading: true, error: null });
+    try {
+      const entry = await createMoodEntry({
+        mood: draftMood,
+        activities: draftActivities.length > 0 ? draftActivities : undefined,
+        note: draftNote || undefined,
+      });
 
-    const success = await asyncAction(
-      set,
-      { errorFallback: 'Failed to save entry' },
-      async () => {
-        const entry = await createMoodEntry({
-          mood: draftMood,
-          activities: draftActivities.length > 0 ? draftActivities : undefined,
-          note: draftNote || undefined,
-        });
-        savedEntry = entry;
+      // Update state
+      set((state) => ({
+        entries: [entry, ...state.entries],
+        todayEntries: [entry, ...state.todayEntries],
+        isLoading: false,
+        draftMood: null,
+        draftActivities: [],
+        draftNote: '',
+      }));
 
-        return {
-          entries: [entry, ...get().entries],
-          todayEntries: [entry, ...get().todayEntries],
-          draftMood: null,
-          draftActivities: [],
-          draftNote: '',
-        };
-      }
-    );
-
-    return success ? savedEntry : null;
+      return entry;
+    } catch (error) {
+      set({
+        error: error instanceof Error ? error.message : 'Failed to save entry',
+        isLoading: false,
+      });
+      return null;
+    }
   },
 
   // Remove an entry
   removeEntry: async (id) => {
-    await asyncAction(set, { errorFallback: 'Failed to delete entry' }, async () => {
+    set({ isLoading: true, error: null });
+    try {
       await deleteMoodEntry(id);
-      const state = get();
-      return {
+      set((state) => ({
         entries: state.entries.filter((e) => e.id !== id),
         todayEntries: state.todayEntries.filter((e) => e.id !== id),
-      };
-    });
+        isLoading: false,
+      }));
+    } catch (error) {
+      set({
+        error: error instanceof Error ? error.message : 'Failed to delete entry',
+        isLoading: false,
+      });
+    }
   },
 
   // Get entries for last N days
@@ -143,7 +157,7 @@ export const useMoodStore = create<MoodState>((set, get) => ({
 
     // Group by date
     entries.forEach((entry) => {
-      const dateKey = toDateKey(entry.timestamp);
+      const dateKey = entry.timestamp.toISOString().split('T')[0];
       if (!summaryMap.has(dateKey)) {
         summaryMap.set(dateKey, []);
       }
@@ -168,9 +182,15 @@ export const useMoodStore = create<MoodState>((set, get) => ({
 
   // Clear all entries
   clearEntries: async () => {
-    await asyncAction(set, { errorFallback: 'Failed to clear entries' }, async () => {
+    set({ isLoading: true, error: null });
+    try {
       await deleteAllMoodEntries();
-      return { entries: [], todayEntries: [] };
-    });
+      set({ entries: [], todayEntries: [], isLoading: false });
+    } catch (error) {
+      set({
+        error: error instanceof Error ? error.message : 'Failed to clear entries',
+        isLoading: false,
+      });
+    }
   },
 }));
