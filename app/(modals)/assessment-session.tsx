@@ -179,6 +179,27 @@ export default function AssessmentSessionScreen() {
         className={`flex-1 ${isDark ? 'bg-background-dark' : 'bg-background'}`}
         edges={['top']}
       >
+        {/* Header with Done button */}
+        <View className="flex-row items-center px-4 py-3">
+          <View style={{ width: 60 }} />
+          <Text variant="bodyMedium" color="textPrimary" style={{ flex: 1, textAlign: 'center' }}>
+            Results
+          </Text>
+          <Pressable
+            onPress={handleDone}
+            style={{
+              backgroundColor: themeColors.primary,
+              paddingHorizontal: 16,
+              paddingVertical: 8,
+              borderRadius: 20,
+            }}
+          >
+            <Text variant="bodyMedium" style={{ color: '#FFFFFF', fontWeight: '600' }}>
+              Done
+            </Text>
+          </Pressable>
+        </View>
+
         <Animated.View entering={FadeIn} className="flex-1">
           <AssessmentComplete
             template={template}
