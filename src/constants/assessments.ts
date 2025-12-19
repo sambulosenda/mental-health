@@ -1,5 +1,42 @@
 import type { AssessmentTemplate, LikertOption } from '@/src/types/assessment';
 
+/**
+ * Clinical Assessment Citations
+ *
+ * GAD-7: Spitzer RL, Kroenke K, Williams JBW, Löwe B. A brief measure for
+ * assessing generalized anxiety disorder: the GAD-7. Arch Intern Med.
+ * 2006;166(10):1092-1097. doi:10.1001/archinte.166.10.1092
+ *
+ * PHQ-9: Kroenke K, Spitzer RL, Williams JBW. The PHQ-9: validity of a brief
+ * depression severity measure. J Gen Intern Med. 2001;16(9):606-613.
+ * doi:10.1046/j.1525-1497.2001.016009606.x
+ */
+
+export const ASSESSMENT_CITATIONS = {
+  gad7: {
+    name: 'GAD-7',
+    authors: 'Spitzer RL, Kroenke K, Williams JBW, Löwe B',
+    title: 'A brief measure for assessing generalized anxiety disorder: the GAD-7',
+    journal: 'Arch Intern Med',
+    year: 2006,
+    volume: '166(10)',
+    pages: '1092-1097',
+    doi: '10.1001/archinte.166.10.1092',
+    url: 'https://jamanetwork.com/journals/jamainternalmedicine/fullarticle/410326',
+  },
+  phq9: {
+    name: 'PHQ-9',
+    authors: 'Kroenke K, Spitzer RL, Williams JBW',
+    title: 'The PHQ-9: validity of a brief depression severity measure',
+    journal: 'J Gen Intern Med',
+    year: 2001,
+    volume: '16(9)',
+    pages: '606-613',
+    doi: '10.1046/j.1525-1497.2001.016009606.x',
+    url: 'https://link.springer.com/article/10.1046/j.1525-1497.2001.016009606.x',
+  },
+} as const;
+
 export const GAD7_TEMPLATE: AssessmentTemplate = {
   id: 'gad7',
   name: 'GAD-7',

@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { View, StyleSheet, Alert, Modal, Linking, Pressable } from 'react-native';
+import { useEffect, useState, useCallback } from 'react';
+import { View, StyleSheet, Alert, Modal, Linking, Pressable, ScrollView as RNScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Host, Switch } from '@expo/ui/swift-ui';
 import { useRouter } from 'expo-router';
@@ -502,6 +502,65 @@ export default function ProfileScreen() {
           </Card>
         </View>
 
+        {/* Medical Disclaimer & Sources */}
+        <View style={styles.section}>
+          <Text variant="h3" color="textPrimary" style={styles.sectionTitle}>
+            Medical Information
+          </Text>
+          <View style={[styles.disclaimerBox, { backgroundColor: `${themeColors.warning}10` }]}>
+            <View style={styles.disclaimerHeader}>
+              <Ionicons name="medical" size={16} color={themeColors.warning} />
+              <Text variant="caption" style={{ marginLeft: 6, color: themeColors.warning, fontWeight: '600' }}>
+                Important Disclaimer
+              </Text>
+            </View>
+            <Text variant="caption" color="textSecondary" style={styles.disclaimerText}>
+              Softmind is for informational and educational purposes only. It is not medical advice and should not replace professional mental health treatment. Always consult a qualified healthcare provider before making health decisions.
+            </Text>
+          </View>
+          <Card variant="flat" padding="sm" style={styles.groupedCard}>
+            <SettingsRow
+              icon="pulse"
+              iconColor="#fff"
+              iconBg="#6366F1"
+              label="GAD-7 Assessment"
+              value="Spitzer et al., 2006"
+              onPress={() => Linking.openURL('https://jamanetwork.com/journals/jamainternalmedicine/fullarticle/410326')}
+              themeColors={themeColors}
+            />
+            <SettingsRow
+              icon="heart"
+              iconColor="#fff"
+              iconBg="#EC4899"
+              label="PHQ-9 Assessment"
+              value="Kroenke et al., 2001"
+              onPress={() => Linking.openURL('https://link.springer.com/article/10.1046/j.1525-1497.2001.016009606.x')}
+              themeColors={themeColors}
+            />
+            <SettingsRow
+              icon="book"
+              iconColor="#fff"
+              iconBg="#10B981"
+              label="Evidence-Based Exercises"
+              value="CBT, DBT, ACT"
+              onPress={() => {
+                Alert.alert(
+                  'Evidence-Based Sources',
+                  'Our exercises are based on established therapeutic frameworks:\n\n' +
+                  '• CBT: Beck AT (1976). Cognitive therapy and the emotional disorders.\n\n' +
+                  '• DBT: Linehan MM (1993). Cognitive-behavioral treatment of borderline personality disorder.\n\n' +
+                  '• ACT: Hayes SC et al. (1999). Acceptance and commitment therapy.\n\n' +
+                  '• Breathing: Ma X et al. (2017). Front Psychol.\n\n' +
+                  '• Gratitude: Emmons RA & McCullough ME (2003). J Pers Soc Psychol.',
+                  [{ text: 'OK' }]
+                );
+              }}
+              themeColors={themeColors}
+              isLast
+            />
+          </Card>
+        </View>
+
         {/* Legal */}
         <View style={styles.section}>
           <Text variant="h3" color="textPrimary" style={styles.sectionTitle}>
@@ -649,5 +708,20 @@ const styles = StyleSheet.create({
   // Bottom padding
   bottomPadding: {
     height: spacing.xxl,
+  },
+
+  // Disclaimer box
+  disclaimerBox: {
+    padding: spacing.md,
+    borderRadius: borderRadius.lg,
+    marginBottom: spacing.sm,
+  },
+  disclaimerHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: spacing.xs,
+  },
+  disclaimerText: {
+    lineHeight: 18,
   },
 });

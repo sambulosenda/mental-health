@@ -89,13 +89,14 @@ export function DisclaimerModal({ visible }: DisclaimerModalProps) {
               }}
             >
               <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
-                <Ionicons name="information-circle" size={16} color={themeColors.warning} />
-                <Text variant="caption" style={{ marginLeft: 6, color: themeColors.warning, fontWeight: '600' }}>
-                  Important Notice
+                <Ionicons name="warning" size={16} color={themeColors.warning} />
+                <Text variant="caption" style={{ marginLeft: 6, color: themeColors.warning, fontWeight: '700' }}>
+                  Medical Disclaimer
                 </Text>
               </View>
-              <Text variant="caption" color="textSecondary">
-                Softmind is a self-care companion for mood tracking, journaling, and wellness exercises.
+              <Text variant="caption" color="textSecondary" style={{ lineHeight: 18 }}>
+                Softmind is a wellness and self-care app. It does NOT provide medical advice, diagnosis, or treatment.
+                Always seek the advice of a qualified healthcare provider with any questions about your mental health.
               </Text>
             </View>
 
@@ -104,26 +105,32 @@ export function DisclaimerModal({ visible }: DisclaimerModalProps) {
               <DisclaimerPoint
                 icon="medical"
                 title="Not Medical Advice"
-                description="Not a substitute for professional mental health treatment or diagnosis."
+                description="This app is for informational and educational purposes only. It is not intended to diagnose, treat, cure, or prevent any disease or health condition."
                 themeColors={themeColors}
               />
               <DisclaimerPoint
                 icon="person"
-                title="Seek Professional Help"
-                description="If in crisis, please consult a qualified healthcare provider."
+                title="Consult Your Doctor"
+                description="Before making any health decisions, consult a qualified healthcare provider. If you are in crisis or need immediate help, call emergency services."
                 themeColors={themeColors}
               />
               <DisclaimerPoint
                 icon="call"
                 title="Crisis Resources"
-                description="Emergency resources are available within the app."
+                description="If you're experiencing thoughts of self-harm or suicide, please contact emergency services or a crisis hotline immediately."
+                themeColors={themeColors}
+              />
+              <DisclaimerPoint
+                icon="book"
+                title="Evidence-Based Tools"
+                description="Our assessments (GAD-7, PHQ-9) and exercises are based on peer-reviewed research. Sources are cited within the app."
                 themeColors={themeColors}
               />
             </View>
 
             {/* Privacy Note */}
-            <Text variant="caption" color="textMuted" center style={{ marginBottom: spacing.md }}>
-              Data stored locally. By continuing, you agree to our Privacy Policy.
+            <Text variant="caption" color="textMuted" center style={{ marginBottom: spacing.md, lineHeight: 16 }}>
+              Your data is stored locally on your device. By continuing, you acknowledge this disclaimer and agree to our Privacy Policy.
             </Text>
 
             {/* Accept Button */}
