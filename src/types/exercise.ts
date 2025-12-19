@@ -1,5 +1,5 @@
-// Exercise therapy types
-export type ExerciseTherapyType = 'cbt' | 'act' | 'dbt' | 'meditation';
+// Exercise types (wellness-focused)
+export type ExerciseTherapyType = 'reflection' | 'breathing' | 'mindfulness' | 'gratitude' | 'meditation';
 
 // Exercise categories
 export type ExerciseCategory =

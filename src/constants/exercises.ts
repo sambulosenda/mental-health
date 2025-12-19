@@ -1,62 +1,28 @@
 import type { ExerciseTemplate } from '@/src/types/exercise';
 
 /**
- * Evidence-Based Therapeutic Approach Citations
- *
- * CBT (Cognitive Behavioral Therapy):
- * Beck AT. Cognitive therapy and the emotional disorders. New York: International
- * Universities Press; 1976.
- *
- * DBT (Dialectical Behavior Therapy):
- * Linehan MM. Cognitive-behavioral treatment of borderline personality disorder.
- * New York: Guilford Press; 1993.
- *
- * ACT (Acceptance and Commitment Therapy):
- * Hayes SC, Strosahl KD, Wilson KG. Acceptance and commitment therapy: An experiential
- * approach to behavior change. New York: Guilford Press; 1999.
+ * Research Citations for Wellness Exercises
  *
  * Box Breathing:
  * Ma X, Yue ZQ, Gong ZQ, et al. The Effect of Diaphragmatic Breathing on Attention,
  * Negative Affect and Stress in Healthy Adults. Front Psychol. 2017;8:874.
- * doi:10.3389/fpsyg.2017.00874
  *
  * Grounding Techniques:
- * Najavits LM. Seeking Safety: A Treatment Manual for PTSD and Substance Abuse.
- * New York: Guilford Press; 2002.
+ * Najavits LM. Seeking Safety. New York: Guilford Press; 2002.
  *
  * Gratitude Practice:
- * Emmons RA, McCullough ME. Counting blessings versus burdens: an experimental
- * investigation of gratitude and subjective well-being in daily life. J Pers Soc
- * Psychol. 2003;84(2):377-389. doi:10.1037/0022-3514.84.2.377
+ * Emmons RA, McCullough ME. Counting blessings versus burdens.
+ * J Pers Soc Psychol. 2003;84(2):377-389.
  *
  * Self-Compassion:
- * Neff KD. Self-compassion: An alternative conceptualization of a healthy attitude
- * toward oneself. Self and Identity. 2003;2(2):85-101. doi:10.1080/15298860309032
+ * Neff KD. Self-compassion. Self and Identity. 2003;2(2):85-101.
  */
 
-export const THERAPY_CITATIONS = {
-  cbt: {
-    name: 'Cognitive Behavioral Therapy (CBT)',
-    source: 'Beck AT (1976). Cognitive therapy and the emotional disorders.',
-    description: 'Evidence-based approach focusing on identifying and changing negative thought patterns.',
-  },
-  dbt: {
-    name: 'Dialectical Behavior Therapy (DBT)',
-    source: 'Linehan MM (1993). Cognitive-behavioral treatment of borderline personality disorder.',
-    description: 'Combines cognitive-behavioral techniques with mindfulness practices.',
-  },
-  act: {
-    name: 'Acceptance and Commitment Therapy (ACT)',
-    source: 'Hayes SC et al. (1999). Acceptance and commitment therapy.',
-    description: 'Focuses on acceptance strategies and value-driven behavior change.',
-  },
-} as const;
-
 export const EXERCISE_TEMPLATES: ExerciseTemplate[] = [
-  // CBT - Thought Record
+  // Thought Record
   {
     id: 'thought-record',
-    type: 'cbt',
+    type: 'reflection',
     category: 'thought_record',
     name: 'Thought Record',
     description: 'Challenge negative thoughts by examining the evidence',
@@ -116,10 +82,10 @@ export const EXERCISE_TEMPLATES: ExerciseTemplate[] = [
     ],
   },
 
-  // DBT - Box Breathing (FREE)
+  // Box Breathing (FREE)
   {
     id: 'box-breathing',
-    type: 'dbt',
+    type: 'breathing',
     category: 'breathing',
     name: 'Box Breathing',
     description: 'Calm your nervous system with this simple breathing technique',
@@ -154,10 +120,10 @@ export const EXERCISE_TEMPLATES: ExerciseTemplate[] = [
     ],
   },
 
-  // DBT - 5-4-3-2-1 Grounding (FREE)
+  // 5-4-3-2-1 Grounding (FREE)
   {
     id: 'grounding-54321',
-    type: 'dbt',
+    type: 'mindfulness',
     category: 'grounding',
     name: '5-4-3-2-1 Grounding',
     description: 'Ground yourself in the present moment using your senses',
@@ -226,10 +192,10 @@ export const EXERCISE_TEMPLATES: ExerciseTemplate[] = [
     ],
   },
 
-  // ACT - Gratitude
+  // Gratitude
   {
     id: 'gratitude-list',
-    type: 'act',
+    type: 'gratitude',
     category: 'gratitude',
     name: 'Gratitude Practice',
     description: 'Shift your focus to what\'s good in your life',
@@ -266,10 +232,10 @@ export const EXERCISE_TEMPLATES: ExerciseTemplate[] = [
     ],
   },
 
-  // CBT - Worry Dump
+  // Worry Dump
   {
     id: 'worry-dump',
-    type: 'cbt',
+    type: 'reflection',
     category: 'worry',
     name: 'Worry Dump',
     description: 'Get worries out of your head and onto paper',
@@ -306,10 +272,10 @@ export const EXERCISE_TEMPLATES: ExerciseTemplate[] = [
     ],
   },
 
-  // ACT - Self-Compassion Break
+  // Self-Compassion Break
   {
     id: 'self-compassion',
-    type: 'act',
+    type: 'mindfulness',
     category: 'self_compassion',
     name: 'Self-Compassion Break',
     description: 'Treat yourself with the kindness you\'d offer a friend',
@@ -352,10 +318,10 @@ export const EXERCISE_TEMPLATES: ExerciseTemplate[] = [
     ],
   },
 
-  // CBT - Quick Goal Setting
+  // Quick Goal Setting
   {
     id: 'quick-goal',
-    type: 'cbt',
+    type: 'reflection',
     category: 'goals',
     name: 'Quick Goal Setting',
     description: 'Set one achievable goal to build momentum',
