@@ -23,10 +23,9 @@ export default function ModalsLayout() {
         }}
       />
       <TransitionStack.Screen
-        name="assessment-session"
+        name="sources"
         options={{
           ...CalmPresets.SlideFromBottom(),
-          gestureEnabled: false,
         }}
       />
     </TransitionStack>

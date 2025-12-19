@@ -43,14 +43,10 @@ export function dateRangeForLastDays<T extends Column>(
 /** Valid mood values (1-5 scale) */
 export type MoodValue = 1 | 2 | 3 | 4 | 5;
 
-/** Valid Likert values (0-3 scale for assessments) */
-export type LikertValue = 0 | 1 | 2 | 3;
-
 /** Session statuses */
 export type SessionStatus = 'in_progress' | 'completed' | 'abandoned';
 
 const VALID_MOOD_VALUES = [1, 2, 3, 4, 5] as const;
-const VALID_LIKERT_VALUES = [0, 1, 2, 3] as const;
 const VALID_SESSION_STATUSES: SessionStatus[] = ['in_progress', 'completed', 'abandoned'];
 
 /**
@@ -58,13 +54,6 @@ const VALID_SESSION_STATUSES: SessionStatus[] = ['in_progress', 'completed', 'ab
  */
 export function isValidMoodValue(value: unknown): value is MoodValue {
   return typeof value === 'number' && VALID_MOOD_VALUES.includes(value as 1 | 2 | 3 | 4 | 5);
-}
-
-/**
- * Check if value is valid Likert value (0-3)
- */
-export function isValidLikertValue(value: unknown): value is LikertValue {
-  return typeof value === 'number' && VALID_LIKERT_VALUES.includes(value as 0 | 1 | 2 | 3);
 }
 
 /**
@@ -99,31 +88,6 @@ export function parseExerciseResponses(
     const validated: Record<string, string | string[]> = {};
     for (const [key, value] of Object.entries(parsed)) {
       if (isValidResponseValue(value)) {
-        validated[key] = value;
-      }
-    }
-    return validated;
-  } catch {
-    return fallback;
-  }
-}
-
-/**
- * Safely parse JSON for assessment responses with validation
- */
-export function parseAssessmentResponses(
-  json: string | null,
-  fallback: Record<string, LikertValue> = {}
-): Record<string, LikertValue> {
-  if (!json) return fallback;
-  try {
-    const parsed = JSON.parse(json);
-    if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
-      return fallback;
-    }
-    const validated: Record<string, LikertValue> = {};
-    for (const [key, value] of Object.entries(parsed)) {
-      if (isValidLikertValue(value)) {
         validated[key] = value;
       }
     }

@@ -1,4 +1,4 @@
-import { View, Modal, ScrollView, Pressable } from 'react-native';
+import { View, Modal, ScrollView, Pressable, Linking } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
@@ -89,14 +89,14 @@ export function DisclaimerModal({ visible }: DisclaimerModalProps) {
               }}
             >
               <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
-                <Ionicons name="warning" size={16} color={themeColors.warning} />
+                <Ionicons name="information-circle" size={16} color={themeColors.warning} />
                 <Text variant="caption" style={{ marginLeft: 6, color: themeColors.warning, fontWeight: '700' }}>
-                  Medical Disclaimer
+                  Wellness App - Not Medical
                 </Text>
               </View>
               <Text variant="caption" color="textSecondary" style={{ lineHeight: 18 }}>
-                Softmind is a wellness and self-care app. It does NOT provide medical advice, diagnosis, or treatment.
-                Always seek the advice of a qualified healthcare provider with any questions about your mental health.
+                Softmind is a wellness and self-care companion for personal reflection. It is NOT a medical device and does NOT provide medical advice, diagnosis, or treatment.
+                Always seek the advice of a qualified healthcare provider with any questions about your health.
               </Text>
             </View>
 
@@ -122,11 +122,31 @@ export function DisclaimerModal({ visible }: DisclaimerModalProps) {
               />
               <DisclaimerPoint
                 icon="book"
-                title="Evidence-Based Tools"
-                description="Our assessments (GAD-7, PHQ-9) and exercises are based on peer-reviewed research. Sources are cited within the app."
+                title="Research-Informed Tools"
+                description="Our self-reflection tools and wellness exercises are informed by published research."
                 themeColors={themeColors}
               />
             </View>
+
+            {/* Research Sources Link */}
+            <Pressable
+              onPress={() => Linking.openURL('https://jamanetwork.com/journals/jamainternalmedicine/fullarticle/410326')}
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: spacing.sm,
+                marginBottom: spacing.md,
+                backgroundColor: `${themeColors.primary}10`,
+                borderRadius: borderRadius.md,
+              }}
+            >
+              <Ionicons name="document-text-outline" size={16} color={themeColors.primary} />
+              <Text variant="caption" style={{ marginLeft: 6, color: themeColors.primary, fontWeight: '600' }}>
+                View Research Sources
+              </Text>
+              <Ionicons name="open-outline" size={14} color={themeColors.primary} style={{ marginLeft: 4 }} />
+            </Pressable>
 
             {/* Privacy Note */}
             <Text variant="caption" color="textMuted" center style={{ marginBottom: spacing.md, lineHeight: 16 }}>

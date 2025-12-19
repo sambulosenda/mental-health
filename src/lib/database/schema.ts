@@ -86,18 +86,3 @@ export const exerciseSessions = sqliteTable('exercise_sessions', {
 
 export type ExerciseSessionRow = typeof exerciseSessions.$inferSelect;
 export type NewExerciseSession = typeof exerciseSessions.$inferInsert;
-
-// Assessment sessions table (GAD-7, PHQ-9)
-export const assessmentSessions = sqliteTable('assessment_sessions', {
-  id: text('id').primaryKey(),
-  type: text('type').notNull(), // 'gad7' | 'phq9'
-  status: text('status').notNull(), // 'in_progress' | 'completed' | 'abandoned'
-  startedAt: integer('started_at', { mode: 'timestamp' }).notNull(),
-  completedAt: integer('completed_at', { mode: 'timestamp' }),
-  responses: text('responses'), // JSON: { questionId: 0-3 }
-  totalScore: integer('total_score'),
-  severity: text('severity'), // 'minimal' | 'mild' | 'moderate' | 'severe'
-});
-
-export type AssessmentSessionRow = typeof assessmentSessions.$inferSelect;
-export type NewAssessmentSession = typeof assessmentSessions.$inferInsert;

@@ -8,10 +8,8 @@ import { formatDistanceToNow } from 'date-fns';
 import { Text, Card, AnimatedHeader, NativeGauge } from '@/src/components/ui';
 import { MoodAnimation } from '@/src/components/mood';
 import { InterventionPicker } from '@/src/components/interventions/InterventionPicker';
-import { AssessmentCard } from '@/src/components/assessments';
-import { useMoodStore, useAssessmentStore, useSubscriptionStore } from '@/src/stores';
+import { useMoodStore, useSubscriptionStore } from '@/src/stores';
 import { usePremiumFeature } from '@/src/hooks/usePremiumFeature';
-import { GAD7_TEMPLATE, PHQ9_TEMPLATE } from '@/src/constants/assessments';
 import { colors, darkColors, spacing, moodLabels } from '@/src/constants/theme';
 import { useTheme } from '@/src/contexts/ThemeContext';
 
@@ -22,14 +20,6 @@ export default function HomeScreen() {
   const { isDark } = useTheme();
   const themeColors = isDark ? darkColors : colors;
   const { todayEntries, entries, loadTodayEntries, loadEntries } = useMoodStore();
-  const {
-    lastGad7,
-    lastPhq9,
-    gad7IsDue,
-    phq9IsDue,
-    loadLastAssessments,
-    checkDueStatus,
-  } = useAssessmentStore();
   const { isPremium } = useSubscriptionStore();
   const { requirePremium } = usePremiumFeature();
 
@@ -44,8 +34,6 @@ export default function HomeScreen() {
   useEffect(() => {
     loadTodayEntries();
     loadEntries();
-    loadLastAssessments();
-    checkDueStatus();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -226,38 +214,6 @@ export default function HomeScreen() {
             <Ionicons name="chevron-forward" size={18} color={themeColors.error} />
           </View>
         </Pressable>
-
-        {/* Self-Assessments */}
-        <View className="mb-6">
-          <View className="flex-row items-center justify-between mb-4">
-            <Text variant="h3" color="textPrimary">
-              Self-Assessments
-            </Text>
-            <Pressable
-              onPress={() => router.navigate('/(tabs)/insights')}
-              hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
-              className="py-2 px-3 -my-2 -mx-3"
-            >
-              <Text variant="captionMedium" color="textPrimary">
-                View History
-              </Text>
-            </Pressable>
-          </View>
-          <View className="flex-row gap-3">
-            <AssessmentCard
-              template={GAD7_TEMPLATE}
-              lastSession={lastGad7}
-              isDue={gad7IsDue}
-              onPress={() => router.push('/assessment-session?type=gad7')}
-            />
-            <AssessmentCard
-              template={PHQ9_TEMPLATE}
-              lastSession={lastPhq9}
-              isDue={phq9IsDue}
-              onPress={() => router.push('/assessment-session?type=phq9')}
-            />
-          </View>
-        </View>
 
         {/* Suggested Exercises */}
         <View className="mb-6" style={{ marginHorizontal: -spacing.lg }}>

@@ -4,9 +4,9 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import Animated, { useSharedValue, useAnimatedScrollHandler } from 'react-native-reanimated';
 import { Text, Card, Button, NativePicker, AnimatedHeader } from '@/src/components/ui';
-import { MoodTrendChart, MoodCalendar, InsightList, AssessmentTrendChart } from '@/src/components/insights';
+import { MoodTrendChart, MoodCalendar, InsightList } from '@/src/components/insights';
 import type { Insight } from '@/src/components/insights';
-import { useMoodStore, useJournalStore, useExerciseStore, useAssessmentStore } from '@/src/stores';
+import { useMoodStore, useJournalStore, useExerciseStore } from '@/src/stores';
 import { detectPatterns } from '@/src/lib/insights';
 import { useAIInsights } from '@/src/lib/ai';
 import { colors, darkColors, spacing } from '@/src/constants/theme';
@@ -32,11 +32,6 @@ export default function InsightsScreen() {
   });
   const { entries: journalEntries, loadEntries: loadJournalEntries } = useJournalStore();
   const { recentSessions, loadRecentSessions } = useExerciseStore();
-  const {
-    gad7History,
-    phq9History,
-    loadAssessmentHistory,
-  } = useAssessmentStore();
   const [summaries, setSummaries] = useState<DailyMoodSummary[]>([]);
   const [insights, setInsights] = useState<Insight[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -64,8 +59,6 @@ export default function InsightsScreen() {
         loadEntries(),
         loadJournalEntries(),
         loadRecentSessions(),
-        loadAssessmentHistory('gad7', daysToFetch),
-        loadAssessmentHistory('phq9', daysToFetch),
       ]);
       const dailySummaries = await getDailySummaries(daysToFetch);
       setSummaries(dailySummaries);
@@ -80,7 +73,7 @@ export default function InsightsScreen() {
     } finally {
       setIsLoading(false);
     }
-  }, [loadEntries, loadJournalEntries, loadRecentSessions, loadAssessmentHistory, getDailySummaries, entries, daysToFetch]);
+  }, [loadEntries, loadJournalEntries, loadRecentSessions, getDailySummaries, entries, daysToFetch]);
 
   useEffect(() => {
     loadData();
@@ -139,14 +132,6 @@ export default function InsightsScreen() {
 
         <View className="mb-6">
           <MoodTrendChart summaries={summaries} isLoading={isLoading} />
-        </View>
-
-        <View className="mb-6">
-          <AssessmentTrendChart
-            gad7History={gad7History}
-            phq9History={phq9History}
-            isLoading={isLoading}
-          />
         </View>
 
         <View className="mb-6">
