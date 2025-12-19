@@ -18,33 +18,6 @@ interface SourceItem {
 
 const SOURCES: SourceItem[] = [
   {
-    category: 'Therapeutic Frameworks',
-    name: 'Cognitive Behavioral Therapy (CBT)',
-    authors: 'Beck AT',
-    year: 1976,
-    title: 'Cognitive therapy and the emotional disorders',
-    journal: 'International Universities Press',
-    url: 'https://www.amazon.com/Cognitive-Therapy-Emotional-Disorders-Beck/dp/0452009286',
-  },
-  {
-    category: 'Therapeutic Frameworks',
-    name: 'Dialectical Behavior Therapy (DBT)',
-    authors: 'Linehan MM',
-    year: 1993,
-    title: 'Cognitive-behavioral treatment of borderline personality disorder',
-    journal: 'Guilford Press',
-    url: 'https://www.guilford.com/books/Cognitive-Behavioral-Treatment-of-Borderline-Personality-Disorder/Marsha-Linehan/9780898621839',
-  },
-  {
-    category: 'Therapeutic Frameworks',
-    name: 'Acceptance and Commitment Therapy (ACT)',
-    authors: 'Hayes SC, Strosahl KD, Wilson KG',
-    year: 1999,
-    title: 'Acceptance and commitment therapy: An experiential approach to behavior change',
-    journal: 'Guilford Press',
-    url: 'https://www.guilford.com/books/Acceptance-and-Commitment-Therapy/Hayes-Strosahl-Wilson/9781462528943',
-  },
-  {
     category: 'Wellness Exercises',
     name: 'Box Breathing',
     authors: 'Ma X, Yue ZQ, Gong ZQ, et al.',
@@ -76,7 +49,7 @@ const SOURCES: SourceItem[] = [
     name: 'Grounding Techniques',
     authors: 'Najavits LM',
     year: 2002,
-    title: 'Seeking Safety: A treatment manual for PTSD and substance abuse',
+    title: 'Seeking Safety: Coping skills for stress and anxiety',
     journal: 'Guilford Press',
     url: 'https://www.guilford.com/books/Seeking-Safety/Lisa-Najavits/9781462504015',
   },
