@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import Animated, { useSharedValue, useAnimatedScrollHandler } from 'react-native-reanimated';
 import { Text, Card, Button, NativePicker, AnimatedHeader } from '@/src/components/ui';
-import { MoodTrendChart, MoodCalendar, InsightList } from '@/src/components/insights';
+import { MoodTrendChart, MoodCalendar, InsightList, InsightSources } from '@/src/components/insights';
 import type { Insight } from '@/src/components/insights';
 import { useMoodStore, useJournalStore, useExerciseStore } from '@/src/stores';
 import { detectPatterns } from '@/src/lib/insights';
@@ -277,6 +277,7 @@ export default function InsightsScreen() {
               )}
             </Card>
           )}
+          <InsightSources />
         </View>
       </Animated.ScrollView>
     </SafeAreaView>
