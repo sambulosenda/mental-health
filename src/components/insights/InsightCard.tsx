@@ -15,6 +15,7 @@ export interface Insight {
   icon?: keyof typeof Ionicons.glyphMap;
   priority?: 'high' | 'medium' | 'low';
   metadata?: Record<string, unknown>;
+  isAIGenerated?: boolean;
 }
 
 interface InsightCardProps {
@@ -49,12 +50,24 @@ export const InsightCard = memo(function InsightCard({ insight }: InsightCardPro
             <Text variant="bodyMedium" color="textPrimary" className="flex-1">
               {insight.title}
             </Text>
-            {insight.priority === 'high' && (
-              <View
-                className="w-2 h-2 rounded-full ml-2 mt-1.5"
-                style={{ backgroundColor: themeColors.warning }}
-              />
-            )}
+            <View className="flex-row items-center">
+              {insight.isAIGenerated && (
+                <View
+                  className="px-1.5 py-0.5 rounded ml-2"
+                  style={{ backgroundColor: isDark ? `${themeColors.primary}30` : `${themeColors.primary}15` }}
+                >
+                  <Text variant="caption" style={{ fontSize: 10, color: themeColors.primary }}>
+                    AI
+                  </Text>
+                </View>
+              )}
+              {insight.priority === 'high' && (
+                <View
+                  className="w-2 h-2 rounded-full ml-2"
+                  style={{ backgroundColor: themeColors.warning }}
+                />
+              )}
+            </View>
           </View>
           <Text
             variant="caption"

@@ -35,6 +35,7 @@ function getFallbackInsights(moodEntries: MoodEntry[]): Insight[] {
         title: 'Positive Trend',
         description: "You've been feeling good lately! Keep doing what works for you.",
         priority: 'medium',
+        isAIGenerated: true,
       });
     } else if (avgMood <= 2.5) {
       insights.push({
@@ -43,6 +44,7 @@ function getFallbackInsights(moodEntries: MoodEntry[]): Insight[] {
         title: 'Check In With Yourself',
         description: "It seems like things have been tough recently. Remember to be kind to yourself.",
         priority: 'high',
+        isAIGenerated: true,
       });
     } else {
       insights.push({
@@ -51,6 +53,7 @@ function getFallbackInsights(moodEntries: MoodEntry[]): Insight[] {
         title: 'Balanced Days',
         description: "Your mood has been relatively steady. Notice what helps maintain this balance.",
         priority: 'medium',
+        isAIGenerated: true,
       });
     }
 
@@ -61,6 +64,7 @@ function getFallbackInsights(moodEntries: MoodEntry[]): Insight[] {
       description: 'Try journaling about what made you feel your best this week.',
       icon: 'bulb-outline',
       priority: 'high',
+      isAIGenerated: true,
     });
   }
 
@@ -86,6 +90,7 @@ function parseInsightsFromResponse(response: string): Insight[] {
         title: 'AI Insight',
         description: text,
         priority: 'medium',
+        isAIGenerated: true,
       });
     }
   });
@@ -99,6 +104,7 @@ function parseInsightsFromResponse(response: string): Insight[] {
         description: text,
         icon: 'bulb-outline',
         priority: 'high',
+        isAIGenerated: true,
       });
     }
   });
@@ -111,6 +117,7 @@ function parseInsightsFromResponse(response: string): Insight[] {
       title: 'AI Analysis',
       description: response.trim().slice(0, 200),
       priority: 'medium',
+      isAIGenerated: true,
     });
   }
 
