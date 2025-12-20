@@ -4,7 +4,6 @@ import {
   Brain,
   Heart,
   Download,
-  Sparkles,
   MessageCircle,
   Moon,
   X,
@@ -223,16 +222,7 @@ export default function PaywallScreen() {
                   <Moon size={14} color="white" strokeWidth={3} />
                 </IconContainer>
               }
-              title="Sleep Stories"
-            />
-            <FeatureItem
-              compact
-              icon={
-                <IconContainer className="bg-pink-500">
-                  <Sparkles size={14} color="white" strokeWidth={3} />
-                </IconContainer>
-              }
-              title="Personalized Programs"
+              title="Guided Meditations"
             />
           </View>
         </FeaturesSection>
