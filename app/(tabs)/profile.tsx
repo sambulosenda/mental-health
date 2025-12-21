@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { View, StyleSheet, Alert, Modal, Linking, Pressable, ScrollView as RNScrollView } from 'react-native';
+import * as WebBrowser from 'expo-web-browser';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Host, Switch } from '@expo/ui/swift-ui';
 import { useRouter } from 'expo-router';
@@ -543,15 +544,15 @@ export default function ProfileScreen() {
               iconColor="#fff"
               iconBg="#8E8E93"
               label="Privacy Policy"
-              onPress={() => Linking.openURL('https://getsoftmind.com/privacy')}
+              onPress={() => WebBrowser.openBrowserAsync('https://getsoftmind.com/privacy')}
               themeColors={themeColors}
             />
             <SettingsRow
               icon="newspaper-outline"
               iconColor="#fff"
               iconBg="#8E8E93"
-              label="Terms of Service"
-              onPress={() => Linking.openURL('https://getsoftmind.com/terms')}
+              label="Terms of Use"
+              onPress={() => WebBrowser.openBrowserAsync('https://getsoftmind.com/terms')}
               themeColors={themeColors}
               isLast
             />

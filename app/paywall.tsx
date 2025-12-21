@@ -1,4 +1,5 @@
-import { Platform, Pressable, ScrollView, StyleSheet, Text, View, Alert, ActivityIndicator, Linking } from "react-native";
+import { Platform, Pressable, ScrollView, StyleSheet, Text, View, Alert, ActivityIndicator } from "react-native";
+import * as WebBrowser from "expo-web-browser";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   Brain,
@@ -341,25 +342,32 @@ export default function PaywallScreen() {
           </Animated.Text>
         </View>
 
-        <View className="w-full flex-row mb-8 items-center justify-center gap-4">
+        {/* Subscription Terms */}
+        <Text className="text-neutral-500 text-xs text-center mb-2 px-4">
+          {selectedPackage?.identifier.toLowerCase().includes("lifetime")
+            ? "One-time purchase. Lifetime access to all premium features."
+            : `Auto-renewable subscription. ${getPriceText()}`}
+        </Text>
+
+        <View className="w-full flex-row mb-4 items-center justify-center gap-4">
           <Pressable onPress={handleRestore}>
             <Text className="text-neutral-400 text-sm font-medium">Restore</Text>
           </Pressable>
           <Text className="text-neutral-600">•</Text>
           <Pressable
-            onPress={() => Linking.openURL(TERMS_URL).catch(() => {})}
-            accessibilityLabel="Terms of Service"
+            onPress={() => WebBrowser.openBrowserAsync(TERMS_URL)}
+            accessibilityLabel="Terms of Use"
             accessibilityRole="link"
           >
-            <Text className="text-neutral-400 text-sm font-medium">Terms</Text>
+            <Text className="text-neutral-400 text-sm font-medium underline">Terms of Use</Text>
           </Pressable>
           <Text className="text-neutral-600">•</Text>
           <Pressable
-            onPress={() => Linking.openURL(PRIVACY_URL).catch(() => {})}
+            onPress={() => WebBrowser.openBrowserAsync(PRIVACY_URL)}
             accessibilityLabel="Privacy Policy"
             accessibilityRole="link"
           >
-            <Text className="text-neutral-400 text-sm font-medium">Privacy</Text>
+            <Text className="text-neutral-400 text-sm font-medium underline">Privacy Policy</Text>
           </Pressable>
         </View>
       </View>
