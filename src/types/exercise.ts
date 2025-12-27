@@ -33,7 +33,8 @@ export type ExerciseStepType =
   | 'reflection'       // Final reflection/summary
   | 'timed_speech'     // TTS reads script with pauses
   | 'meditation_timer' // Silent timer with interval bells
-  | 'guided_visual';   // Visual + TTS overlay
+  | 'guided_visual'    // Visual + TTS overlay
+  | 'audio_story';     // Pre-recorded audio playback (ElevenLabs)
 
 // Speech segment for TTS meditation
 export interface SpeechSegment {
@@ -66,6 +67,8 @@ export interface ExerciseStep {
   intervalBellSeconds?: number;      // Bell every N seconds (for meditation_timer)
   showBreathingGuide?: boolean;      // Show breathing animation overlay
   visualType?: 'breathing' | 'expanding_circle' | 'wave'; // For guided_visual
+  // Audio story properties (pre-recorded audio)
+  audioUrl?: string;             // CDN URL for audio file
 }
 
 // Exercise template (definition)

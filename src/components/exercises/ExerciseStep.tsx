@@ -5,6 +5,7 @@ import { MultiInputStep } from './steps/MultiInputStep';
 import { BreathingStep } from './steps/BreathingStep';
 import { TimedSpeechStep } from './steps/TimedSpeechStep';
 import { MeditationTimerStep } from './steps/MeditationTimerStep';
+import { AudioSleepStep } from './steps/AudioSleepStep';
 import type { ExerciseStep as ExerciseStepType, MoodValue } from '@/src/types/exercise';
 
 interface ExerciseStepProps {
@@ -85,6 +86,15 @@ export function ExerciseStepRenderer({
       // For now, use TimedSpeechStep for guided_visual as well
       return (
         <TimedSpeechStep
+          step={step}
+          onComplete={onBreathingComplete || (() => {})}
+          accentColor={accentColor}
+        />
+      );
+
+    case 'audio_story':
+      return (
+        <AudioSleepStep
           step={step}
           onComplete={onBreathingComplete || (() => {})}
           accentColor={accentColor}
