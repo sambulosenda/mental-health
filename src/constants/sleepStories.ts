@@ -15,7 +15,7 @@ const VOICE_CONFIG = {
  * 2. Uploaded them to your CDN
  * 3. Updated CDN_BASE_URL in src/constants/cdnConfig.ts
  */
-const USE_AUDIO = false;
+const USE_AUDIO = true;
 
 /**
  * Transforms sleep story templates to use audio when enabled.

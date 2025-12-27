@@ -1,10 +1,10 @@
 /**
  * ElevenLabs Audio Generation Script
  *
- * Generates audio files for all sleep stories using ElevenLabs TTS API.
+ * Generates audio files for sleep stories using ElevenLabs TTS API.
  *
  * Usage:
- *   ELEVENLABS_API_KEY=xxx npx ts-node scripts/generate-audio.ts
+ *   ELEVENLABS_API_KEY=xxx npx tsx scripts/generate-audio.ts
  *
  * Options:
  *   --story=<id>    Generate audio for a specific story only
@@ -15,37 +15,16 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
-// Import sleep story templates
-// Note: This assumes the script is run from project root
+// Inline the sleep story data extraction
+// We'll read the file and extract text segments
+
 const SLEEP_STORIES_PATH = './src/constants/sleepStories.ts';
-
-interface SpeechSegment {
-  text: string;
-  pauseAfter: number;
-  breathCue?: boolean;
-}
-
-interface ExerciseStep {
-  id: string;
-  type: string;
-  title: string;
-  content: string;
-  speechSegments?: SpeechSegment[];
-}
-
-interface SleepStory {
-  id: string;
-  name: string;
-  description: string;
-  duration: number;
-  steps: ExerciseStep[];
-}
 
 // ElevenLabs configuration
 const ELEVENLABS_API_URL = 'https://api.elevenlabs.io/v1/text-to-speech';
 
 // Recommended voices for sleep stories
-const VOICES = {
+const VOICES: Record<string, string> = {
   rachel: '21m00Tcm4TlvDq8ikWAM', // Calm, soothing female
   bella: 'EXAVITQu4vr4xnSDxMaL',  // Gentle female
   adam: 'pNInz6obpgDQGcFmaJgB',   // Deep male
@@ -61,6 +40,44 @@ const VOICE_SETTINGS = {
 };
 
 const OUTPUT_DIR = './generated-audio';
+
+interface Story {
+  id: string;
+  name: string;
+  texts: string[];
+}
+
+function parseStoriesFromFile(): Story[] {
+  const content = fs.readFileSync(SLEEP_STORIES_PATH, 'utf-8');
+  const stories: Story[] = [];
+
+  // Split by story blocks (each starts with id: 'sleep-)
+  const storyBlocks = content.split(/\{\s*id:\s*'(sleep-[^']+)'/);
+
+  for (let i = 1; i < storyBlocks.length; i += 2) {
+    const id = storyBlocks[i];
+    const block = storyBlocks[i + 1] || '';
+
+    // Extract name
+    const nameMatch = block.match(/name:\s*'([^']+)'/);
+    const name = nameMatch ? nameMatch[1] : id;
+
+    // Extract all text segments
+    const textMatches = block.matchAll(/text:\s*'([^']+)'/g);
+    const texts = Array.from(textMatches).map((m) => m[1]);
+
+    if (texts.length > 0) {
+      stories.push({ id, name, texts });
+    }
+  }
+
+  return stories;
+}
+
+function createScript(texts: string[]): string {
+  // Join texts with pauses (represented by line breaks)
+  return texts.join('\n\n');
+}
 
 async function generateAudio(
   text: string,
@@ -90,88 +107,6 @@ async function generateAudio(
   fs.writeFileSync(outputPath, Buffer.from(buffer));
 }
 
-function extractScriptFromStory(story: SleepStory): string {
-  const segments: string[] = [];
-
-  for (const step of story.steps) {
-    if (step.speechSegments && step.speechSegments.length > 0) {
-      for (const segment of step.speechSegments) {
-        // Add the text
-        segments.push(segment.text);
-
-        // Add pause markers (ElevenLabs will interpret these)
-        if (segment.pauseAfter > 0) {
-          // Use SSML-like pause notation
-          // ElevenLabs handles natural pauses, but we add periods for longer pauses
-          if (segment.pauseAfter >= 10) {
-            segments.push('...');
-          } else if (segment.pauseAfter >= 5) {
-            segments.push('..');
-          }
-        }
-      }
-    }
-  }
-
-  return segments.join('\n\n');
-}
-
-function parseSleepStories(): SleepStory[] {
-  // Read the TypeScript file as text
-  const content = fs.readFileSync(SLEEP_STORIES_PATH, 'utf-8');
-
-  // Simple extraction - find all story objects
-  // This is a basic parser; for production, consider using a proper TS parser
-  const stories: SleepStory[] = [];
-
-  // Match story IDs and extract basic info
-  const idMatches = content.matchAll(/id:\s*['"]([^'"]+)['"]/g);
-  const nameMatches = content.matchAll(/name:\s*['"]([^'"]+)['"]/g);
-
-  const ids = Array.from(idMatches).map((m) => m[1]);
-  const names = Array.from(nameMatches).map((m) => m[1]);
-
-  // For each story ID, extract the full script
-  for (let i = 0; i < ids.length; i++) {
-    const id = ids[i];
-    const name = names[i] || id;
-
-    // Find all text segments for this story
-    const storyMatch = content.match(
-      new RegExp(`id:\\s*['"]${id}['"][\\s\\S]*?(?=\\{\\s*id:|$)`, 'm')
-    );
-
-    if (storyMatch) {
-      const storyContent = storyMatch[0];
-      const textMatches = storyContent.matchAll(/text:\s*['"]([^'"]+)['"]/g);
-      const texts = Array.from(textMatches).map((m) => m[1]);
-
-      if (texts.length > 0) {
-        stories.push({
-          id,
-          name,
-          description: '',
-          duration: 15,
-          steps: [
-            {
-              id: 'combined',
-              type: 'timed_speech',
-              title: name,
-              content: '',
-              speechSegments: texts.map((text) => ({
-                text,
-                pauseAfter: 5,
-              })),
-            },
-          ],
-        });
-      }
-    }
-  }
-
-  return stories;
-}
-
 async function main(): Promise<void> {
   const args = process.argv.slice(2);
   const dryRun = args.includes('--dry-run');
@@ -181,26 +116,26 @@ async function main(): Promise<void> {
   const apiKey = process.env.ELEVENLABS_API_KEY;
   if (!apiKey && !dryRun) {
     console.error('Error: ELEVENLABS_API_KEY environment variable is required');
-    console.error('Usage: ELEVENLABS_API_KEY=xxx npx ts-node scripts/generate-audio.ts');
+    console.error('Usage: ELEVENLABS_API_KEY=xxx npx tsx scripts/generate-audio.ts');
     process.exit(1);
   }
 
-  const voiceId = voiceArg ? VOICES[voiceArg as keyof typeof VOICES] || voiceArg : VOICES.rachel;
+  const voiceId = voiceArg ? (VOICES[voiceArg] || voiceArg) : VOICES.rachel;
 
   console.log('Parsing sleep stories...');
-  const stories = parseSleepStories();
+  let stories = parseStoriesFromFile();
 
   if (storyFilter) {
-    const filtered = stories.filter((s) => s.id === storyFilter);
-    if (filtered.length === 0) {
+    stories = stories.filter((s) => s.id === storyFilter);
+    if (stories.length === 0) {
       console.error(`Story "${storyFilter}" not found`);
+      console.log('Available stories:');
+      parseStoriesFromFile().forEach((s) => console.log(`  - ${s.id}`));
       process.exit(1);
     }
-    stories.length = 0;
-    stories.push(...filtered);
   }
 
-  console.log(`Found ${stories.length} stories to process`);
+  console.log(`Found ${stories.length} stories to process\n`);
 
   if (!fs.existsSync(OUTPUT_DIR)) {
     fs.mkdirSync(OUTPUT_DIR, { recursive: true });
@@ -209,22 +144,23 @@ async function main(): Promise<void> {
   const manifest: { id: string; name: string; audioFile: string; characters: number }[] = [];
 
   for (const story of stories) {
-    const script = extractScriptFromStory(story);
+    const script = createScript(story.texts);
     const outputFile = `${story.id}.mp3`;
     const outputPath = path.join(OUTPUT_DIR, outputFile);
 
-    console.log(`\n--- ${story.name} (${story.id}) ---`);
+    console.log(`--- ${story.name} (${story.id}) ---`);
+    console.log(`Segments: ${story.texts.length}`);
     console.log(`Characters: ${script.length}`);
     console.log(`Output: ${outputPath}`);
 
     if (dryRun) {
-      console.log('Preview (first 200 chars):');
-      console.log(script.substring(0, 200) + '...');
+      console.log('\nPreview (first 300 chars):');
+      console.log(script.substring(0, 300) + '...\n');
     } else {
       console.log('Generating audio...');
       try {
         await generateAudio(script, outputPath, voiceId, apiKey!);
-        console.log('Done!');
+        console.log('Done!\n');
 
         manifest.push({
           id: story.id,
@@ -233,7 +169,7 @@ async function main(): Promise<void> {
           characters: script.length,
         });
       } catch (error) {
-        console.error(`Failed to generate audio for ${story.id}:`, error);
+        console.error(`Failed: ${error}\n`);
       }
 
       // Rate limiting - wait between requests
@@ -242,11 +178,10 @@ async function main(): Promise<void> {
   }
 
   if (!dryRun && manifest.length > 0) {
-    // Write manifest file for CDN upload reference
     const manifestPath = path.join(OUTPUT_DIR, 'manifest.json');
     fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2));
-    console.log(`\nManifest written to ${manifestPath}`);
-    console.log(`\nTotal stories generated: ${manifest.length}`);
+    console.log(`\nManifest: ${manifestPath}`);
+    console.log(`Generated: ${manifest.length} stories`);
     console.log(`Total characters: ${manifest.reduce((sum, m) => sum + m.characters, 0)}`);
   }
 }
