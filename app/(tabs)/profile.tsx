@@ -12,7 +12,9 @@ import Animated, {
 } from 'react-native-reanimated';
 import { Text, Card, AnimatedHeader } from '@/src/components/ui';
 import { ReminderTypeCard } from '@/src/components/settings';
+import { BadgeGrid } from '@/src/components/gamification';
 import { useSettingsStore, useMoodStore, useJournalStore, useSubscriptionStore } from '@/src/stores';
+import { useGamificationStore } from '@/src/stores/useGamificationStore';
 import { requestNotificationPermissions } from '@/src/lib/notifications';
 import {
   checkBiometricAvailability,
@@ -104,6 +106,7 @@ export default function ProfileScreen() {
   const { entries: moodEntries, loadEntries: loadMoodEntries, clearEntries: clearMoodEntries } = useMoodStore();
   const { entries: journalEntries, loadEntries: loadJournalEntries, clearEntries: clearJournalEntries } = useJournalStore();
   const { isPremium, customerInfo } = useSubscriptionStore();
+  const { streaks, earnedBadges, loadGamificationData } = useGamificationStore();
   const { mode, setMode, isDark } = useTheme();
 
   const themeColors = isDark ? darkColors : colors;
@@ -125,6 +128,7 @@ export default function ProfileScreen() {
     checkBiometrics();
     loadMoodEntries();
     loadJournalEntries();
+    loadGamificationData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -345,6 +349,39 @@ export default function ProfileScreen() {
               themeColors={themeColors}
               isLast
             />
+          </Card>
+        </View>
+
+        {/* Achievements */}
+        <View style={styles.section}>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.md }}>
+            <Text variant="h3" color="textPrimary">
+              Achievements
+            </Text>
+            <Pressable onPress={() => router.push('/achievements')}>
+              <Text variant="caption" style={{ color: themeColors.primary }}>
+                See All
+              </Text>
+            </Pressable>
+          </View>
+          <View style={styles.statsContainer}>
+            <View style={[styles.statBox, { backgroundColor: themeColors.surfaceElevated }]}>
+              <Ionicons name="flame" size={24} color="#FF6B35" />
+              <Text variant="h2" color="textPrimary" style={{ marginTop: 4 }}>
+                {streaks.overall.currentStreak}
+              </Text>
+              <Text variant="caption" color="textSecondary">Day Streak</Text>
+            </View>
+            <View style={[styles.statBox, { backgroundColor: themeColors.surfaceElevated }]}>
+              <Ionicons name="ribbon" size={24} color={themeColors.primary} />
+              <Text variant="h2" color="textPrimary" style={{ marginTop: 4 }}>
+                {earnedBadges.length}
+              </Text>
+              <Text variant="caption" color="textSecondary">Badges</Text>
+            </View>
+          </View>
+          <Card variant="flat" padding="md">
+            <BadgeGrid maxItems={6} onBadgePress={() => router.push('/achievements')} />
           </Card>
         </View>
 

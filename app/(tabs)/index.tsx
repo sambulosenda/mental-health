@@ -8,7 +8,9 @@ import { formatDistanceToNow } from 'date-fns';
 import { Text, Card, AnimatedHeader, NativeGauge } from '@/src/components/ui';
 import { MoodAnimation } from '@/src/components/mood';
 import { InterventionPicker } from '@/src/components/interventions/InterventionPicker';
+import { StreakCard, BadgeCelebration } from '@/src/components/gamification';
 import { useMoodStore, useSubscriptionStore } from '@/src/stores';
+import { useGamificationStore } from '@/src/stores/useGamificationStore';
 import { usePremiumFeature } from '@/src/hooks/usePremiumFeature';
 import { colors, darkColors, spacing, moodLabels } from '@/src/constants/theme';
 import { useTheme } from '@/src/contexts/ThemeContext';
@@ -22,6 +24,11 @@ export default function HomeScreen() {
   const { todayEntries, entries, loadTodayEntries, loadEntries } = useMoodStore();
   const { isPremium } = useSubscriptionStore();
   const { requirePremium } = usePremiumFeature();
+  const {
+    pendingCelebrations,
+    loadGamificationData,
+    dismissCelebration,
+  } = useGamificationStore();
 
   const handleChatPress = useCallback(
     (type: 'checkin' | 'chat') => {
@@ -31,9 +38,11 @@ export default function HomeScreen() {
     },
     [requirePremium, router]
   );
+
   useEffect(() => {
     loadTodayEntries();
     loadEntries();
+    loadGamificationData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -261,7 +270,25 @@ export default function HomeScreen() {
           </View>
         )}
 
+        {/* Streak Card */}
+        <View className="mb-6">
+          <Text variant="h3" color="textPrimary" className="mb-4">
+            Your Streak
+          </Text>
+          <StreakCard onPress={() => router.push('/achievements')} />
+        </View>
+
       </Animated.ScrollView>
+
+      {/* Badge Celebration Modal */}
+      <BadgeCelebration
+        badge={pendingCelebrations[0] ?? null}
+        onDismiss={() => {
+          if (pendingCelebrations[0]) {
+            dismissCelebration(pendingCelebrations[0].badgeId);
+          }
+        }}
+      />
     </SafeAreaView>
   );
 }

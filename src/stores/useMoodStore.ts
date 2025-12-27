@@ -9,6 +9,7 @@ import {
   deleteMoodEntry,
   deleteAllMoodEntries,
 } from '@/src/lib/database';
+import { useGamificationStore } from './useGamificationStore';
 
 interface MoodState {
   // Data
@@ -116,6 +117,9 @@ export const useMoodStore = create<MoodState>((set, get) => ({
         draftActivities: [],
         draftNote: '',
       }));
+
+      // Record activity for gamification (streaks & badges)
+      useGamificationStore.getState().recordActivity('mood');
 
       return entry;
     } catch (error) {

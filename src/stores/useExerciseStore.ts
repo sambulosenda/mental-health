@@ -16,6 +16,7 @@ import {
 } from '@/src/lib/database';
 import { EXERCISE_TEMPLATES } from '@/src/constants/exercises';
 import { MEDITATION_TEMPLATES } from '@/src/constants/meditations';
+import { useGamificationStore } from './useGamificationStore';
 
 interface ExerciseState {
   // Templates (from constants)
@@ -226,6 +227,9 @@ export const useExerciseStore = create<ExerciseState>((set, get) => ({
         exerciseFlow.responses,
         exerciseFlow.moodAfter
       );
+
+      // Record activity for gamification (streaks & badges)
+      useGamificationStore.getState().recordActivity('exercise');
 
       // Reload recent sessions
       await get().loadRecentSessions();

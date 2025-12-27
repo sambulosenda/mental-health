@@ -21,6 +21,6 @@ module.exports = {
     '!src/**/*.d.ts',
     '!src/**/index.ts',
   ],
-  // Exclude files that import React Native modules for pure unit tests
-  testPathIgnorePatterns: ['/node_modules/'],
+
+  
 };

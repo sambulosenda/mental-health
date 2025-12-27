@@ -13,6 +13,7 @@ import {
   markPromptUsed,
 } from '@/src/lib/database';
 import { asyncAction, silentAction } from './utils';
+import { useGamificationStore } from './useGamificationStore';
 
 interface JournalState {
   // Data
@@ -182,6 +183,11 @@ export const useJournalStore = create<JournalState>((set, get) => ({
         };
       }
     );
+
+    // Record activity for gamification (only for new entries, not edits)
+    if (success && savedEntry && !editingId) {
+      useGamificationStore.getState().recordActivity('journal');
+    }
 
     return success ? savedEntry : null;
   },

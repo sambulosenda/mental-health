@@ -28,6 +28,12 @@ export default function ModalsLayout() {
           ...CalmPresets.SlideFromBottom(),
         }}
       />
+      <TransitionStack.Screen
+        name="achievements"
+        options={{
+          ...CalmPresets.SlideFromBottom(),
+        }}
+      />
     </TransitionStack>
   );
 }

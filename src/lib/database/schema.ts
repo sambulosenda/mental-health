@@ -86,3 +86,36 @@ export const exerciseSessions = sqliteTable('exercise_sessions', {
 
 export type ExerciseSessionRow = typeof exerciseSessions.$inferSelect;
 export type NewExerciseSession = typeof exerciseSessions.$inferInsert;
+
+// User streaks table - tracks consecutive activity days
+export const userStreaks = sqliteTable('user_streaks', {
+  id: text('id').primaryKey(),
+  type: text('type').notNull(), // 'mood' | 'journal' | 'exercise' | 'overall'
+  currentStreak: integer('current_streak').notNull().default(0),
+  longestStreak: integer('longest_streak').notNull().default(0),
+  lastActivityDate: text('last_activity_date'), // YYYY-MM-DD format
+  streakStartDate: text('streak_start_date'), // When current streak began
+  updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull(),
+});
+
+// User badges/achievements table
+export const userBadges = sqliteTable('user_badges', {
+  id: text('id').primaryKey(),
+  badgeId: text('badge_id').notNull(), // References badge definition
+  earnedAt: integer('earned_at', { mode: 'timestamp' }).notNull(),
+  metadata: text('metadata'), // JSON - extra context
+});
+
+// Streak protection table (rest days)
+export const streakProtection = sqliteTable('streak_protection', {
+  id: text('id').primaryKey(),
+  usedAt: integer('used_at', { mode: 'timestamp' }).notNull(),
+  reason: text('reason'), // Optional: 'self_care_day', 'feeling_unwell', etc.
+});
+
+export type UserStreakRow = typeof userStreaks.$inferSelect;
+export type NewUserStreak = typeof userStreaks.$inferInsert;
+export type UserBadgeRow = typeof userBadges.$inferSelect;
+export type NewUserBadge = typeof userBadges.$inferInsert;
+export type StreakProtectionRow = typeof streakProtection.$inferSelect;
+export type NewStreakProtection = typeof streakProtection.$inferInsert;
