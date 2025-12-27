@@ -14,11 +14,8 @@
  *     └── ...
  */
 
-// TODO: Replace with your Cloudflare R2 bucket URL
-// Examples:
-//   - Custom domain: 'https://cdn.yourdomain.com'
-//   - R2.dev subdomain: 'https://pub-xxxxxxxxxxxx.r2.dev'
-export const CDN_BASE_URL = 'https://cdn.example.com';
+// Cloudflare R2 bucket URL
+export const CDN_BASE_URL = 'https://pub-cd0bdc36c3ae4d86ac2b9bdaa9b15b48.r2.dev';
 
 // Audio file paths
 export const AUDIO_PATHS = {
