@@ -40,14 +40,14 @@ interface SubscriptionState {
 export const useSubscriptionStore = create<SubscriptionState>()(
   persist(
     (set, get) => ({
-      // Initial state
-      isInitialized: false,
-      isPremium: false,
+      // Initial state - in dev mode, default to premium for testing
+      isInitialized: __DEV__,
+      isPremium: __DEV__,
       customerInfo: null,
       currentOffering: null,
       isLoading: false,
       error: null,
-      cachedPremiumStatus: false,
+      cachedPremiumStatus: __DEV__,
       lastSyncTime: null,
 
       initialize: async () => {

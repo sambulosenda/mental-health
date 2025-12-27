@@ -17,6 +17,12 @@ export function usePremiumFeature() {
 
   const requirePremium = useCallback(
     (onAllowed: () => void) => {
+      // Bypass premium check in development
+      if (__DEV__) {
+        onAllowed();
+        return;
+      }
+
       const effectiveStatus = isInitialized ? isPremium : cachedPremiumStatus;
 
       if (effectiveStatus) {
@@ -29,6 +35,7 @@ export function usePremiumFeature() {
   );
 
   const checkPremium = useCallback((): boolean => {
+    if (__DEV__) return true;
     return isInitialized ? isPremium : cachedPremiumStatus;
   }, [isPremium, isInitialized, cachedPremiumStatus]);
 
