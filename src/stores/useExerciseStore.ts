@@ -16,6 +16,7 @@ import {
 } from '@/src/lib/database';
 import { EXERCISE_TEMPLATES } from '@/src/constants/exercises';
 import { MEDITATION_TEMPLATES } from '@/src/constants/meditations';
+import { SLEEP_STORY_TEMPLATES } from '@/src/constants/sleepStories';
 import { useGamificationStore } from './useGamificationStore';
 
 interface ExerciseState {
@@ -53,8 +54,8 @@ interface ExerciseState {
   reset: () => void;
 }
 
-// Merge exercise and meditation templates
-const ALL_TEMPLATES = [...EXERCISE_TEMPLATES, ...MEDITATION_TEMPLATES];
+// Merge exercise, meditation, and sleep story templates
+const ALL_TEMPLATES = [...EXERCISE_TEMPLATES, ...MEDITATION_TEMPLATES, ...SLEEP_STORY_TEMPLATES];
 
 export const useExerciseStore = create<ExerciseState>((set, get) => ({
   // Initial state
