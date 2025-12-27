@@ -33,16 +33,19 @@ const MOOD_EXERCISE_MAP: Record<string, string[]> = {
 
 // Activity-based overrides (these take priority when matched)
 const ACTIVITY_EXERCISE_MAP: Record<string, string[]> = {
-  anxious: ['calming-anxiety', 'grounding-meditation', 'grounding-54321', 'box-breathing'],
-  stressed: ['breath-awareness-5min', 'box-breathing', 'body-scan-10min', 'worry-dump'],
+  anxious: ['calming-anxiety', '4-7-8-breathing', 'grounding-meditation', 'grounding-54321', 'box-breathing'],
+  stressed: ['coherent-breathing', 'breath-awareness-5min', 'box-breathing', 'body-scan-10min', 'worry-dump'],
   work: ['worry-dump', 'breath-awareness-5min', 'thought-record', 'quick-goal'],
-  sleep: ['sleep-forest-path', 'sleep-cloud-float', 'sleep-body-release', 'sleep-relaxation', 'body-scan-10min'],
-  bedtime: ['sleep-forest-path', 'sleep-rainy-window', 'sleep-cloud-float', 'sleep-body-release'],
-  insomnia: ['sleep-body-release', 'sleep-counting-down', 'sleep-mind-quieting', 'sleep-breath-journey'],
-  restless: ['sleep-cloud-float', 'sleep-train-journey', 'sleep-river-boat', 'body-scan-10min'],
+  sleep: ['4-7-8-breathing', 'sleep-forest-path', 'sleep-cloud-float', 'sleep-body-release', 'sleep-relaxation'],
+  bedtime: ['4-7-8-breathing', 'sleep-forest-path', 'sleep-rainy-window', 'sleep-cloud-float', 'sleep-body-release'],
+  insomnia: ['4-7-8-breathing', 'sleep-body-release', 'sleep-counting-down', 'sleep-mind-quieting', 'sleep-breath-journey'],
+  restless: ['coherent-breathing', 'sleep-cloud-float', 'sleep-train-journey', 'sleep-river-boat', 'body-scan-10min'],
   social: ['thought-record', 'self-compassion', 'calming-anxiety'],
   sad: ['self-compassion', 'calming-anxiety', 'body-scan-10min', 'gratitude-list'],
-  tired: ['breath-awareness-5min', 'body-scan-10min', 'box-breathing'],
+  tired: ['energizing-breath', 'breath-awareness-5min', 'body-scan-10min', 'box-breathing'],
+  'low-energy': ['energizing-breath', 'breath-awareness-5min', 'quick-goal'],
+  energy: ['energizing-breath', 'quick-goal'],
+  focus: ['coherent-breathing', 'box-breathing', 'breath-awareness-5min'],
 };
 
 // Reasons for each exercise type
@@ -61,6 +64,21 @@ const EXERCISE_REASONS: Record<string, Record<string, string>> = {
     mood: 'Calms your nervous system',
     activity: 'Helps with anxiety',
     effectiveness: 'Reliably improves your mood',
+  },
+  '4-7-8-breathing': {
+    mood: 'Natural tranquilizer for your nervous system',
+    activity: 'Perfect for sleep and anxiety',
+    effectiveness: 'Deeply relaxing for you',
+  },
+  'coherent-breathing': {
+    mood: 'Balances heart and brain rhythms',
+    activity: 'Optimizes your stress response',
+    effectiveness: 'Builds your calm baseline',
+  },
+  'energizing-breath': {
+    mood: 'Natural energy boost',
+    activity: 'Wakes up your system',
+    effectiveness: 'Quick pick-me-up that works for you',
   },
   'grounding-54321': {
     mood: 'Brings you back to the present',
