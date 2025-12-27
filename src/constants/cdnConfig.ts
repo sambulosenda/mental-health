@@ -21,6 +21,7 @@ export const CDN_BASE_URL = 'https://pub-cd0bdc36c3ae4d86ac2b9bdaa9b15b48.r2.dev
 export const AUDIO_PATHS = {
   sleepStories: `${CDN_BASE_URL}/sleep-stories`,
   breathingCues: `${CDN_BASE_URL}/breathing-cues`,
+  meditations: `${CDN_BASE_URL}/meditations`,
 } as const;
 
 /**
@@ -36,4 +37,12 @@ export function getSleepStoryAudioUrl(storyId: string): string {
  */
 export function getBreathingCueAudioUrl(cueId: string): string {
   return `${AUDIO_PATHS.breathingCues}/${cueId}.mp3`;
+}
+
+/**
+ * Get the full audio URL for a meditation
+ * Meditation IDs: breath-awareness-5min, body-scan-10min, sleep-relaxation, calming-anxiety, grounding-meditation
+ */
+export function getMeditationAudioUrl(meditationId: string): string {
+  return `${AUDIO_PATHS.meditations}/${meditationId}.mp3`;
 }

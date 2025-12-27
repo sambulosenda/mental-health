@@ -8,6 +8,7 @@ import {
 import { Button, Text } from '@/src/components/ui';
 import { colors, darkColors } from '@/src/constants/theme';
 import { useTheme } from '@/src/contexts/ThemeContext';
+import { stopMeditationAudio } from '@/src/lib/meditation/meditationVoice';
 import { useExerciseStore } from '@/src/stores';
 import type { MoodValue } from '@/src/types/exercise';
 import { useFocusEffect } from '@react-navigation/native';
@@ -65,6 +66,7 @@ function ExerciseSessionContent() {
       // On blur: reset the store to clean up (also invalidates in-flight requests)
       return () => {
         console.log('[Exercise] Screen blur, resetting store');
+        stopMeditationAudio(); // Stop any playing meditation audio
         reset();
         currentTemplateRef.current = null;
       };
@@ -270,6 +272,7 @@ function ExerciseSessionContent() {
             onChange={handleStepResponse}
             onBreathingComplete={advanceStep}
             accentColor={accentColor}
+            templateId={template.id}
           />
         )}
       </View>

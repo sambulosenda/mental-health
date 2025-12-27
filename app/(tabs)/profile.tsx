@@ -1,5 +1,5 @@
-import { useEffect, useState, useCallback } from 'react';
-import { View, StyleSheet, Alert, Modal, Linking, Pressable, ScrollView as RNScrollView } from 'react-native';
+import { useEffect, useState } from 'react';
+import { View, Alert, Modal, Linking, Pressable } from 'react-native';
 import * as WebBrowser from 'expo-web-browser';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Host, Switch } from '@expo/ui/swift-ui';
@@ -24,14 +24,13 @@ import {
 import { exportMoodToCSV, exportAllData } from '@/src/lib/export';
 import { sendSMSInvites } from '@/src/lib/share';
 import { ContactPicker } from '@/src/components/share/ContactPicker';
-import { colors, darkColors, spacing, borderRadius } from '@/src/constants/theme';
+import { colors, darkColors } from '@/src/constants/theme';
 import { useTheme } from '@/src/contexts/ThemeContext';
 
 const HEADER_EXPANDED_HEIGHT = 110;
 
 type ThemeColors = typeof colors | typeof darkColors;
 
-// Apple-style settings row
 function SettingsRow({
   icon,
   iconColor,
@@ -56,17 +55,23 @@ function SettingsRow({
   themeColors: ThemeColors;
 }) {
   const content = (
-    <View style={styles.settingsRow}>
-      <View style={[styles.settingsIconContainer, { backgroundColor: iconBg }]}>
+    <View className="flex-row items-center pl-3 min-h-[48px]">
+      <View
+        className="w-[30px] h-[30px] rounded-[7px] items-center justify-center"
+        style={{ backgroundColor: iconBg }}
+      >
         <Ionicons name={icon} size={18} color={iconColor} />
       </View>
-      <View style={[styles.settingsContent, !isLast && { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: themeColors.divider }]}>
-        <Text variant="body" color="textPrimary" style={styles.settingsLabel}>
+      <View
+        className="flex-1 flex-row items-center justify-between py-2 pr-3 ml-3"
+        style={!isLast ? { borderBottomWidth: 0.5, borderBottomColor: themeColors.divider } : undefined}
+      >
+        <Text variant="body" color="textPrimary" className="flex-1">
           {label}
         </Text>
-        <View style={styles.settingsRight}>
+        <View className="flex-row items-center gap-1">
           {value && (
-            <Text variant="body" color="textSecondary" style={styles.settingsValue}>
+            <Text variant="body" color="textSecondary" className="mr-1">
               {value}
             </Text>
           )}
@@ -273,7 +278,10 @@ export default function ProfileScreen() {
   };
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: themeColors.background }]} edges={['top']}>
+    <SafeAreaView
+      className={`flex-1 ${isDark ? 'bg-background-dark' : 'bg-background'}`}
+      edges={['top']}
+    >
       <AnimatedHeader
         scrollY={scrollY}
         title="Settings"
@@ -281,33 +289,30 @@ export default function ProfileScreen() {
         showThemeToggle
       />
       <Animated.ScrollView
-        style={styles.scroll}
-        contentContainerStyle={[styles.content, { paddingTop: HEADER_EXPANDED_HEIGHT }]}
+        className="flex-1"
+        contentContainerStyle={{ paddingTop: HEADER_EXPANDED_HEIGHT, paddingHorizontal: 16 }}
         showsVerticalScrollIndicator={false}
         onScroll={scrollHandler}
         scrollEventThrottle={16}
       >
-        {/* Subscription Card */}
-        <View style={styles.section}>
-          <Text variant="h3" color="textPrimary" style={styles.sectionTitle}>
-            Subscription
+        {/* SECTION 1: Account */}
+        <View className="mb-4">
+          <Text variant="h3" color="textPrimary" className="mb-3">
+            Account
           </Text>
-          <Card variant="flat" padding="sm" style={styles.groupedCard}>
+          <Card variant="flat" padding="none" className="overflow-hidden">
             {isPremium ? (
-              <>
-                <SettingsRow
-                  icon="checkmark-circle"
-                  iconColor="#fff"
-                  iconBg={themeColors.success}
-                  label="Premium"
-                  value={customerInfo?.entitlements.active['premium']?.expirationDate
-                    ? `Renews ${format(new Date(customerInfo.entitlements.active['premium'].expirationDate), 'MMM d')}`
-                    : 'Active'}
-                  onPress={() => Linking.openURL('https://apps.apple.com/account/subscriptions')}
-                  themeColors={themeColors}
-                  isLast
-                />
-              </>
+              <SettingsRow
+                icon="checkmark-circle"
+                iconColor="#fff"
+                iconBg={themeColors.success}
+                label="Premium"
+                value={customerInfo?.entitlements.active['premium']?.expirationDate
+                  ? `Renews ${format(new Date(customerInfo.entitlements.active['premium'].expirationDate), 'MMM d')}`
+                  : 'Active'}
+                onPress={() => Linking.openURL('https://apps.apple.com/account/subscriptions')}
+                themeColors={themeColors}
+              />
             ) : (
               <SettingsRow
                 icon="star"
@@ -317,46 +322,32 @@ export default function ProfileScreen() {
                 value="Unlock all features"
                 onPress={() => router.push('/paywall')}
                 themeColors={themeColors}
-                isLast
               />
             )}
+            <View
+              className="flex-row"
+              style={{ borderTopWidth: 0.5, borderTopColor: themeColors.divider }}
+            >
+              <View
+                className="flex-1 items-center py-3"
+                style={{ borderRightWidth: 0.5, borderRightColor: themeColors.divider }}
+              >
+                <Text variant="h3" color="textPrimary">{moodEntries.length}</Text>
+                <Text variant="caption" color="textSecondary">Moods</Text>
+              </View>
+              <View className="flex-1 items-center py-3">
+                <Text variant="h3" color="textPrimary">{journalEntries.length}</Text>
+                <Text variant="caption" color="textSecondary">Journals</Text>
+              </View>
+            </View>
           </Card>
         </View>
 
-        {/* Your Data */}
-        <View style={styles.section}>
-          <Text variant="h3" color="textPrimary" style={styles.sectionTitle}>
-            Your Data
-          </Text>
-          <View style={styles.statsContainer}>
-            <View style={[styles.statBox, { backgroundColor: themeColors.surfaceElevated }]}>
-              <Text variant="h2" color="textPrimary">{moodEntries.length}</Text>
-              <Text variant="caption" color="textSecondary">Moods</Text>
-            </View>
-            <View style={[styles.statBox, { backgroundColor: themeColors.surfaceElevated }]}>
-              <Text variant="h2" color="textPrimary">{journalEntries.length}</Text>
-              <Text variant="caption" color="textSecondary">Journals</Text>
-            </View>
-          </View>
-          <Card variant="flat" padding="sm" style={styles.groupedCard}>
-            <SettingsRow
-              icon="download-outline"
-              iconColor="#fff"
-              iconBg={themeColors.primary}
-              label={isPremium ? 'Export Data' : 'Export Data'}
-              value={!isPremium ? 'Premium' : undefined}
-              onPress={handleExport}
-              themeColors={themeColors}
-              isLast
-            />
-          </Card>
-        </View>
-
-        {/* Achievements */}
-        <View style={styles.section}>
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.md }}>
+        {/* SECTION 2: Progress */}
+        <View className="mb-4">
+          <View className="flex-row justify-between items-center mb-3">
             <Text variant="h3" color="textPrimary">
-              Achievements
+              Progress
             </Text>
             <Pressable onPress={() => router.push('/achievements')}>
               <Text variant="caption" style={{ color: themeColors.primary }}>
@@ -364,17 +355,23 @@ export default function ProfileScreen() {
               </Text>
             </Pressable>
           </View>
-          <View style={styles.statsContainer}>
-            <View style={[styles.statBox, { backgroundColor: themeColors.surfaceElevated }]}>
+          <View className="flex-row gap-2 mb-2">
+            <View
+              className="flex-1 items-center py-3 rounded-xl"
+              style={{ backgroundColor: themeColors.surfaceElevated }}
+            >
               <Ionicons name="flame" size={24} color="#FF6B35" />
-              <Text variant="h2" color="textPrimary" style={{ marginTop: 4 }}>
+              <Text variant="h3" color="textPrimary" className="mt-1">
                 {streaks.overall.currentStreak}
               </Text>
               <Text variant="caption" color="textSecondary">Day Streak</Text>
             </View>
-            <View style={[styles.statBox, { backgroundColor: themeColors.surfaceElevated }]}>
+            <View
+              className="flex-1 items-center py-3 rounded-xl"
+              style={{ backgroundColor: themeColors.surfaceElevated }}
+            >
               <Ionicons name="ribbon" size={24} color={themeColors.primary} />
-              <Text variant="h2" color="textPrimary" style={{ marginTop: 4 }}>
+              <Text variant="h3" color="textPrimary" className="mt-1">
                 {earnedBadges.length}
               </Text>
               <Text variant="caption" color="textSecondary">Badges</Text>
@@ -385,9 +382,9 @@ export default function ProfileScreen() {
           </Card>
         </View>
 
-        {/* Reminders */}
-        <View style={styles.section}>
-          <Text variant="h3" color="textPrimary" style={styles.sectionTitle}>
+        {/* SECTION 3: Reminders */}
+        <View className="mb-4">
+          <Text variant="h3" color="textPrimary" className="mb-3">
             Reminders
           </Text>
           <ReminderTypeCard
@@ -420,13 +417,13 @@ export default function ProfileScreen() {
             onFollowUpToggle={(enabled) => setFollowUpEnabled('journal', enabled)}
             onFollowUpTimeChange={(time) => setFollowUpTime('journal', time)}
           />
-          <Card variant="flat" padding="sm" style={styles.groupedCard}>
-            <View style={styles.settingsRow}>
-              <View style={[styles.settingsIconContainer, { backgroundColor: '#FF9500' }]}>
+          <Card variant="flat" padding="none" className="overflow-hidden">
+            <View className="flex-row items-center pl-3 min-h-[48px]">
+              <View className="w-[30px] h-[30px] rounded-[7px] items-center justify-center bg-orange-500">
                 <Ionicons name="flame" size={18} color="#fff" />
               </View>
-              <View style={styles.settingsContent}>
-                <Text variant="body" color="textPrimary" style={styles.settingsLabel}>
+              <View className="flex-1 flex-row items-center justify-between py-2 pr-3 ml-3">
+                <Text variant="body" color="textPrimary" className="flex-1">
                   Streak Motivation
                 </Text>
                 <Host matchContents>
@@ -442,12 +439,12 @@ export default function ProfileScreen() {
           </Card>
         </View>
 
-        {/* Appearance */}
-        <View style={styles.section}>
-          <Text variant="h3" color="textPrimary" style={styles.sectionTitle}>
-            Appearance
+        {/* SECTION 4: Preferences */}
+        <View className="mb-4">
+          <Text variant="h3" color="textPrimary" className="mb-3">
+            Preferences
           </Text>
-          <Card variant="flat" padding="sm" style={styles.groupedCard}>
+          <Card variant="flat" padding="none" className="overflow-hidden">
             <SettingsRow
               icon={isDark ? 'moon' : 'sunny'}
               iconColor="#fff"
@@ -456,28 +453,22 @@ export default function ProfileScreen() {
               value={getThemeModeLabel()}
               onPress={cycleTheme}
               themeColors={themeColors}
-              isLast
+              isLast={!biometricAvailable}
             />
-          </Card>
-        </View>
-
-        {/* Privacy & Security */}
-        <View style={styles.section}>
-          <Text variant="h3" color="textPrimary" style={styles.sectionTitle}>
-            Privacy & Security
-          </Text>
-          <Card variant="flat" padding="sm" style={styles.groupedCard}>
             {biometricAvailable && (
-              <View style={[styles.settingsRow, { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: themeColors.divider }]}>
-                <View style={[styles.settingsIconContainer, { backgroundColor: themeColors.success }]}>
+              <View className="flex-row items-center pl-3 min-h-[48px]">
+                <View
+                  className="w-[30px] h-[30px] rounded-[7px] items-center justify-center"
+                  style={{ backgroundColor: themeColors.success }}
+                >
                   <Ionicons
                     name={biometricName.toLowerCase().includes('face') ? 'scan' : 'finger-print'}
                     size={18}
                     color="#fff"
                   />
                 </View>
-                <View style={styles.settingsContent}>
-                  <Text variant="body" color="textPrimary" style={styles.settingsLabel}>
+                <View className="flex-1 flex-row items-center justify-between py-2 pr-3 ml-3">
+                  <Text variant="body" color="textPrimary" className="flex-1">
                     {biometricName} Lock
                   </Text>
                   <Host matchContents>
@@ -491,6 +482,24 @@ export default function ProfileScreen() {
                 </View>
               </View>
             )}
+          </Card>
+        </View>
+
+        {/* SECTION 5: Data & Privacy */}
+        <View className="mb-4">
+          <Text variant="h3" color="textPrimary" className="mb-3">
+            Data & Privacy
+          </Text>
+          <Card variant="flat" padding="none" className="overflow-hidden">
+            <SettingsRow
+              icon="download-outline"
+              iconColor="#fff"
+              iconBg={themeColors.primary}
+              label="Export Data"
+              value={!isPremium ? 'Premium' : undefined}
+              onPress={handleExport}
+              themeColors={themeColors}
+            />
             <SettingsRow
               icon="trash-outline"
               iconColor="#fff"
@@ -503,79 +512,36 @@ export default function ProfileScreen() {
           </Card>
         </View>
 
-        {/* Share */}
-        <View style={styles.section}>
-          <Text variant="h3" color="textPrimary" style={styles.sectionTitle}>
-            Share
+        {/* SECTION 6: More */}
+        <View className="mb-4">
+          <Text variant="h3" color="textPrimary" className="mb-3">
+            More
           </Text>
-          <Card variant="flat" padding="sm" style={styles.groupedCard}>
+          <Card variant="flat" padding="none" className="overflow-hidden">
             <SettingsRow
               icon="heart"
               iconColor="#fff"
               iconBg="#FF2D55"
               label="Invite Friends"
-              value="Share via SMS"
               onPress={() => setShowContactPicker(true)}
               themeColors={themeColors}
-              isLast
             />
-          </Card>
-        </View>
-
-        {/* Support */}
-        <View style={styles.section}>
-          <Text variant="h3" color="textPrimary" style={styles.sectionTitle}>
-            Support
-          </Text>
-          <Card variant="flat" padding="sm" style={styles.groupedCard}>
             <SettingsRow
               icon="mail-outline"
               iconColor="#fff"
               iconBg="#5856D6"
-              label="Contact"
+              label="Contact Support"
               onPress={() => Linking.openURL('mailto:support@getsoftmind.com')}
               themeColors={themeColors}
-              isLast
             />
-          </Card>
-        </View>
-
-        {/* Wellness Information & Sources */}
-        <View style={styles.section}>
-          <Text variant="h3" color="textPrimary" style={styles.sectionTitle}>
-            Research & Sources
-          </Text>
-          <View style={[styles.disclaimerBox, { backgroundColor: `${themeColors.warning}10` }]}>
-            <View style={styles.disclaimerHeader}>
-              <Ionicons name="information-circle" size={16} color={themeColors.warning} />
-              <Text variant="caption" style={{ marginLeft: 6, color: themeColors.warning, fontWeight: '600' }}>
-                Wellness App Disclaimer
-              </Text>
-            </View>
-            <Text variant="caption" color="textSecondary" style={styles.disclaimerText}>
-              Softmind is a wellness and self-care companion for personal reflection and stress management. It is NOT a medical device and does NOT provide medical advice, diagnosis, or treatment. Always consult a qualified healthcare provider for any health concerns.
-            </Text>
-          </View>
-          <Card variant="flat" padding="sm" style={styles.groupedCard}>
             <SettingsRow
               icon="book"
               iconColor="#fff"
               iconBg="#10B981"
-              label="View All Sources"
-              value="Research & Citations"
+              label="Research & Sources"
               onPress={() => router.push('/(modals)/sources' as any)}
               themeColors={themeColors}
-              isLast
             />
-          </Card>
-        </View>
-
-        {/* Legal */}
-        <View style={styles.section}>
-          <Text variant="h3" color="textPrimary" style={styles.sectionTitle}>
-            Legal
-          </Text>
-          <Card variant="flat" padding="sm" style={styles.groupedCard}>
             <SettingsRow
               icon="document-text-outline"
               iconColor="#fff"
@@ -591,34 +557,24 @@ export default function ProfileScreen() {
               label="Terms of Use"
               onPress={() => WebBrowser.openBrowserAsync('https://getsoftmind.com/terms')}
               themeColors={themeColors}
-              isLast
             />
-          </Card>
-        </View>
-
-        {/* About */}
-        <View style={styles.section}>
-          <Text variant="h3" color="textPrimary" style={styles.sectionTitle}>
-            About
-          </Text>
-          <Card variant="flat" padding="sm" style={styles.groupedCard}>
             <SettingsRow
               icon="leaf"
               iconColor="#fff"
               iconBg={themeColors.primary}
               label="Softmind"
-              value="Version 1.0.0"
+              value="v1.0.0"
               showChevron={false}
               themeColors={themeColors}
               isLast
             />
           </Card>
-          <Text variant="caption" color="textMuted" style={styles.footer}>
-            Your emotional wellness companion. All data is stored locally on your device and never shared.
+          <Text variant="caption" color="textMuted" className="mt-3 mx-3 text-center leading-[18px]">
+            Your emotional wellness companion.{'\n'}All data is stored locally on your device.
           </Text>
         </View>
 
-        <View style={styles.bottomPadding} />
+        <View className="h-8" />
       </Animated.ScrollView>
 
       <Modal
@@ -635,102 +591,3 @@ export default function ProfileScreen() {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  scroll: {
-    flex: 1,
-  },
-  content: {
-    paddingHorizontal: spacing.lg,
-  },
-  section: {
-    marginBottom: spacing.lg,
-  },
-  sectionTitle: {
-    marginBottom: spacing.md,
-  },
-  groupedCard: {
-    paddingVertical: 0,
-    paddingHorizontal: 0,
-    overflow: 'hidden',
-  },
-
-  // Settings row styles
-  settingsRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingLeft: spacing.md,
-    minHeight: 48,
-  },
-  settingsIconContainer: {
-    width: 30,
-    height: 30,
-    borderRadius: 7,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  settingsContent: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: spacing.sm,
-    paddingRight: spacing.md,
-    marginLeft: spacing.md,
-  },
-  settingsLabel: {
-    flex: 1,
-  },
-  settingsRight: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xs,
-  },
-  settingsValue: {
-    marginRight: spacing.xs,
-  },
-
-  // Stats
-  statsContainer: {
-    flexDirection: 'row',
-    gap: spacing.sm,
-    marginBottom: spacing.sm,
-  },
-  statBox: {
-    flex: 1,
-    alignItems: 'center',
-    paddingVertical: spacing.md,
-    borderRadius: borderRadius.lg,
-  },
-
-  // Footer
-  footer: {
-    marginTop: spacing.md,
-    marginHorizontal: spacing.md,
-    textAlign: 'center',
-    lineHeight: 18,
-  },
-
-  // Bottom padding
-  bottomPadding: {
-    height: spacing.xxl,
-  },
-
-  // Disclaimer box
-  disclaimerBox: {
-    padding: spacing.md,
-    borderRadius: borderRadius.lg,
-    marginBottom: spacing.sm,
-  },
-  disclaimerHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: spacing.xs,
-  },
-  disclaimerText: {
-    lineHeight: 18,
-  },
-});

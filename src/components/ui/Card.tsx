@@ -13,7 +13,7 @@ const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 interface CardProps extends ViewProps {
   variant?: 'elevated' | 'outlined' | 'flat';
-  padding?: 'sm' | 'md' | 'lg';
+  padding?: 'none' | 'sm' | 'md' | 'lg';
   onPress?: () => void;
 }
 
@@ -51,6 +51,7 @@ export function Card({
   };
 
   const paddingValue = {
+    none: 0,
     sm: spacing.sm,
     md: spacing.md,
     lg: spacing.lg,

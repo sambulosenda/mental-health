@@ -6,6 +6,8 @@ import { BreathingStep } from './steps/BreathingStep';
 import { TimedSpeechStep } from './steps/TimedSpeechStep';
 import { MeditationTimerStep } from './steps/MeditationTimerStep';
 import { AudioSleepStep } from './steps/AudioSleepStep';
+import { AudioMeditationStep } from './steps/AudioMeditationStep';
+import { hasMeditationAudio } from '@/src/lib/meditation/meditationVoice';
 import type { ExerciseStep as ExerciseStepType, MoodValue } from '@/src/types/exercise';
 
 interface ExerciseStepProps {
@@ -14,6 +16,7 @@ interface ExerciseStepProps {
   onChange: (value: string | string[]) => void;
   onBreathingComplete?: () => void;
   accentColor?: string;
+  templateId?: string;
 }
 
 // For mood steps (before/after)
@@ -29,6 +32,7 @@ export function ExerciseStepRenderer({
   onChange,
   onBreathingComplete,
   accentColor,
+  templateId,
 }: ExerciseStepProps) {
   switch (step.type) {
     case 'instruction':
@@ -65,6 +69,17 @@ export function ExerciseStepRenderer({
       );
 
     case 'timed_speech':
+      // Use pre-recorded audio if available for this meditation
+      if (templateId && hasMeditationAudio(templateId)) {
+        return (
+          <AudioMeditationStep
+            step={step}
+            meditationId={templateId}
+            onComplete={onBreathingComplete || (() => {})}
+            accentColor={accentColor}
+          />
+        );
+      }
       return (
         <TimedSpeechStep
           step={step}
