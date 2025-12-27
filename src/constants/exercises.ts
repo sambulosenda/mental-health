@@ -1,4 +1,5 @@
 import type { ExerciseTemplate } from '@/src/types/exercise';
+import { BREATHING_TECHNIQUES } from './breathingTechniques';
 
 /**
  * Research Citations for Wellness Exercises
@@ -115,6 +116,129 @@ export const EXERCISE_TEMPLATES: ExerciseTemplate[] = [
         title: 'Reflection',
         content: 'How do you feel after the breathing exercise? Notice any changes in your body or mind.',
         placeholder: 'I feel more calm and centered...',
+        required: false,
+      },
+    ],
+  },
+
+  // 4-7-8 Relaxation Breathing (PREMIUM)
+  {
+    id: '4-7-8-breathing',
+    type: 'breathing',
+    category: 'breathing',
+    name: '4-7-8 Relaxation',
+    description: "Dr. Weil's breathing technique for sleep and anxiety relief",
+    duration: 5,
+    icon: 'moon-outline',
+    color: '#6366F1',
+    isPremium: true,
+    steps: [
+      {
+        id: 'intro',
+        type: 'instruction',
+        title: 'The Relaxing Breath',
+        content: "The 4-7-8 breathing technique was developed by Dr. Andrew Weil. It's based on an ancient yogic practice called pranayama.\n\nThis pattern acts as a natural tranquilizer for the nervous system. The longer exhale activates your body's relaxation response.",
+        required: false,
+      },
+      {
+        id: 'breathing',
+        type: 'breathing',
+        title: '4-7-8 Breathing',
+        content: 'Breathe in for 4 seconds, hold for 7 seconds, then exhale slowly for 8 seconds.',
+        duration: 180, // 3 minutes of breathing
+        breathingConfig: BREATHING_TECHNIQUES['4-7-8-relaxation'],
+        enableVoiceGuidance: true,
+        enableHaptics: true,
+        required: true,
+      },
+      {
+        id: 'reflection',
+        type: 'text_input',
+        title: 'Reflection',
+        content: 'How do you feel after the 4-7-8 breathing? Notice any changes in your body, especially tension release.',
+        placeholder: 'I notice...',
+        required: false,
+      },
+    ],
+  },
+
+  // Coherent Breathing (PREMIUM)
+  {
+    id: 'coherent-breathing',
+    type: 'breathing',
+    category: 'breathing',
+    name: 'Coherent Breathing',
+    description: 'Optimize heart rate variability with balanced 5-second rhythms',
+    duration: 5,
+    icon: 'pulse-outline',
+    color: '#10B981',
+    isPremium: true,
+    steps: [
+      {
+        id: 'intro',
+        type: 'instruction',
+        title: 'Heart-Brain Harmony',
+        content: "Coherent breathing at 5 breaths per minute (5 seconds in, 5 seconds out) has been shown to optimize heart rate variability (HRV).\n\nHigher HRV is associated with better stress resilience, emotional regulation, and overall health. This rhythm brings your heart and brain into sync.",
+        required: false,
+      },
+      {
+        id: 'breathing',
+        type: 'breathing',
+        title: 'Coherent Breathing',
+        content: 'Breathe in for 5 seconds, then out for 5 seconds. Find a smooth, effortless rhythm.',
+        duration: 180, // 3 minutes of breathing
+        breathingConfig: BREATHING_TECHNIQUES['coherent-breathing'],
+        enableVoiceGuidance: true,
+        enableHaptics: true,
+        required: true,
+      },
+      {
+        id: 'reflection',
+        type: 'text_input',
+        title: 'Reflection',
+        content: 'How does your body feel after coherent breathing? Notice your heart rate and overall sense of calm.',
+        placeholder: 'My body feels...',
+        required: false,
+      },
+    ],
+  },
+
+  // Energizing Breath (PREMIUM)
+  {
+    id: 'energizing-breath',
+    type: 'breathing',
+    category: 'breathing',
+    name: 'Energizing Breath',
+    description: 'Quick rhythmic breathing for energy boost and focus',
+    duration: 2,
+    icon: 'flash-outline',
+    color: '#F59E0B',
+    isPremium: true,
+    steps: [
+      {
+        id: 'intro',
+        type: 'instruction',
+        title: 'Wake Up Your System',
+        content: "This quick breathing exercise uses rapid, rhythmic breaths to boost your energy and alertness.\n\nUnlike calming techniques, this exercise is designed to energize. It's perfect for when you need a natural pick-me-up without caffeine.",
+        required: false,
+      },
+      {
+        id: 'breathing',
+        type: 'breathing',
+        title: 'Energizing Breath',
+        content: 'Quick breaths: 1 second in, 1 second out. Keep the rhythm steady and strong.',
+        duration: 60, // 1 minute of energizing breath
+        breathingConfig: BREATHING_TECHNIQUES['energizing-breath'],
+        enableVoiceGuidance: false, // Voice would be too slow for rapid breathing
+        enableHaptics: true,
+        required: true,
+      },
+      {
+        id: 'reflection',
+        type: 'text_input',
+        title: 'Reflection',
+        content: 'How do you feel now? Notice any changes in your energy level or mental clarity.',
+        placeholder: 'I feel more...',
         required: false,
       },
     ],
