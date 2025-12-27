@@ -26,7 +26,7 @@ export const AUDIO_PATHS = {
 
 // Image file paths
 export const IMAGE_PATHS = {
-  sleepStories: `${CDN_BASE_URL}/sleep-stories/images`,
+  sleepStories: `${CDN_BASE_URL}/sleep-stories/thumbnails`,
 } as const;
 
 /**
@@ -57,5 +57,5 @@ export function getMeditationAudioUrl(meditationId: string): string {
  * Uses story ID as image filename (e.g., sleep-forest-path.png)
  */
 export function getSleepStoryImageUrl(storyId: string): string {
-  return `${IMAGE_PATHS.sleepStories}/${storyId}.png`;
+  return `${IMAGE_PATHS.sleepStories}/${storyId}.webp`;
 }

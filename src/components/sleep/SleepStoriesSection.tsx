@@ -160,7 +160,17 @@ export function SleepStoriesSection({ maxStories = 8 }: SleepStoriesSectionProps
             </Text>
           </View>
         </View>
-        <Ionicons name="moon" size={16} color={themeColors.primary} />
+        <Pressable
+          onPress={() => router.push('/sleep-stories')}
+          className="flex-row items-center gap-1"
+          accessibilityLabel="See all sleep stories"
+          accessibilityRole="link"
+        >
+          <Text variant="caption" style={{ color: themeColors.primary }}>
+            See All
+          </Text>
+          <Ionicons name="chevron-forward" size={14} color={themeColors.primary} />
+        </Pressable>
       </View>
 
       {isEvening && (
