@@ -24,6 +24,11 @@ export const AUDIO_PATHS = {
   meditations: `${CDN_BASE_URL}/meditations`,
 } as const;
 
+// Image file paths
+export const IMAGE_PATHS = {
+  sleepStories: `${CDN_BASE_URL}/sleep-stories/images`,
+} as const;
+
 /**
  * Get the full audio URL for a sleep story
  */
@@ -45,4 +50,12 @@ export function getBreathingCueAudioUrl(cueId: string): string {
  */
 export function getMeditationAudioUrl(meditationId: string): string {
   return `${AUDIO_PATHS.meditations}/${meditationId}.mp3`;
+}
+
+/**
+ * Get the full image URL for a sleep story
+ * Uses story ID as image filename (e.g., sleep-forest-path.png)
+ */
+export function getSleepStoryImageUrl(storyId: string): string {
+  return `${IMAGE_PATHS.sleepStories}/${storyId}.png`;
 }

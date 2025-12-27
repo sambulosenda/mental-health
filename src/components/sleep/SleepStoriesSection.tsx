@@ -1,10 +1,12 @@
-import { useMemo } from 'react';
-import { View, Pressable, ScrollView } from 'react-native';
+import { useMemo, useState } from 'react';
+import { View, Pressable, ScrollView, Image } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import { Text } from '@/src/components/ui';
 import { SLEEP_STORY_TEMPLATES } from '@/src/constants/sleepStories';
+import { getSleepStoryImageUrl } from '@/src/constants/cdnConfig';
 import { colors, darkColors, spacing } from '@/src/constants/theme';
 import { useTheme } from '@/src/contexts/ThemeContext';
 import { useSubscriptionStore } from '@/src/stores';
@@ -20,6 +22,8 @@ interface SleepStoryCardProps {
 function SleepStoryCard({ story, themeColors, isPremiumUser, onPress }: SleepStoryCardProps) {
   const accentColor = story.color || '#6366f1';
   const isLocked = story.isPremium && !isPremiumUser;
+  const [imageError, setImageError] = useState(false);
+  const imageUrl = getSleepStoryImageUrl(story.id);
 
   const handlePress = async () => {
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -36,31 +40,48 @@ function SleepStoryCard({ story, themeColors, isPremiumUser, onPress }: SleepSto
         opacity: isLocked ? 0.85 : 1,
       }}
     >
-      {/* Header with accent color */}
-      <View
-        className="h-20 items-center justify-center relative"
-        style={{ backgroundColor: `${accentColor}15` }}
-      >
-        <View
-          className="w-12 h-12 rounded-full items-center justify-center"
-          style={{ backgroundColor: `${accentColor}25` }}
-        >
-          <Ionicons name="moon-outline" size={24} color={accentColor} />
-        </View>
+      {/* Image header with gradient overlay */}
+      <View className="h-24 relative">
+        {!imageError ? (
+          <Image
+            source={{ uri: imageUrl }}
+            className="w-full h-full"
+            resizeMode="cover"
+            onError={() => setImageError(true)}
+          />
+        ) : (
+          // Fallback to accent color with icon
+          <View
+            className="w-full h-full items-center justify-center"
+            style={{ backgroundColor: `${accentColor}20` }}
+          >
+            <Ionicons name="moon-outline" size={32} color={accentColor} />
+          </View>
+        )}
+
+        {/* Gradient overlay for badges */}
+        <LinearGradient
+          colors={['rgba(0,0,0,0.4)', 'transparent']}
+          className="absolute top-0 left-0 right-0 h-10"
+        />
+
+        {/* Lock badge */}
         {isLocked && (
           <View
             className="absolute top-2 right-2 w-5 h-5 rounded-full items-center justify-center"
-            style={{ backgroundColor: themeColors.warning }}
+            style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
           >
             <Ionicons name="lock-closed" size={10} color="#fff" />
           </View>
         )}
+
+        {/* Free badge */}
         {!story.isPremium && (
           <View
             className="absolute top-2 left-2 px-2 py-0.5 rounded-full"
-            style={{ backgroundColor: `${themeColors.success}20` }}
+            style={{ backgroundColor: 'rgba(16,185,129,0.9)' }}
           >
-            <Text variant="label" style={{ color: themeColors.success, fontSize: 9 }}>
+            <Text variant="label" style={{ color: '#fff', fontSize: 9 }}>
               FREE
             </Text>
           </View>
@@ -72,10 +93,7 @@ function SleepStoryCard({ story, themeColors, isPremiumUser, onPress }: SleepSto
         <Text variant="bodyMedium" color="textPrimary" numberOfLines={1}>
           {story.name}
         </Text>
-        <Text variant="caption" color="textMuted" numberOfLines={2} className="mt-1">
-          {story.description}
-        </Text>
-        <View className="flex-row items-center mt-2 gap-1">
+        <View className="flex-row items-center mt-1.5 gap-1">
           <Ionicons name="time-outline" size={12} color={themeColors.textMuted} />
           <Text variant="caption" color="textMuted">
             {story.duration} min

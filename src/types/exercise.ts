@@ -106,6 +106,7 @@ export interface ExerciseTemplate {
   icon?: string;                 // Ionicons name
   color?: string;                // Accent color
   isPremium?: boolean;           // Whether this exercise requires premium
+  image?: string;                // Image ID for featured image (e.g., sleep stories)
 }
 
 // Session status
