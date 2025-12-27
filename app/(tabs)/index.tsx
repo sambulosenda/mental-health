@@ -8,6 +8,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { Text, Card, AnimatedHeader, NativeGauge } from '@/src/components/ui';
 import { MoodAnimation } from '@/src/components/mood';
 import { InterventionPicker } from '@/src/components/interventions/InterventionPicker';
+import { SleepStoriesSection } from '@/src/components/sleep';
 import { StreakCard, BadgeCelebration } from '@/src/components/gamification';
 import { useMoodStore, useSubscriptionStore } from '@/src/stores';
 import { useGamificationStore } from '@/src/stores/useGamificationStore';
@@ -194,6 +195,11 @@ export default function HomeScreen() {
               </View>
             </Card>
           </View>
+        </View>
+
+        {/* Sleep Stories Section */}
+        <View className="mb-6">
+          <SleepStoriesSection maxStories={6} />
         </View>
 
         {/* Crisis Support - Quick Access */}
