@@ -29,7 +29,9 @@
       "Bash(git -C /Users/sambulosenda/Documents/zen-mobile-app diff app/_layout.tsx src/components/navigation/TransitionStack.tsx app/\\(modals\\)/_layout.tsx --stat)",
       "Bash(git -C /Users/sambulosenda/Documents/zen-mobile-app diff --stat -- app/_layout.tsx \"app/(modals)/_layout.tsx\" src/components/navigation/TransitionStack.tsx)",
       "Bash(git -C /Users/sambulosenda/Documents/zen-mobile-app add app/_layout.tsx \"app/(modals)/_layout.tsx\" src/components/navigation/TransitionStack.tsx)",
-      "Bash(git -C /Users/sambulosenda/Documents/zen-mobile-app commit:*)"
+      "Bash(git -C /Users/sambulosenda/Documents/zen-mobile-app commit:*)",
+      "Bash(git add:*)",
+      "Bash(gt create:*)"
     ],
     "deny": [],
     "ask": []

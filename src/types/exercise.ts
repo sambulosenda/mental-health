@@ -14,7 +14,14 @@ export type ExerciseCategory =
   | 'goals'
   | 'mindfulness_basics'
   | 'sleep_relaxation'
-  | 'anxiety_stress';
+  | 'anxiety_stress'
+  // Sleep story categories
+  | 'sleep_nature'
+  | 'sleep_fantasy'
+  | 'sleep_cozy'
+  | 'sleep_travel'
+  | 'sleep_guided'
+  | 'sleep_celestial';
 
 // Step types for different exercise interactions
 export type ExerciseStepType =
