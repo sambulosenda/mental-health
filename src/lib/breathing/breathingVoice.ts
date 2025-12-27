@@ -1,26 +1,63 @@
-import { speakText, stopSpeaking } from '@/src/lib/meditation/speechService';
-import type { VoiceConfig } from '@/src/types/exercise';
+import { Audio } from 'expo-av';
+import { getBreathingCueAudioUrl } from '@/src/constants/cdnConfig';
 
-// Calm, slow voice configuration for breathing exercises
-const BREATHING_VOICE_CONFIG: VoiceConfig = {
-  rate: 0.85,
-  pitch: 0.95,
-  language: 'en-US',
+// Map voice cue text to audio file IDs
+const CUE_TO_AUDIO_ID: Record<string, string> = {
+  'Breathe in': 'breathe-in',
+  'Breathe in slowly': 'breathe-in-slowly',
+  'Hold': 'hold',
+  'Breathe out': 'breathe-out',
+  'Release slowly': 'release-slowly',
+  'In': 'in',
+  'Out': 'out',
 };
 
+let currentSound: Audio.Sound | null = null;
+
 /**
- * Speak a breathing cue with calm voice settings
- * @param cue - The text to speak (e.g., "Breathe in", "Hold")
- * @param config - Optional voice config overrides
+ * Play a pre-recorded breathing cue audio
+ * @param cue - The cue text (e.g., "Breathe in", "Hold")
  */
-export async function speakBreathCue(
-  cue: string,
-  config?: Partial<VoiceConfig>
-): Promise<void> {
+export async function speakBreathCue(cue: string): Promise<void> {
   try {
-    await speakText(cue, { ...BREATHING_VOICE_CONFIG, ...config });
+    // Stop any currently playing cue
+    await stopBreathCue();
+
+    // Find matching audio file
+    const audioId = CUE_TO_AUDIO_ID[cue];
+    if (!audioId) {
+      // No matching audio for this cue - skip silently
+      return;
+    }
+
+    const audioUrl = getBreathingCueAudioUrl(audioId);
+
+    // Configure audio for foreground playback
+    await Audio.setAudioModeAsync({
+      playsInSilentModeIOS: true,
+      staysActiveInBackground: false,
+      shouldDuckAndroid: true,
+    });
+
+    // Load and play
+    const { sound } = await Audio.Sound.createAsync(
+      { uri: audioUrl },
+      { shouldPlay: true }
+    );
+
+    currentSound = sound;
+
+    // Auto-unload when done
+    sound.setOnPlaybackStatusUpdate((status) => {
+      if (status.isLoaded && status.didJustFinish) {
+        sound.unloadAsync().catch(() => {});
+        if (currentSound === sound) {
+          currentSound = null;
+        }
+      }
+    });
   } catch {
-    // Voice is an optional enhancement - fail silently
+    // Audio is an optional enhancement - fail silently
     // User can still follow visual cues
   }
 }
@@ -28,13 +65,37 @@ export async function speakBreathCue(
 /**
  * Stop any currently playing breath cue
  */
-export function stopBreathCue(): void {
-  stopSpeaking();
+export async function stopBreathCue(): Promise<void> {
+  if (currentSound) {
+    try {
+      await currentSound.stopAsync();
+      await currentSound.unloadAsync();
+    } catch {
+      // Best effort cleanup
+    }
+    currentSound = null;
+  }
 }
 
 /**
- * Get the default breathing voice configuration
+ * Audio files needed for breathing cues:
+ * Upload these to R2 CDN at /breathing-cues/
+ *
+ * Files needed:
+ * - breathe-in.mp3        ("Breathe in")
+ * - breathe-in-slowly.mp3 ("Breathe in slowly")
+ * - hold.mp3              ("Hold")
+ * - breathe-out.mp3       ("Breathe out")
+ * - release-slowly.mp3    ("Release slowly")
+ * - in.mp3                ("In")
+ * - out.mp3               ("Out")
  */
-export function getBreathingVoiceConfig(): VoiceConfig {
-  return { ...BREATHING_VOICE_CONFIG };
-}
+export const BREATHING_CUE_FILES = [
+  { id: 'breathe-in', text: 'Breathe in' },
+  { id: 'breathe-in-slowly', text: 'Breathe in slowly' },
+  { id: 'hold', text: 'Hold' },
+  { id: 'breathe-out', text: 'Breathe out' },
+  { id: 'release-slowly', text: 'Release slowly' },
+  { id: 'in', text: 'In' },
+  { id: 'out', text: 'Out' },
+];

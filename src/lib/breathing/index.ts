@@ -7,5 +7,5 @@ export {
 export {
   speakBreathCue,
   stopBreathCue,
-  getBreathingVoiceConfig,
+  BREATHING_CUE_FILES,
 } from './breathingVoice';

@@ -20,6 +20,7 @@ export const CDN_BASE_URL = 'https://pub-cd0bdc36c3ae4d86ac2b9bdaa9b15b48.r2.dev
 // Audio file paths
 export const AUDIO_PATHS = {
   sleepStories: `${CDN_BASE_URL}/sleep-stories`,
+  breathingCues: `${CDN_BASE_URL}/breathing-cues`,
 } as const;
 
 /**
@@ -27,4 +28,12 @@ export const AUDIO_PATHS = {
  */
 export function getSleepStoryAudioUrl(storyId: string): string {
   return `${AUDIO_PATHS.sleepStories}/${storyId}.mp3`;
+}
+
+/**
+ * Get the full audio URL for a breathing cue
+ * Cue IDs: breathe-in, breathe-in-slowly, hold, breathe-out, release-slowly, in, out
+ */
+export function getBreathingCueAudioUrl(cueId: string): string {
+  return `${AUDIO_PATHS.breathingCues}/${cueId}.mp3`;
 }
