@@ -1,13 +1,61 @@
-import type { ExerciseTemplate } from '@/src/types/exercise';
+import type { ExerciseTemplate, ExerciseStep } from '@/src/types/exercise';
+import { getSleepStoryAudioUrl } from './cdnConfig';
 
-// Voice configuration presets for sleep stories
+// Voice configuration presets for sleep stories (TTS fallback)
 const VOICE_CONFIG = {
   intro: { rate: 0.6, pitch: 0.9 },
   story: { rate: 0.55, pitch: 0.88 },
   drift: { rate: 0.5, pitch: 0.85 },
 };
 
-export const SLEEP_STORY_TEMPLATES: ExerciseTemplate[] = [
+/**
+ * AUDIO TOGGLE
+ * Set to true once you have:
+ * 1. Generated audio files using scripts/generate-audio.ts
+ * 2. Uploaded them to your CDN
+ * 3. Updated CDN_BASE_URL in src/constants/cdnConfig.ts
+ */
+const USE_AUDIO = false;
+
+/**
+ * Transforms sleep story templates to use audio when enabled.
+ * Wraps all TTS steps into a single audio_story step.
+ */
+function withAudioSupport(templates: ExerciseTemplate[]): ExerciseTemplate[] {
+  if (!USE_AUDIO) {
+    return templates;
+  }
+
+  return templates.map((template) => {
+    // Only transform sleep stories (categories starting with 'sleep_')
+    if (!template.category.startsWith('sleep_')) {
+      return template;
+    }
+
+    const audioUrl = getSleepStoryAudioUrl(template.id);
+
+    // Combine all speech segments for TTS fallback
+    const allSegments = template.steps.flatMap((step) => step.speechSegments || []);
+
+    const audioStep: ExerciseStep = {
+      id: 'audio',
+      type: 'audio_story',
+      title: template.name,
+      content: template.description,
+      audioUrl,
+      speechSegments: allSegments,
+      voiceConfig: VOICE_CONFIG.story,
+      required: true,
+    };
+
+    return {
+      ...template,
+      steps: [audioStep],
+    };
+  });
+}
+
+const RAW_SLEEP_STORY_TEMPLATES: ExerciseTemplate[] = [
   // ============================================
   // SLEEP_NATURE - Forest Path (FREE)
   // ============================================
@@ -3044,3 +3092,6 @@ export const SLEEP_STORY_TEMPLATES: ExerciseTemplate[] = [
     ],
   },
 ];
+
+// Apply audio transformation when USE_AUDIO is enabled
+export const SLEEP_STORY_TEMPLATES = withAudioSupport(RAW_SLEEP_STORY_TEMPLATES);
