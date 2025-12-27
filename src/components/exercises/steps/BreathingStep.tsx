@@ -1,6 +1,5 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect } from 'react';
 import { View, Pressable } from 'react-native';
-import * as Haptics from 'expo-haptics';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -12,7 +11,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { Text, Button } from '@/src/components/ui';
 import { colors, darkColors } from '@/src/constants/theme';
 import { useTheme } from '@/src/contexts/ThemeContext';
-import type { ExerciseStep } from '@/src/types/exercise';
+import { useBreathing, DEFAULT_BREATHING_CONFIG } from '@/src/hooks/useBreathing';
+import type { ExerciseStep, BreathingPhase } from '@/src/types/exercise';
 
 interface BreathingStepProps {
   step: ExerciseStep;
@@ -20,123 +20,75 @@ interface BreathingStepProps {
   accentColor?: string;
 }
 
-type BreathingPhase = 'inhale' | 'hold-in' | 'exhale' | 'hold-out';
-
-const PHASE_DURATION = 4000; // 4 seconds per phase
-const PHASES: BreathingPhase[] = ['inhale', 'hold-in', 'exhale', 'hold-out'];
-const PHASE_LABELS: Record<BreathingPhase, string> = {
-  'inhale': 'Breathe In',
-  'hold-in': 'Hold',
-  'exhale': 'Breathe Out',
-  'hold-out': 'Hold',
-};
-
 export function BreathingStep({ step, onComplete, accentColor }: BreathingStepProps) {
   const { isDark } = useTheme();
   const themeColors = isDark ? darkColors : colors;
   const color = accentColor || themeColors.primary;
 
-  const [isRunning, setIsRunning] = useState(false);
-  const [phase, setPhase] = useState<BreathingPhase>('inhale');
-  const [cyclesCompleted, setCyclesCompleted] = useState(0);
-  const [secondsLeft, setSecondsLeft] = useState(4);
+  // Use config from step or fall back to default box breathing
+  const config = step.breathingConfig || DEFAULT_BREATHING_CONFIG;
+  const totalDuration = step.duration || 120;
+  const enableVoice = step.enableVoiceGuidance ?? false;
+  const enableHaptics = step.enableHaptics ?? true;
 
-  const totalDuration = step.duration || 120; // default 2 minutes
-  // Ensure at least 1 cycle even if duration < 16
-  const totalCycles = Math.max(1, Math.floor(totalDuration / 16)); // 16 seconds per full box cycle
+  const {
+    isRunning,
+    currentPhase,
+    phaseSecondsLeft,
+    cyclesCompleted,
+    totalCycles,
+    start,
+    stop,
+  } = useBreathing({
+    config,
+    totalDurationSeconds: totalDuration,
+    enableVoice,
+    enableHaptics,
+    onComplete,
+  });
 
   const scale = useSharedValue(1);
   const opacity = useSharedValue(0.3);
 
-  const updatePhase = useCallback((newPhase: BreathingPhase) => {
-    setPhase(newPhase);
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-  }, []);
-
-  const incrementCycle = useCallback(() => {
-    setCyclesCompleted(prev => prev + 1);
-  }, []);
-
-  useEffect(() => {
-    if (!isRunning) return;
-
-    let phaseIndex = 0;
-    let secondsInPhase = 4;
-
-    // Countdown timer
-    const countdownInterval = setInterval(() => {
-      secondsInPhase -= 1;
-      if (secondsInPhase > 0) {
-        setSecondsLeft(secondsInPhase);
-      } else {
-        secondsInPhase = 4;
-        setSecondsLeft(4);
-        phaseIndex = (phaseIndex + 1) % 4;
-        updatePhase(PHASES[phaseIndex]);
-
-        // Completed a full cycle
-        if (phaseIndex === 0) {
-          incrementCycle();
-        }
-      }
-    }, 1000);
-
-    return () => {
-      clearInterval(countdownInterval);
-    };
-  }, [isRunning, updatePhase, incrementCycle]);
+  // Get current phase duration for animation
+  const phaseDurationMs = (currentPhase?.durationSeconds || 4) * 1000;
 
   // Animate the circle based on phase
   useEffect(() => {
-    if (!isRunning) {
-      scale.value = 1;
-      opacity.value = 0.3;
+    if (!isRunning || !currentPhase) {
+      scale.value = withTiming(1, { duration: 300 });
+      opacity.value = withTiming(0.3, { duration: 300 });
       return;
     }
 
-    switch (phase) {
+    const phaseName = currentPhase.name as BreathingPhase;
+
+    switch (phaseName) {
       case 'inhale':
-        scale.value = withTiming(1.5, { duration: PHASE_DURATION, easing: Easing.inOut(Easing.ease) });
-        opacity.value = withTiming(0.6, { duration: PHASE_DURATION });
+        scale.value = withTiming(1.5, { duration: phaseDurationMs, easing: Easing.inOut(Easing.ease) });
+        opacity.value = withTiming(0.6, { duration: phaseDurationMs });
         break;
       case 'hold-in':
-        // Hold at expanded
+        // Hold at expanded - no animation change
         break;
       case 'exhale':
-        scale.value = withTiming(1, { duration: PHASE_DURATION, easing: Easing.inOut(Easing.ease) });
-        opacity.value = withTiming(0.3, { duration: PHASE_DURATION });
+        scale.value = withTiming(1, { duration: phaseDurationMs, easing: Easing.inOut(Easing.ease) });
+        opacity.value = withTiming(0.3, { duration: phaseDurationMs });
         break;
       case 'hold-out':
-        // Hold at contracted
+        // Hold at contracted - no animation change
         break;
     }
 
-    // Cleanup animations on unmount or when isRunning changes
     return () => {
       cancelAnimation(scale);
       cancelAnimation(opacity);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [phase, isRunning]);
-
-  // Check if exercise is complete
-  useEffect(() => {
-    if (cyclesCompleted >= totalCycles && isRunning) {
-      setIsRunning(false);
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    }
-  }, [cyclesCompleted, totalCycles, isRunning]);
-
-  const handleStart = () => {
-    setIsRunning(true);
-    setCyclesCompleted(0);
-    setPhase('inhale');
-    setSecondsLeft(4);
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-  };
+  }, [currentPhase, isRunning, phaseDurationMs]);
 
   const handleStop = () => {
-    setIsRunning(false);
+    stop();
     cancelAnimation(scale);
     cancelAnimation(opacity);
     scale.value = withTiming(1);
@@ -152,7 +104,7 @@ export function BreathingStep({ step, onComplete, accentColor }: BreathingStepPr
     transform: [{ scale: scale.value * 1.2 }],
   }));
 
-  const isComplete = cyclesCompleted >= totalCycles;
+  const isComplete = cyclesCompleted >= totalCycles && !isRunning;
 
   return (
     <View className="flex-1 items-center justify-center px-6">
@@ -179,7 +131,7 @@ export function BreathingStep({ step, onComplete, accentColor }: BreathingStepPr
           {isRunning ? (
             <View className="items-center">
               <Text variant="h1" style={{ color: 'white', fontSize: 40 }}>
-                {secondsLeft}
+                {phaseSecondsLeft}
               </Text>
             </View>
           ) : isComplete ? (
@@ -191,9 +143,9 @@ export function BreathingStep({ step, onComplete, accentColor }: BreathingStepPr
       </View>
 
       {/* Phase label */}
-      {isRunning && (
+      {isRunning && currentPhase && (
         <Text variant="h3" color="textPrimary" center className="mb-2">
-          {PHASE_LABELS[phase]}
+          {currentPhase.label}
         </Text>
       )}
 
@@ -208,7 +160,7 @@ export function BreathingStep({ step, onComplete, accentColor }: BreathingStepPr
 
       {/* Controls */}
       {!isRunning && !isComplete && (
-        <Button onPress={handleStart} style={{ backgroundColor: color }}>
+        <Button onPress={start} style={{ backgroundColor: color }}>
           Start Breathing
         </Button>
       )}
