@@ -4,3 +4,8 @@ generated-audio/
 
 # Wrangler local state
 .wrangler/
+# Generated audio files
+generated-audio/
+
+# Wrangler local state
+.wrangler/
