@@ -1,6 +1,25 @@
 // Exercise types (wellness-focused)
 export type ExerciseTherapyType = 'reflection' | 'breathing' | 'mindfulness' | 'gratitude' | 'meditation';
 
+// Breathing exercise types
+export type BreathingPhase = 'inhale' | 'hold-in' | 'exhale' | 'hold-out';
+export type HapticPatternType = 'ascending' | 'descending' | 'steady' | 'pulse' | 'single';
+
+export interface BreathingPhaseConfig {
+  name: BreathingPhase;
+  durationSeconds: number;
+  label: string;
+  voiceCue?: string;
+  hapticPattern?: HapticPatternType;
+}
+
+export interface BreathingConfig {
+  id: string;
+  name: string;
+  phases: BreathingPhaseConfig[];
+  description?: string;
+}
+
 // Exercise categories
 export type ExerciseCategory =
   | 'thought_record'
@@ -69,6 +88,10 @@ export interface ExerciseStep {
   visualType?: 'breathing' | 'expanding_circle' | 'wave'; // For guided_visual
   // Audio story properties (pre-recorded audio)
   audioUrl?: string;             // CDN URL for audio file
+  // Breathing exercise properties
+  breathingConfig?: BreathingConfig;
+  enableVoiceGuidance?: boolean;
+  enableHaptics?: boolean;
 }
 
 // Exercise template (definition)
