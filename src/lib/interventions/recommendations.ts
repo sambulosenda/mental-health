@@ -1,9 +1,10 @@
 import { EXERCISE_TEMPLATES } from '@/src/constants/exercises';
 import { MEDITATION_TEMPLATES } from '@/src/constants/meditations';
+import { SLEEP_STORY_TEMPLATES } from '@/src/constants/sleepStories';
 import type { ExerciseTemplate } from '@/src/types/exercise';
 
 // Combine all templates
-const ALL_TEMPLATES = [...EXERCISE_TEMPLATES, ...MEDITATION_TEMPLATES];
+const ALL_TEMPLATES = [...EXERCISE_TEMPLATES, ...MEDITATION_TEMPLATES, ...SLEEP_STORY_TEMPLATES];
 
 export interface InterventionRecommendation {
   template: ExerciseTemplate;
@@ -35,7 +36,10 @@ const ACTIVITY_EXERCISE_MAP: Record<string, string[]> = {
   anxious: ['calming-anxiety', 'grounding-meditation', 'grounding-54321', 'box-breathing'],
   stressed: ['breath-awareness-5min', 'box-breathing', 'body-scan-10min', 'worry-dump'],
   work: ['worry-dump', 'breath-awareness-5min', 'thought-record', 'quick-goal'],
-  sleep: ['sleep-relaxation', 'body-scan-10min', 'box-breathing'],
+  sleep: ['sleep-forest-path', 'sleep-cloud-float', 'sleep-body-release', 'sleep-relaxation', 'body-scan-10min'],
+  bedtime: ['sleep-forest-path', 'sleep-rainy-window', 'sleep-cloud-float', 'sleep-body-release'],
+  insomnia: ['sleep-body-release', 'sleep-counting-down', 'sleep-mind-quieting', 'sleep-breath-journey'],
+  restless: ['sleep-cloud-float', 'sleep-train-journey', 'sleep-river-boat', 'body-scan-10min'],
   social: ['thought-record', 'self-compassion', 'calming-anxiety'],
   sad: ['self-compassion', 'calming-anxiety', 'body-scan-10min', 'gratitude-list'],
   tired: ['breath-awareness-5min', 'body-scan-10min', 'box-breathing'],
@@ -108,6 +112,52 @@ const EXERCISE_REASONS: Record<string, Record<string, string>> = {
     mood: 'Brings you to the present',
     activity: 'Reconnects you to now',
     effectiveness: 'Effective grounding practice',
+  },
+  // Sleep story reasons
+  'sleep-forest-path': {
+    mood: 'A peaceful journey into sleep',
+    activity: 'Perfect for winding down',
+    effectiveness: 'Helps you drift off naturally',
+  },
+  'sleep-cloud-float': {
+    mood: 'Float away from your worries',
+    activity: 'Gentle relaxation for bedtime',
+    effectiveness: 'Soothes you to sleep',
+  },
+  'sleep-rainy-window': {
+    mood: 'Cozy comfort for restless nights',
+    activity: 'Calming for bedtime',
+    effectiveness: 'Creates a peaceful space',
+  },
+  'sleep-body-release': {
+    mood: 'Release tension for better sleep',
+    activity: 'Relaxes your whole body',
+    effectiveness: 'Proven to help you sleep',
+  },
+  'sleep-counting-down': {
+    mood: 'A classic technique for sleep',
+    activity: 'Quiets a busy mind',
+    effectiveness: 'Works well for insomnia',
+  },
+  'sleep-mind-quieting': {
+    mood: 'Let go of racing thoughts',
+    activity: 'Calms an overactive mind',
+    effectiveness: 'Helps you find peace',
+  },
+  'sleep-breath-journey': {
+    mood: 'Follow your breath to sleep',
+    activity: 'Gentle breathing practice',
+    effectiveness: 'Naturally induces sleep',
+  },
+  'sleep-train-journey': {
+    mood: 'A soothing journey to rest',
+    activity: 'Gentle motion to sleep',
+    effectiveness: 'Rocks you to sleep',
+  },
+  'sleep-river-boat': {
+    mood: 'Drift away on gentle waters',
+    activity: 'Peaceful nighttime journey',
+    effectiveness: 'Calms restless nights',
   },
 };
 
