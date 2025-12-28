@@ -36,7 +36,7 @@ const AnimatedScrollView = Animated.createAnimatedComponent(ScrollView);
 
 function ChatScreenContent() {
   const router = useRouter();
-  const params = useLocalSearchParams<{ type?: string }>();
+  const params = useLocalSearchParams<{ type?: string; context?: string }>();
   const { isDark } = useTheme();
   const themeColors = isDark ? darkColors : colors;
   const scrollViewRef = useAnimatedRef<Animated.ScrollView>();
@@ -67,6 +67,7 @@ function ChatScreenContent() {
 
   const type: ConversationType = (params.type as ConversationType) || 'chat';
   const isCheckin = type === 'checkin';
+  const proactiveContext = params.context ? decodeURIComponent(params.context) : null;
 
   // Stores
   const { entries: moodEntries } = useMoodStore();
@@ -142,9 +143,15 @@ function ChatScreenContent() {
       setGenerating(true);
       setError(null);
       try {
-        const greetingPrompt = isCheckin
-          ? getCheckinPrompt('greeting')
-          : 'Greet the user warmly and ask how they are feeling today. Be brief (2 sentences max).';
+        // Use proactive context if available, otherwise default greeting
+        let greetingPrompt: string;
+        if (proactiveContext) {
+          greetingPrompt = `${proactiveContext}\n\nStart a warm, empathetic conversation based on this context. Be brief (2-3 sentences max). Don't mention that you're an AI or that you've been monitoring them.`;
+        } else if (isCheckin) {
+          greetingPrompt = getCheckinPrompt('greeting');
+        } else {
+          greetingPrompt = 'Greet the user warmly and ask how they are feeling today. Be brief (2 sentences max).';
+        }
 
         const tempMessages: ChatMessage[] = [
           {

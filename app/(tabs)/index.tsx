@@ -7,10 +7,11 @@ import Animated, { useSharedValue, useAnimatedScrollHandler } from 'react-native
 import { formatDistanceToNow } from 'date-fns';
 import { Text, Card, AnimatedHeader } from '@/src/components/ui';
 import { MoodAnimation } from '@/src/components/mood';
+import { ProactiveChatCard } from '@/src/components/chat';
 import { InterventionPicker } from '@/src/components/interventions/InterventionPicker';
 import { SleepStoriesSection } from '@/src/components/sleep';
 import { StreakCard, BadgeCelebration, BadgeProgressCard } from '@/src/components/gamification';
-import { useMoodStore, useSubscriptionStore } from '@/src/stores';
+import { useMoodStore, useSubscriptionStore, useProactiveTriggerStore } from '@/src/stores';
 import { useGamificationStore } from '@/src/stores/useGamificationStore';
 import { usePremiumFeature } from '@/src/hooks/usePremiumFeature';
 import { colors, darkColors, spacing, moodLabels } from '@/src/constants/theme';
@@ -32,6 +33,8 @@ export default function HomeScreen() {
     dismissCelebration,
   } = useGamificationStore();
 
+  const { checkForTriggers, clearExpiredTriggers } = useProactiveTriggerStore();
+
   const handleChatPress = useCallback(
     (type: 'checkin' | 'chat') => {
       requirePremium(() => {
@@ -44,6 +47,8 @@ export default function HomeScreen() {
   useEffect(() => {
     loadTodayEntries();
     loadGamificationData();
+    clearExpiredTriggers();
+    checkForTriggers();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -120,6 +125,9 @@ export default function HomeScreen() {
             </View>
           </Card>
         )}
+
+        {/* Proactive AI Outreach */}
+        <ProactiveChatCard />
 
         {/* AI Chat Cards */}
         <View className="mb-6">
