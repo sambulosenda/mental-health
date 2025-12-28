@@ -38,7 +38,7 @@ function withAudioSupport(templates: ExerciseTemplate[]): ExerciseTemplate[] {
     const allSegments = template.steps.flatMap((step) => step.speechSegments || []);
 
     const audioStep: ExerciseStep = {
-      id: 'audio',
+      id: `${template.id}-audio`,
       type: 'audio_story',
       title: template.name,
       content: template.description,
