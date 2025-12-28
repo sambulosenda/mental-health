@@ -280,3 +280,52 @@ export function getNotificationService(): NotificationService {
   }
   return defaultService;
 }
+
+/**
+ * Schedule a weekly summary notification for Sunday evenings
+ */
+export async function scheduleWeeklySummaryNotification(): Promise<boolean> {
+  try {
+    const { status } = await Notifications.getPermissionsAsync();
+    if (status !== 'granted') return false;
+
+    // Cancel existing weekly summary notification
+    await Notifications.cancelScheduledNotificationAsync('weekly-summary');
+
+    // Schedule for Sunday at 7pm
+    await Notifications.scheduleNotificationAsync({
+      identifier: 'weekly-summary',
+      content: {
+        title: '📊 Your Weekly Summary is Ready',
+        body: 'See how your week went and celebrate your progress!',
+        sound: true,
+        data: {
+          type: 'weekly-summary',
+          action: 'weekly_summary',
+        } as Record<string, unknown>,
+      },
+      trigger: {
+        type: Notifications.SchedulableTriggerInputTypes.WEEKLY,
+        weekday: 1, // Sunday (1=Sunday in Expo)
+        hour: 19,
+        minute: 0,
+      },
+    });
+
+    return true;
+  } catch (error) {
+    console.error('Failed to schedule weekly summary notification:', error);
+    return false;
+  }
+}
+
+/**
+ * Cancel weekly summary notification
+ */
+export async function cancelWeeklySummaryNotification(): Promise<void> {
+  try {
+    await Notifications.cancelScheduledNotificationAsync('weekly-summary');
+  } catch {
+    // Best-effort cancellation
+  }
+}

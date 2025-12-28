@@ -13,7 +13,7 @@ const REMINDER_ROUTES: Record<ReminderType, AppRoute> = {
 };
 
 // Extended notification actions beyond reminder types
-type NotificationAction = ReminderType | 'chat' | 'checkin' | 'achievements' | 'insights';
+type NotificationAction = ReminderType | 'chat' | 'checkin' | 'achievements' | 'insights' | 'weekly_summary';
 
 const EXTENDED_ROUTES: Record<NotificationAction, string> = {
   mood: ROUTES.TRACK,
@@ -23,6 +23,7 @@ const EXTENDED_ROUTES: Record<NotificationAction, string> = {
   checkin: ROUTES.CHAT_CHECKIN,
   achievements: ROUTES.ACHIEVEMENTS,
   insights: ROUTES.INSIGHTS,
+  weekly_summary: ROUTES.WEEKLY_SUMMARY,
 };
 
 function isValidNotificationAction(value: unknown): value is NotificationAction {

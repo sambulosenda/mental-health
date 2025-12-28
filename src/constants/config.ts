@@ -27,6 +27,7 @@ export const ROUTES = {
   CHAT: '/chat',
   CHAT_CHECKIN: '/chat?type=checkin',
   EXERCISE_SESSION: '/(modals)/exercise-session',
+  WEEKLY_SUMMARY: '/(modals)/weekly-summary',
   PAYWALL: '/paywall',
   ONBOARDING: '/onboarding',
   CRISIS: '/crisis',

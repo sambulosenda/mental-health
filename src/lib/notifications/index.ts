@@ -15,6 +15,8 @@ export {
   createExpoNotificationService,
   getNotificationService,
   parseTimeString,
+  scheduleWeeklySummaryNotification,
+  cancelWeeklySummaryNotification,
 } from './expo-notification.service';
 
 /** @deprecated Use getNotificationService().requestPermissions() instead */
