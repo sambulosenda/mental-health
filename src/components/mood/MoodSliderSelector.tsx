@@ -52,22 +52,7 @@ export function MoodSliderSelector({ selectedMood, onSelectMood }: MoodSliderSel
             </Text>
           </Animated.View>
         </Animated.View>
-      ) : (
-        <View className="items-center mb-8">
-          <View
-            className="w-28 h-28 rounded-full items-center justify-center"
-            style={{ backgroundColor: themeColors.surfaceElevated }}
-          >
-            <Text variant="h1" style={{ fontSize: 48 }}>?</Text>
-          </View>
-          <Text variant="h3" color="textPrimary" center className="mt-4">
-            How are you right now?
-          </Text>
-          <Text variant="body" color="textMuted" center className="mt-1">
-            This helps personalize your session
-          </Text>
-        </View>
-      )}
+      ) : null}
 
       {/* Mood options */}
       <View className="flex-row justify-center gap-3 w-full px-2">
