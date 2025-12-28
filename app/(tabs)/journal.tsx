@@ -99,6 +99,7 @@ export default function JournalScreen() {
   };
 
   const displayedEntries = searchQuery ? searchResults : entries;
+  const showSearch = entries.length > 10 || searchQuery.length > 0;
 
   return (
     <SafeAreaView className={`flex-1 ${isDark ? 'bg-background-dark' : 'bg-background'}`} edges={['top']}>
@@ -129,13 +130,15 @@ export default function JournalScreen() {
           />
         }
       >
-        <View className="mb-4">
-          <SearchBar
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-            onClear={clearSearch}
-          />
-        </View>
+        {showSearch && (
+          <View className="mb-4">
+            <SearchBar
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              onClear={clearSearch}
+            />
+          </View>
+        )}
 
         {displayedEntries.length > 0 ? (
           <View className="gap-3">
