@@ -5,3 +5,4 @@ export { useChatStore } from './useChatStore';
 export { useExerciseStore } from './useExerciseStore';
 export { useSubscriptionStore } from './useSubscriptionStore';
 export { useProactiveTriggerStore } from './useProactiveTriggerStore';
+export { useFavoritesStore } from './useFavoritesStore';

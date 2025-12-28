@@ -119,3 +119,14 @@ export type UserBadgeRow = typeof userBadges.$inferSelect;
 export type NewUserBadge = typeof userBadges.$inferInsert;
 export type StreakProtectionRow = typeof streakProtection.$inferSelect;
 export type NewStreakProtection = typeof streakProtection.$inferInsert;
+
+// Favorites table - bookmarked content
+export const favorites = sqliteTable('favorites', {
+  id: text('id').primaryKey(),
+  contentType: text('content_type').notNull(), // 'meditation' | 'sleep_story' | 'exercise'
+  contentId: text('content_id').notNull(), // template ID
+  createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),
+});
+
+export type FavoriteRow = typeof favorites.$inferSelect;
+export type NewFavorite = typeof favorites.$inferInsert;

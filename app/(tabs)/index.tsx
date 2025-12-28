@@ -10,6 +10,7 @@ import { MoodAnimation } from '@/src/components/mood';
 import { ProactiveChatCard } from '@/src/components/chat';
 import { InterventionPicker } from '@/src/components/interventions/InterventionPicker';
 import { SleepStoriesSection } from '@/src/components/sleep';
+import { FavoritesSection } from '@/src/components/favorites';
 import { StreakCard, BadgeCelebration, BadgeProgressCard } from '@/src/components/gamification';
 import { useMoodStore, useSubscriptionStore, useProactiveTriggerStore } from '@/src/stores';
 import { useGamificationStore } from '@/src/stores/useGamificationStore';
@@ -184,6 +185,9 @@ export default function HomeScreen() {
             </Card>
           </View>
         </View>
+
+        {/* Favorites Section */}
+        <FavoritesSection />
 
         {/* Sleep Stories Section */}
         <View className="mb-6">

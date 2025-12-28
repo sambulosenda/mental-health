@@ -1,17 +1,17 @@
-import { useMemo, useState, useCallback } from 'react';
+import { useMemo, useState, useCallback, useEffect } from 'react';
 import { View, Pressable, FlatList, Image, Dimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
-import { Text, PremiumBadge, DurationFilter, filterByDuration, countByDuration } from '@/src/components/ui';
+import { Text, PremiumBadge, DurationFilter, filterByDuration, countByDuration, FavoriteButton } from '@/src/components/ui';
 import type { DurationFilterValue } from '@/src/components/ui';
 import { SLEEP_STORY_TEMPLATES } from '@/src/constants/sleepStories';
 import { getSleepStoryImageUrl } from '@/src/constants/cdnConfig';
 import { colors, darkColors, spacing } from '@/src/constants/theme';
 import { useTheme } from '@/src/contexts/ThemeContext';
-import { useSubscriptionStore, useSettingsStore } from '@/src/stores';
+import { useSubscriptionStore, useSettingsStore, useFavoritesStore } from '@/src/stores';
 import type { ExerciseTemplate } from '@/src/types/exercise';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -79,6 +79,14 @@ function SleepStoryGridCard({ story, themeColors, isPremiumUser, onPress }: Slee
           className="absolute top-0 left-0 right-0 h-10"
         />
 
+        <View className="absolute top-2 left-2">
+          <FavoriteButton
+            contentType="sleep_story"
+            contentId={story.id}
+            size={20}
+          />
+        </View>
+
         {isLocked && (
           <View className="absolute top-2 right-2">
             <PremiumBadge />
@@ -107,6 +115,11 @@ export default function SleepStoriesScreen() {
   const themeColors = isDark ? darkColors : colors;
   const { isPremium, isInitialized } = useSubscriptionStore();
   const { contentFilters, setSleepStoriesDurationFilter } = useSettingsStore();
+  const { loadFavorites } = useFavoritesStore();
+
+  useEffect(() => {
+    loadFavorites();
+  }, [loadFavorites]);
 
   const allStories = useMemo(() => {
     const freeStories = SLEEP_STORY_TEMPLATES.filter((s) => !s.isPremium);

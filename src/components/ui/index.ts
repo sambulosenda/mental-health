@@ -21,3 +21,4 @@ export { PremiumBadge } from './PremiumBadge';
 export { OfflineBanner } from './OfflineBanner';
 export { DurationFilter, filterByDuration, countByDuration } from './DurationFilter';
 export type { DurationFilterValue } from './DurationFilter';
+export { FavoriteButton } from './FavoriteButton';
