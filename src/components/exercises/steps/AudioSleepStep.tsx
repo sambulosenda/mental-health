@@ -49,6 +49,7 @@ export function AudioSleepStep({ step, onComplete, accentColor }: AudioSleepStep
 
   const controllerRef = useRef<AudioController | null>(null);
   const progressBarWidthRef = useRef(0);
+  const mountedRef = useRef(true);
 
   const handleProgressBarLayout = useCallback((event: LayoutChangeEvent) => {
     progressBarWidthRef.current = event.nativeEvent.layout.width;
@@ -115,11 +116,12 @@ export function AudioSleepStep({ step, onComplete, accentColor }: AudioSleepStep
   }, [step.audioUrl, stopPulseAnimation]);
 
   useEffect(() => {
-    let mounted = true;
+    mountedRef.current = true;
 
     const init = async () => {
       await initializePlayer();
-      if (!mounted && controllerRef.current) {
+      // Check ref after async operation to handle unmount during init
+      if (!mountedRef.current && controllerRef.current) {
         controllerRef.current.unload();
         controllerRef.current = null;
       }
@@ -128,7 +130,7 @@ export function AudioSleepStep({ step, onComplete, accentColor }: AudioSleepStep
     init();
 
     return () => {
-      mounted = false;
+      mountedRef.current = false;
       controllerRef.current?.unload();
     };
   }, [initializePlayer]);
