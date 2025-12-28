@@ -13,8 +13,9 @@ import { useExerciseStore } from '@/src/stores';
 import type { MoodValue } from '@/src/types/exercise';
 import { useFocusEffect } from '@react-navigation/native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, View } from 'react-native';
+import type { ExerciseSession } from '@/src/types/exercise';
 import { useKeyboardHandler } from 'react-native-keyboard-controller';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -54,8 +55,13 @@ function ExerciseSessionContent() {
     setStepResponse,
     completeExercise,
     abandonExercise,
+    checkForIncompleteSession,
+    resumeExercise,
     reset,
   } = useExerciseStore();
+
+  const [pendingResume, setPendingResume] = useState<ExerciseSession | null>(null);
+  const hasCheckedResume = useRef(false);
 
   // Track the current templateId to detect changes
   const currentTemplateRef = useRef<string | null>(null);
@@ -73,9 +79,48 @@ function ExerciseSessionContent() {
     }, [reset])
   );
 
+  // Check for incomplete session to resume
+  useEffect(() => {
+    if (hasCheckedResume.current || exerciseFlow) return;
+    hasCheckedResume.current = true;
+
+    const checkResume = async () => {
+      const incomplete = await checkForIncompleteSession();
+      if (incomplete && incomplete.templateId === templateId) {
+        // Same exercise - show resume prompt
+        setPendingResume(incomplete);
+      } else if (incomplete) {
+        // Different exercise - abandon the old one silently and start new
+        await abandonExercise();
+      }
+    };
+
+    checkResume();
+  }, [templateId, exerciseFlow, checkForIncompleteSession, abandonExercise]);
+
+  // Handle resume decision
+  const handleResume = useCallback(() => {
+    if (pendingResume) {
+      resumeExercise(pendingResume);
+      setPendingResume(null);
+    }
+  }, [pendingResume, resumeExercise]);
+
+  const handleStartFresh = useCallback(async () => {
+    if (pendingResume) {
+      await abandonExercise();
+    }
+    setPendingResume(null);
+    currentTemplateRef.current = templateId ?? null;
+    const sessionKey = Date.now();
+    if (templateId) {
+      startExercise(templateId, sessionKey);
+    }
+  }, [pendingResume, templateId, abandonExercise, startExercise]);
+
   // Start exercise when templateId changes (or on initial mount)
   useEffect(() => {
-    if (!templateId) return;
+    if (!templateId || pendingResume) return;
 
     // Only start if templateId changed
     if (currentTemplateRef.current === templateId) return;
@@ -90,7 +135,7 @@ function ExerciseSessionContent() {
     const sessionKey = Date.now();
     console.log('[Exercise] Starting exercise with templateId:', templateId, 'key:', sessionKey);
     startExercise(templateId, sessionKey);
-  }, [templateId, startExercise, reset]);
+  }, [templateId, startExercise, reset, pendingResume]);
 
   const handleClose = useCallback(() => {
     if (exerciseFlow && exerciseFlow.currentStepIndex > 0) {
@@ -132,6 +177,34 @@ function ExerciseSessionContent() {
       Alert.alert('Error', 'Failed to save exercise. Please try again.');
     }
   }, [completeExercise, router]);
+
+  // Resume prompt
+  if (pendingResume) {
+    const resumeTemplate = useExerciseStore.getState().templates.find(t => t.id === pendingResume.templateId);
+    return (
+      <SafeAreaView className={`flex-1 ${isDark ? 'bg-background-dark' : 'bg-background'}`}>
+        <View className="flex-1 items-center justify-center px-6">
+          <Text variant="h2" color="textPrimary" center className="mb-2">
+            Resume Exercise?
+          </Text>
+          <Text variant="body" color="textSecondary" center className="mb-8">
+            You have an incomplete {resumeTemplate?.name || 'exercise'} session
+          </Text>
+          <View className="w-full gap-3">
+            <Button onPress={handleResume}>
+              Continue Where I Left Off
+            </Button>
+            <Button
+              variant="secondary"
+              onPress={handleStartFresh}
+            >
+              Start Fresh
+            </Button>
+          </View>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   if (error) {
     return (

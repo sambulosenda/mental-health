@@ -13,6 +13,7 @@ import {
   setSessionMoodBefore,
   setSessionMoodAfter,
   getRecentExerciseSessions,
+  getIncompleteSession,
 } from '@/src/lib/database';
 import { EXERCISE_TEMPLATES } from '@/src/constants/exercises';
 import { MEDITATION_TEMPLATES } from '@/src/constants/meditations';
@@ -46,6 +47,10 @@ interface ExerciseState {
   setStepResponse: (stepId: string, response: string | string[]) => Promise<void>;
   completeExercise: () => Promise<void>;
   abandonExercise: () => Promise<void>;
+
+  // Recovery actions
+  checkForIncompleteSession: () => Promise<ExerciseSession | null>;
+  resumeExercise: (session: ExerciseSession) => void;
 
   // History actions
   loadRecentSessions: () => Promise<void>;
@@ -290,6 +295,53 @@ export const useExerciseStore = create<ExerciseState>((set, get) => ({
     } catch {
       // Best-effort load - keep existing state
     }
+  },
+
+  // Check for incomplete session to resume
+  checkForIncompleteSession: async () => {
+    try {
+      return await getIncompleteSession();
+    } catch {
+      return null;
+    }
+  },
+
+  // Resume an incomplete exercise session
+  resumeExercise: (session) => {
+    const template = get().templates.find((t) => t.id === session.templateId);
+    if (!template) {
+      set({ error: 'Exercise template not found' });
+      return;
+    }
+
+    // Calculate current step based on saved progress
+    // Flow: mood_before (0) → exercise steps (1 to n) → mood_after (n+1) → complete (n+2)
+    let currentStepIndex = 0;
+
+    if (session.moodBefore !== undefined) {
+      // Past mood_before step
+      currentStepIndex = 1;
+
+      // Check how many exercise steps have responses
+      const responseCount = Object.keys(session.responses).length;
+      if (responseCount > 0) {
+        // Advance to the step after the last response, but cap at mood_after step
+        currentStepIndex = Math.min(1 + responseCount, template.steps.length + 1);
+      }
+    }
+
+    set({
+      activeSession: session,
+      exerciseFlow: {
+        template,
+        currentStepIndex,
+        responses: session.responses,
+        moodBefore: session.moodBefore,
+        moodAfter: session.moodAfter,
+      },
+      isLoading: false,
+      error: null,
+    });
   },
 
   // Reset state (increments sessionKey to invalidate any in-flight requests)

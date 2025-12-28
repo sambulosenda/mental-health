@@ -146,6 +146,18 @@ export async function getRecentExerciseSessions(
   return rows.map(toExerciseSession);
 }
 
+// Get the most recent incomplete (in_progress) session
+export async function getIncompleteSession(): Promise<ExerciseSession | null> {
+  const rows = await db
+    .select()
+    .from(exerciseSessions)
+    .where(eq(exerciseSessions.status, 'in_progress'))
+    .orderBy(desc(exerciseSessions.startedAt))
+    .limit(1);
+
+  return rows.length > 0 ? toExerciseSession(rows[0]) : null;
+}
+
 // Get completed sessions count by template
 export async function getExerciseStats(): Promise<{
   totalCompleted: number;
