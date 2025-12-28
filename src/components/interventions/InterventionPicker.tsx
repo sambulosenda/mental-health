@@ -1,4 +1,4 @@
-import { Text } from '@/src/components/ui';
+import { Text, PremiumBadge } from '@/src/components/ui';
 import { colors, darkColors, spacing } from '@/src/constants/theme';
 import { useTheme } from '@/src/contexts/ThemeContext';
 import { useInterventionRecommendations } from '@/src/hooks/useInterventionRecommendations';
@@ -66,11 +66,8 @@ function RecommendationCard({
           />
         </View>
         {isLocked && (
-          <View
-            className="absolute -top-1 -right-1 w-5 h-5 rounded-full items-center justify-center"
-            style={{ backgroundColor: themeColors.warning }}
-          >
-            <Ionicons name="lock-closed" size={10} color="#fff" />
+          <View className="absolute -top-1 -right-1">
+            <PremiumBadge />
           </View>
         )}
       </View>

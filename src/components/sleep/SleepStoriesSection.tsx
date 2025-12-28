@@ -4,7 +4,7 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
-import { Text } from '@/src/components/ui';
+import { Text, PremiumBadge } from '@/src/components/ui';
 import { SLEEP_STORY_TEMPLATES } from '@/src/constants/sleepStories';
 import { getSleepStoryImageUrl } from '@/src/constants/cdnConfig';
 import { colors, darkColors, spacing } from '@/src/constants/theme';
@@ -67,23 +67,8 @@ function SleepStoryCard({ story, themeColors, isPremiumUser, onPress }: SleepSto
 
         {/* Lock badge */}
         {isLocked && (
-          <View
-            className="absolute top-2 right-2 w-5 h-5 rounded-full items-center justify-center"
-            style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
-          >
-            <Ionicons name="lock-closed" size={10} color="#fff" />
-          </View>
-        )}
-
-        {/* Free badge */}
-        {!story.isPremium && (
-          <View
-            className="absolute top-2 left-2 px-2 py-0.5 rounded-full"
-            style={{ backgroundColor: 'rgba(16,185,129,0.9)' }}
-          >
-            <Text variant="label" style={{ color: '#fff', fontSize: 9 }}>
-              FREE
-            </Text>
+          <View className="absolute top-2 right-2">
+            <PremiumBadge />
           </View>
         )}
       </View>

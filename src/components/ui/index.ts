@@ -17,3 +17,4 @@ export { ThemeToggleButton } from './ThemeToggleButton';
 export { default as SegmentedControl } from './SegmentedControl';
 export { ProgressiveBlurView } from './ProgressiveBlurView';
 export { GradientText } from './GradientText';
+export { PremiumBadge } from './PremiumBadge';

@@ -123,18 +123,9 @@ export default function HomeScreen() {
 
         {/* AI Chat Cards */}
         <View className="mb-6">
-          <View className="flex-row items-center gap-2 mb-4">
-            <Text variant="h3" color="textPrimary">
-              Talk with Softmind
-            </Text>
-            {!isPremium && (
-              <View className="px-2 py-0.5 rounded-full" style={{ backgroundColor: isDark ? `${themeColors.warning}30` : `${themeColors.warning}15` }}>
-                <Text variant="label" style={{ color: themeColors.warning, fontSize: 10 }}>
-                  PRO
-                </Text>
-              </View>
-            )}
-          </View>
+          <Text variant="h3" color="textPrimary" className="mb-4">
+            Talk with Softmind
+          </Text>
           <View className="gap-3">
             <Card onPress={() => handleChatPress('checkin')}>
               <View className="flex-row items-center">
