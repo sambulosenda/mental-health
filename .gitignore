@@ -45,3 +45,13 @@ app-example
 # generated native folders
 /ios
 /android
+
+# Claude Code
+.claude/
+
+# Cloudflare
+.wrangler/
+
+# Generated assets
+generated-audio/
+optimized-images/
