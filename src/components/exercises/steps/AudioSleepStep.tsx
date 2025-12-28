@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
-import { View, Pressable } from 'react-native';
+import { View, Pressable, type LayoutChangeEvent } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import Animated, {
   useSharedValue,
@@ -48,6 +48,11 @@ export function AudioSleepStep({ step, onComplete, accentColor }: AudioSleepStep
   const [loadError, setLoadError] = useState<string | null>(null);
 
   const controllerRef = useRef<AudioController | null>(null);
+  const progressBarWidthRef = useRef(0);
+
+  const handleProgressBarLayout = useCallback((event: LayoutChangeEvent) => {
+    progressBarWidthRef.current = event.nativeEvent.layout.width;
+  }, []);
 
   // Pulsing animation for playing state
   const pulseScale = useSharedValue(1);
@@ -223,11 +228,16 @@ export function AudioSleepStep({ step, onComplete, accentColor }: AudioSleepStep
       {hasStarted && !isComplete && (
         <View className="w-full px-4 mb-4">
           <Pressable
+            onLayout={handleProgressBarLayout}
             onPress={(e) => {
               const { locationX } = e.nativeEvent;
-              const width = 300; // approximate
-              const seekPosition = (locationX / width) * audioState.durationMs;
-              handleSeek(Math.max(0, Math.min(seekPosition, audioState.durationMs)));
+              const width = progressBarWidthRef.current;
+              if (width <= 0 || audioState.durationMs <= 0) return;
+              const seekPosition = Math.max(0, Math.min(
+                (locationX / width) * audioState.durationMs,
+                audioState.durationMs
+              ));
+              handleSeek(seekPosition);
             }}
             className="h-2 rounded-full overflow-hidden"
             style={{ backgroundColor: `${color}30` }}
