@@ -115,9 +115,16 @@ export function SleepStoriesSection({ maxStories = 8 }: SleepStoriesSectionProps
   const { isPremium, isInitialized } = useSubscriptionStore();
 
   // Get current hour to determine if it's evening/night time
+  // Show during evening/night hours (7pm-6am), hide during daytime
   const isEvening = useMemo(() => {
     const hour = new Date().getHours();
     return hour >= 19 || hour < 6; // 7pm to 6am
+  }, []);
+
+  // Hide section during daytime (6am-7pm)
+  const isDaytime = useMemo(() => {
+    const hour = new Date().getHours();
+    return hour >= 6 && hour < 19;
   }, []);
 
   // Select stories to display
@@ -139,8 +146,8 @@ export function SleepStoriesSection({ maxStories = 8 }: SleepStoriesSectionProps
     router.push(`/exercise-session?templateId=${templateId}`);
   };
 
-  // Don't show section if no stories
-  if (displayedStories.length === 0) {
+  // Don't show section if no stories or during daytime
+  if (displayedStories.length === 0 || isDaytime) {
     return null;
   }
 

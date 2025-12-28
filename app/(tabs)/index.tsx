@@ -1,4 +1,4 @@
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useState } from 'react';
 import { View, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -14,6 +14,7 @@ import { useMoodStore, useSubscriptionStore } from '@/src/stores';
 import { useGamificationStore } from '@/src/stores/useGamificationStore';
 import { usePremiumFeature } from '@/src/hooks/usePremiumFeature';
 import { colors, darkColors, spacing, moodLabels } from '@/src/constants/theme';
+import { getUniqueDaysTracked } from '@/src/lib/database';
 import { useTheme } from '@/src/contexts/ThemeContext';
 
 const HEADER_EXPANDED_HEIGHT = 110;
@@ -26,10 +27,13 @@ export default function HomeScreen() {
   const { isPremium } = useSubscriptionStore();
   const { requirePremium } = usePremiumFeature();
   const {
+    streaks,
     pendingCelebrations,
     loadGamificationData,
     dismissCelebration,
   } = useGamificationStore();
+
+  const [daysTracked, setDaysTracked] = useState(0);
 
   const handleChatPress = useCallback(
     (type: 'checkin' | 'chat') => {
@@ -43,11 +47,14 @@ export default function HomeScreen() {
   useEffect(() => {
     loadTodayEntries();
     loadGamificationData();
+    getUniqueDaysTracked().then(setDaysTracked);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const greeting = getGreeting();
   const latestMood = todayEntries[0];
+  const currentStreak = streaks.overall.currentStreak;
+  const headerSubtitle = currentStreak > 0 ? `🔥 ${currentStreak} day streak` : undefined;
 
   const scrollY = useSharedValue(0);
   const scrollHandler = useAnimatedScrollHandler({
@@ -58,7 +65,7 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView className={`flex-1 ${isDark ? 'bg-background-dark' : 'bg-background'}`} edges={['top']}>
-      <AnimatedHeader scrollY={scrollY} title={greeting} showThemeToggle />
+      <AnimatedHeader scrollY={scrollY} title={greeting} subtitle={headerSubtitle} showThemeToggle />
       <Animated.ScrollView
         className="flex-1"
         contentContainerStyle={{ paddingHorizontal: spacing.lg, paddingBottom: spacing.xxl, paddingTop: HEADER_EXPANDED_HEIGHT }}
@@ -118,6 +125,21 @@ export default function HomeScreen() {
           </Card>
         )}
 
+        {/* Days Tracked Progress */}
+        {daysTracked > 0 && (
+          <View className="flex-row items-center justify-center mb-4 -mt-2">
+            <View
+              className="flex-row items-center px-3 py-1.5 rounded-full"
+              style={{ backgroundColor: isDark ? `${themeColors.primary}15` : `${themeColors.primary}08` }}
+            >
+              <Ionicons name="calendar-outline" size={14} color={themeColors.primary} />
+              <Text variant="caption" style={{ color: themeColors.primary, marginLeft: 6 }}>
+                {daysTracked} {daysTracked === 1 ? 'day' : 'days'} tracked
+              </Text>
+            </View>
+          </View>
+        )}
+
         {/* AI Chat Cards */}
         <View className="mb-6">
           <View className="flex-row items-center gap-2 mb-4">
@@ -153,7 +175,7 @@ export default function HomeScreen() {
                     </View>
                   </View>
                   <Text variant="caption" color="textSecondary">
-                    Quick guided mood check
+                    Understand what's behind your mood
                   </Text>
                 </View>
                 {!isPremium && <Ionicons name="lock-closed" size={16} color={themeColors.textMuted} style={{ marginRight: 4 }} />}
@@ -173,7 +195,7 @@ export default function HomeScreen() {
                     Talk it out
                   </Text>
                   <Text variant="caption" color="textSecondary">
-                    {"I'm here to listen"}
+                    Open conversation when you need to vent
                   </Text>
                 </View>
                 {!isPremium && <Ionicons name="lock-closed" size={16} color={themeColors.textMuted} style={{ marginRight: 4 }} />}
