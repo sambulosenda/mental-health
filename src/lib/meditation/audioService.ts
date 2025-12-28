@@ -79,15 +79,7 @@ export async function createAudioPlayer(
 
   const { sound } = await Audio.Sound.createAsync(
     { uri: audioUrl },
-    { shouldPlay: false, progressUpdateIntervalMillis: 500 },
-    (status) => {
-      const state = parsePlaybackStatus(status);
-      callbacks.onPlaybackStatusUpdate?.(state);
-
-      if (status.isLoaded && status.didJustFinish) {
-        callbacks.onComplete?.();
-      }
-    }
+    { shouldPlay: false, progressUpdateIntervalMillis: 500 }
   );
 
   let currentState: AudioState = {

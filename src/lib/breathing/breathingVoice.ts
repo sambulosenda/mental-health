@@ -1,5 +1,5 @@
-import { Audio } from 'expo-av';
 import { getBreathingCueAudioUrl } from '@/src/constants/cdnConfig';
+import { Audio } from 'expo-av';
 
 // Map voice cue text to audio file IDs
 const CUE_TO_AUDIO_ID: Record<string, string> = {
@@ -66,14 +66,15 @@ export async function speakBreathCue(cue: string): Promise<void> {
  * Stop any currently playing breath cue
  */
 export async function stopBreathCue(): Promise<void> {
-  if (currentSound) {
+  const soundToStop = currentSound;
+  if (soundToStop) {
+    currentSound = null; // Clear immediately to prevent race
     try {
-      await currentSound.stopAsync();
-      await currentSound.unloadAsync();
+      await soundToStop.stopAsync();
+      await soundToStop.unloadAsync();
     } catch {
       // Best effort cleanup
     }
-    currentSound = null;
   }
 }
 
