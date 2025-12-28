@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { View, Alert, Modal, Linking, Pressable } from 'react-native';
 import * as WebBrowser from 'expo-web-browser';
+import Constants from 'expo-constants';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Host, Switch } from '@expo/ui/swift-ui';
 import { useRouter } from 'expo-router';
@@ -563,7 +564,7 @@ export default function ProfileScreen() {
               iconColor="#fff"
               iconBg={themeColors.primary}
               label="Softmind"
-              value="v1.0.0"
+              value={`v${Constants.expoConfig?.version ?? '1.0.0'}`}
               showChevron={false}
               themeColors={themeColors}
               isLast
