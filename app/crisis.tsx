@@ -10,6 +10,7 @@ import { spacing, borderRadius } from '@/src/constants/theme';
 import { useTheme } from '@/src/contexts/ThemeContext';
 import {
   getAllResourcesSorted,
+  getEmergencyNumber,
   INTERNATIONAL_RESOURCE,
   BEFRIENDERS_RESOURCE,
   type CrisisResource,
@@ -19,13 +20,15 @@ import {
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 function EmergencyBanner({ isDark }: { isDark: boolean }) {
+  const emergency = getEmergencyNumber();
+
   const handleEmergencyCall = useCallback(async () => {
-    const phoneUrl = 'tel:999';
+    const phoneUrl = `tel:${emergency.number}`;
     const canOpen = await Linking.canOpenURL(phoneUrl);
     if (canOpen) {
       Linking.openURL(phoneUrl);
     }
-  }, []);
+  }, [emergency.number]);
 
   return (
     <Animated.View entering={FadeIn.duration(400)}>
@@ -53,7 +56,7 @@ function EmergencyBanner({ isDark }: { isDark: boolean }) {
           >
             <Ionicons name="call" size={18} color="#fff" />
             <Text variant="caption" style={styles.emergencyButtonText}>
-              999
+              {emergency.display}
             </Text>
           </Pressable>
         </View>

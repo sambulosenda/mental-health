@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback } from 'react';
-import { View, TextInput, Pressable } from 'react-native';
+import { View, TextInput, Pressable, Modal } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
@@ -38,6 +39,7 @@ export default function TrackScreen() {
   } = useMoodStore();
 
   const [showSuggestion, setShowSuggestion] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
   const [savedMood, setSavedMood] = useState<number | null>(null);
   const [savedActivities, setSavedActivities] = useState<string[]>([]);
 
@@ -86,8 +88,12 @@ export default function TrackScreen() {
     }
 
     if (isQuickCheckin) {
-      // Quick check-in: skip modal, go straight home
-      router.navigate('/(tabs)');
+      // Quick check-in: show brief success, then go home
+      setShowSuccess(true);
+      setTimeout(() => {
+        setShowSuccess(false);
+        router.navigate('/(tabs)');
+      }, 1200);
     } else if (currentMood !== null) {
       // Detailed check-in: show suggestion modal
       setSavedMood(currentMood);
@@ -250,6 +256,25 @@ export default function TrackScreen() {
           activities={savedActivities}
         />
       )}
+
+      {/* Success confirmation overlay */}
+      <Modal visible={showSuccess} transparent animationType="fade">
+        <View className="flex-1 items-center justify-center bg-black/40">
+          <Animated.View
+            entering={FadeIn.duration(200)}
+            className="items-center rounded-3xl px-10 py-8"
+            style={{ backgroundColor: themeColors.surface }}
+          >
+            <View
+              className="w-16 h-16 rounded-full items-center justify-center mb-4"
+              style={{ backgroundColor: themeColors.successLight }}
+            >
+              <Ionicons name="checkmark" size={32} color={themeColors.success} />
+            </View>
+            <Text variant="h3" color="textPrimary">Mood logged!</Text>
+          </Animated.View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }

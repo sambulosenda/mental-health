@@ -266,6 +266,38 @@ export const CRISIS_RESOURCES: CountryResources[] = [
   },
 ];
 
+// Emergency numbers by country
+export const EMERGENCY_NUMBERS: Record<string, { number: string; display: string }> = {
+  GB: { number: '999', display: '999' },
+  IE: { number: '999', display: '999' },
+  US: { number: '911', display: '911' },
+  CA: { number: '911', display: '911' },
+  AU: { number: '000', display: '000' },
+  NZ: { number: '111', display: '111' },
+  // EU countries use 112
+  DE: { number: '112', display: '112' },
+  FR: { number: '112', display: '112' },
+  ES: { number: '112', display: '112' },
+  IT: { number: '112', display: '112' },
+  NL: { number: '112', display: '112' },
+  BE: { number: '112', display: '112' },
+  AT: { number: '112', display: '112' },
+  CH: { number: '112', display: '112' },
+  SE: { number: '112', display: '112' },
+  NO: { number: '112', display: '112' },
+  DK: { number: '112', display: '112' },
+  FI: { number: '112', display: '112' },
+  PL: { number: '112', display: '112' },
+  PT: { number: '112', display: '112' },
+};
+
+// Get emergency number for user's locale
+export function getEmergencyNumber(locale?: string): { number: string; display: string } {
+  const deviceLocale = locale || getDeviceLocale();
+  const countryCode = getCountryFromLocale(deviceLocale);
+  return EMERGENCY_NUMBERS[countryCode] || { number: '112', display: '112' };
+}
+
 // International fallback resource
 export const INTERNATIONAL_RESOURCE: CrisisResource = {
   name: 'Find a Helpline',

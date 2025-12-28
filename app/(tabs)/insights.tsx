@@ -13,13 +13,71 @@ import { colors, darkColors, spacing } from '@/src/constants/theme';
 import { EXERCISE_TEMPLATES } from '@/src/constants/exercises';
 import { useTheme } from '@/src/contexts/ThemeContext';
 import type { DailyMoodSummary } from '@/src/types/mood';
+import { useRouter } from 'expo-router';
 
 const HEADER_EXPANDED_HEIGHT = 110;
+const MIN_ENTRIES_FOR_INSIGHTS = 7;
 
 const TIME_RANGES = ['Week', 'Month', 'Year'] as const;
 const DAYS_MAP = { Week: 7, Month: 30, Year: 365 } as const;
 
+function EmptyInsightsState({ entriesCount, onTrackMood }: { entriesCount: number; onTrackMood: () => void }) {
+  const { isDark } = useTheme();
+  const themeColors = isDark ? darkColors : colors;
+  const remaining = Math.max(0, MIN_ENTRIES_FOR_INSIGHTS - entriesCount);
+  const progress = Math.min(1, entriesCount / MIN_ENTRIES_FOR_INSIGHTS);
+
+  return (
+    <View className="flex-1 items-center justify-center px-8 py-12">
+      <View
+        className="w-20 h-20 rounded-full items-center justify-center mb-6"
+        style={{ backgroundColor: `${themeColors.primary}15` }}
+      >
+        <Ionicons name="analytics" size={40} color={themeColors.primary} />
+      </View>
+      <Text variant="h2" color="textPrimary" center className="mb-2">
+        Unlock Your Insights
+      </Text>
+      <Text variant="body" color="textSecondary" center className="mb-6">
+        Track your mood daily to discover patterns and get personalized insights about your emotional well-being.
+      </Text>
+
+      {/* Progress indicator */}
+      <View className="w-full mb-6">
+        <View className="flex-row justify-between mb-2">
+          <Text variant="caption" color="textMuted">Progress</Text>
+          <Text variant="caption" color="textPrimary">
+            {entriesCount} / {MIN_ENTRIES_FOR_INSIGHTS} check-ins
+          </Text>
+        </View>
+        <View
+          className="h-2 rounded-full overflow-hidden"
+          style={{ backgroundColor: themeColors.border }}
+        >
+          <View
+            className="h-full rounded-full"
+            style={{
+              backgroundColor: themeColors.primary,
+              width: `${progress * 100}%`,
+            }}
+          />
+        </View>
+        {remaining > 0 && (
+          <Text variant="caption" color="textMuted" className="mt-2 text-center">
+            {remaining} more {remaining === 1 ? 'check-in' : 'check-ins'} to unlock insights
+          </Text>
+        )}
+      </View>
+
+      <Button variant="primary" onPress={onTrackMood}>
+        Track Your Mood
+      </Button>
+    </View>
+  );
+}
+
 export default function InsightsScreen() {
+  const router = useRouter();
   const { isDark } = useTheme();
   const themeColors = isDark ? darkColors : colors;
   const { entries, loadEntries, getDailySummaries } = useMoodStore();
@@ -96,14 +154,24 @@ export default function InsightsScreen() {
     setRefreshing(false);
   }, [loadData]);
 
+  const handleTrackMood = useCallback(() => {
+    router.push('/(tabs)/track');
+  }, [router]);
+
+  // Show empty state for new users with few entries
+  const showEmptyState = !isLoading && entries.length < MIN_ENTRIES_FOR_INSIGHTS;
+
   return (
     <SafeAreaView className={`flex-1 ${isDark ? 'bg-background-dark' : 'bg-background'}`} edges={['top']}>
       <AnimatedHeader
         scrollY={scrollY}
         title="Insights"
-        subtitle="Discover patterns in your emotional journey"
+        subtitle={showEmptyState ? undefined : "Discover patterns in your emotional journey"}
         showThemeToggle
       />
+      {showEmptyState ? (
+        <EmptyInsightsState entriesCount={entries.length} onTrackMood={handleTrackMood} />
+      ) : (
       <Animated.ScrollView
         className="flex-1"
         contentContainerStyle={{
@@ -280,6 +348,7 @@ export default function InsightsScreen() {
           <InsightSources />
         </View>
       </Animated.ScrollView>
+      )}
     </SafeAreaView>
   );
 }

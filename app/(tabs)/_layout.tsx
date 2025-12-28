@@ -38,8 +38,8 @@ export default function TabLayout() {
       </NativeTabs.Trigger>
 
       <NativeTabs.Trigger name="profile">
-        <Icon src={<VectorIcon family={IconFamily} name="person" />} />
-        <Label>Profile</Label>
+        <Icon src={<VectorIcon family={IconFamily} name="settings-outline" />} />
+        <Label>Settings</Label>
       </NativeTabs.Trigger>
     </NativeTabs>
   );
