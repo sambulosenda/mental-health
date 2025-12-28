@@ -53,6 +53,16 @@ export function useBreathing(options: UseBreathingOptions): UseBreathingReturn {
   const abortControllerRef = useRef<AbortController | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
+  // Refs to track latest values and avoid stale closures in timer
+  const currentPhaseIndexRef = useRef(currentPhaseIndex);
+  const cyclesCompletedRef = useRef(cyclesCompleted);
+  const phaseSecondsLeftRef = useRef(phaseSecondsLeft);
+
+  // Keep refs in sync with state
+  currentPhaseIndexRef.current = currentPhaseIndex;
+  cyclesCompletedRef.current = cyclesCompleted;
+  phaseSecondsLeftRef.current = phaseSecondsLeft;
+
   const currentPhase = config.phases[currentPhaseIndex] || null;
 
   // Cleanup function
@@ -96,14 +106,19 @@ export function useBreathing(options: UseBreathingOptions): UseBreathingReturn {
     }
   }, [config.phases, enableHaptics, enableVoice, onPhaseChange]);
 
-  // Move to next phase
-  const nextPhase = useCallback(() => {
-    const nextIndex = (currentPhaseIndex + 1) % config.phases.length;
+  // Move to next phase - uses refs to avoid stale closures
+  // Returns next phase duration, or null if exercise is complete
+  const nextPhase = useCallback((): number | null => {
+    const currentIdx = currentPhaseIndexRef.current;
+    const currentCycles = cyclesCompletedRef.current;
+
+    const nextIndex = (currentIdx + 1) % config.phases.length;
     const isNewCycle = nextIndex === 0;
 
     if (isNewCycle) {
-      const newCycleCount = cyclesCompleted + 1;
+      const newCycleCount = currentCycles + 1;
       setCyclesCompleted(newCycleCount);
+      cyclesCompletedRef.current = newCycleCount;
       onCycleComplete?.(newCycleCount);
 
       // Check if exercise is complete
@@ -114,25 +129,34 @@ export function useBreathing(options: UseBreathingOptions): UseBreathingReturn {
           playPhaseCompleteHaptic();
         }
         onComplete?.();
-        return;
+        return null;
       }
     }
 
     startPhase(nextIndex, isNewCycle);
-  }, [currentPhaseIndex, config.phases.length, cyclesCompleted, totalCycles, startPhase, cleanup, enableHaptics, onCycleComplete, onComplete]);
+    return config.phases[nextIndex]?.durationSeconds || 4;
+  }, [config.phases, totalCycles, startPhase, cleanup, enableHaptics, onCycleComplete, onComplete]);
 
-  // Timer tick
+  // Timer tick - uses refs to avoid stale closures
   useEffect(() => {
     if (!isRunning || isPaused) return;
 
     timerRef.current = setInterval(() => {
-      setPhaseSecondsLeft((prev) => {
-        if (prev <= 1) {
-          nextPhase();
-          return config.phases[(currentPhaseIndex + 1) % config.phases.length]?.durationSeconds || 4;
+      const currentSeconds = phaseSecondsLeftRef.current;
+
+      if (currentSeconds <= 1) {
+        // Phase complete - move to next phase
+        const nextDuration = nextPhase();
+        if (nextDuration !== null) {
+          setPhaseSecondsLeft(nextDuration);
+          phaseSecondsLeftRef.current = nextDuration;
         }
-        return prev - 1;
-      });
+      } else {
+        // Decrement seconds
+        const newSeconds = currentSeconds - 1;
+        setPhaseSecondsLeft(newSeconds);
+        phaseSecondsLeftRef.current = newSeconds;
+      }
     }, 1000);
 
     return () => {
@@ -141,7 +165,7 @@ export function useBreathing(options: UseBreathingOptions): UseBreathingReturn {
         timerRef.current = null;
       }
     };
-  }, [isRunning, isPaused, currentPhaseIndex, config.phases, nextPhase]);
+  }, [isRunning, isPaused, nextPhase]);
 
   // Cleanup on unmount
   useEffect(() => {
