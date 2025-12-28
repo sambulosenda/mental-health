@@ -16,7 +16,7 @@ import type { DailyMoodSummary } from '@/src/types/mood';
 import { useRouter } from 'expo-router';
 
 const HEADER_EXPANDED_HEIGHT = 110;
-const MIN_ENTRIES_FOR_INSIGHTS = 7;
+const MIN_ENTRIES_FOR_INSIGHTS = 3;
 
 const TIME_RANGES = ['Week', 'Month', 'Year'] as const;
 const DAYS_MAP = { Week: 7, Month: 30, Year: 365 } as const;
