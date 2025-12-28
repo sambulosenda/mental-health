@@ -277,8 +277,8 @@ export const pressAnimation = {
 
 // Mood labels for accessibility
 export const moodLabels: Record<number, { label: string; description: string }> = {
-  1: { label: 'Struggling', description: 'Feeling distressed or overwhelmed' },
-  2: { label: 'Low', description: 'Feeling down or unmotivated' },
+  1: { label: 'Rough', description: 'Having a hard time right now' },
+  2: { label: 'Low', description: 'Not feeling my best' },
   3: { label: 'Okay', description: 'Feeling neutral or balanced' },
   4: { label: 'Good', description: 'Feeling positive and content' },
   5: { label: 'Great', description: 'Feeling joyful and energized' },

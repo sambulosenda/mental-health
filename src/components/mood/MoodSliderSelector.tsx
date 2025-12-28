@@ -61,10 +61,10 @@ export function MoodSliderSelector({ selectedMood, onSelectMood }: MoodSliderSel
             <Text variant="h1" style={{ fontSize: 48 }}>?</Text>
           </View>
           <Text variant="h3" color="textPrimary" center className="mt-4">
-            How are you feeling?
+            How are you right now?
           </Text>
           <Text variant="body" color="textMuted" center className="mt-1">
-            Tap to select your mood
+            This helps personalize your session
           </Text>
         </View>
       )}

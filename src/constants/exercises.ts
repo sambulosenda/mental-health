@@ -442,13 +442,13 @@ export const EXERCISE_TEMPLATES: ExerciseTemplate[] = [
     ],
   },
 
-  // Quick Goal Setting
+  // Set Your Intention
   {
     id: 'quick-goal',
     type: 'reflection',
     category: 'goals',
-    name: 'Quick Goal Setting',
-    description: 'Set one achievable goal to build momentum',
+    name: 'Set Your Intention',
+    description: 'Focus on one achievable goal to build momentum',
     duration: 2,
     icon: 'flag-outline',
     color: '#22D3EE',
