@@ -27,6 +27,8 @@ interface ProactiveTriggerState {
   addExerciseFollowUp: (exerciseName: string) => void;
   clearExpiredTriggers: () => void;
   getTopTrigger: () => ProactiveTrigger | null;
+  /** DEV ONLY: Inject a test trigger */
+  _injectTestTrigger: () => void;
 }
 
 export const useProactiveTriggerStore = create<ProactiveTriggerState>()(
@@ -119,6 +121,22 @@ export const useProactiveTriggerStore = create<ProactiveTriggerState>()(
       getTopTrigger: () => {
         const { activeTriggers } = get();
         return activeTriggers.length > 0 ? activeTriggers[0] : null;
+      },
+
+      _injectTestTrigger: () => {
+        const testTrigger: ProactiveTrigger = {
+          id: `test-trigger-${Date.now()}`,
+          type: 'struggling',
+          title: "I've noticed you're going through a tough time",
+          message: "The last few days have been challenging. Want to talk about what's going on?",
+          chatContext: "The user has been experiencing low mood recently. Approach with empathy and gentle curiosity. Ask open-ended questions about what they're experiencing. Validate their feelings before offering any suggestions.",
+          priority: 'high',
+          detectedAt: new Date(),
+          expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
+        };
+        set((state) => ({
+          activeTriggers: [testTrigger, ...state.activeTriggers],
+        }));
       },
     }),
     {

@@ -33,7 +33,7 @@ export default function HomeScreen() {
     dismissCelebration,
   } = useGamificationStore();
 
-  const { checkForTriggers, clearExpiredTriggers } = useProactiveTriggerStore();
+  const { checkForTriggers, clearExpiredTriggers, _injectTestTrigger } = useProactiveTriggerStore();
 
   const handleChatPress = useCallback(
     (type: 'checkin' | 'chat') => {
@@ -238,6 +238,19 @@ export default function HomeScreen() {
         <View className="mb-6">
           <BadgeProgressCard onPress={() => router.push('/achievements')} />
         </View>
+
+        {/* DEV: Test Proactive Trigger */}
+        {__DEV__ && (
+          <Pressable
+            onPress={_injectTestTrigger}
+            className="mb-6 p-4 rounded-xl border border-dashed"
+            style={{ borderColor: themeColors.textMuted }}
+          >
+            <Text variant="caption" color="textMuted" center>
+              [DEV] Tap to inject test proactive trigger
+            </Text>
+          </Pressable>
+        )}
 
       </Animated.ScrollView>
 
