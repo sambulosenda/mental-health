@@ -11,7 +11,7 @@ import Animated, {
   useSharedValue,
   useAnimatedScrollHandler,
 } from 'react-native-reanimated';
-import { Text, Card, AnimatedHeader } from '@/src/components/ui';
+import { Text, Card, AnimatedHeader, SegmentedControl } from '@/src/components/ui';
 import { ReminderTypeCard } from '@/src/components/settings';
 import { BadgeGrid } from '@/src/components/gamification';
 import { useSettingsStore, useMoodStore, useJournalStore, useSubscriptionStore } from '@/src/stores';
@@ -265,18 +265,6 @@ export default function ProfileScreen() {
     }
   };
 
-  const getThemeModeLabel = () => {
-    if (mode === 'system') return 'System';
-    if (mode === 'dark') return 'Dark';
-    return 'Light';
-  };
-
-  const cycleTheme = () => {
-    const modes: ('light' | 'dark' | 'system')[] = ['light', 'dark', 'system'];
-    const currentIndex = modes.indexOf(mode);
-    const nextIndex = (currentIndex + 1) % modes.length;
-    setMode(modes[nextIndex]);
-  };
 
   return (
     <SafeAreaView
@@ -313,77 +301,24 @@ export default function ProfileScreen() {
                   : 'Active'}
                 onPress={() => Linking.openURL('https://apps.apple.com/account/subscriptions')}
                 themeColors={themeColors}
+                isLast
               />
             ) : (
               <SettingsRow
                 icon="star"
                 iconColor="#fff"
                 iconBg={themeColors.primary}
-                label="Upgrade to Premium"
+                label="Go Premium"
                 value="Unlock all features"
                 onPress={() => router.push('/paywall')}
                 themeColors={themeColors}
+                isLast
               />
             )}
-            <View
-              className="flex-row"
-              style={{ borderTopWidth: 0.5, borderTopColor: themeColors.divider }}
-            >
-              <View
-                className="flex-1 items-center py-3"
-                style={{ borderRightWidth: 0.5, borderRightColor: themeColors.divider }}
-              >
-                <Text variant="h3" color="textPrimary">{moodEntries.length}</Text>
-                <Text variant="caption" color="textSecondary">Moods</Text>
-              </View>
-              <View className="flex-1 items-center py-3">
-                <Text variant="h3" color="textPrimary">{journalEntries.length}</Text>
-                <Text variant="caption" color="textSecondary">Journals</Text>
-              </View>
-            </View>
           </Card>
         </View>
 
-        {/* SECTION 2: Progress */}
-        <View className="mb-4">
-          <View className="flex-row justify-between items-center mb-3">
-            <Text variant="h3" color="textPrimary">
-              Progress
-            </Text>
-            <Pressable onPress={() => router.push('/achievements')}>
-              <Text variant="caption" style={{ color: themeColors.primary }}>
-                See All
-              </Text>
-            </Pressable>
-          </View>
-          <View className="flex-row gap-2 mb-2">
-            <View
-              className="flex-1 items-center py-3 rounded-xl"
-              style={{ backgroundColor: themeColors.surfaceElevated }}
-            >
-              <Ionicons name="flame" size={24} color="#FF6B35" />
-              <Text variant="h3" color="textPrimary" className="mt-1">
-                {streaks.overall.currentStreak}
-              </Text>
-              <Text variant="caption" color="textSecondary">Day Streak</Text>
-            </View>
-            <View
-              className="flex-1 items-center py-3 rounded-xl"
-              style={{ backgroundColor: themeColors.surfaceElevated }}
-            >
-              <Ionicons name="ribbon" size={24} color={themeColors.primary} />
-              <Text variant="h3" color="textPrimary" className="mt-1">
-                {earnedBadges.length}
-              </Text>
-              <Text variant="caption" color="textSecondary">Badges</Text>
-            </View>
-          </View>
-          <Card variant="flat" padding="md">
-            <BadgeGrid maxItems={6} onBadgePress={() => router.push('/achievements')} />
-          </Card>
-        </View>
-
-        {/* SECTION 3: Reminders */}
+        {/* SECTION 2: Reminders */}
         <View className="mb-4">
           <Text variant="h3" color="textPrimary" className="mb-3">
             Reminders
@@ -446,16 +381,46 @@ export default function ProfileScreen() {
             Preferences
           </Text>
           <Card variant="flat" padding="none" className="overflow-hidden">
-            <SettingsRow
-              icon={isDark ? 'moon' : 'sunny'}
-              iconColor="#fff"
-              iconBg={isDark ? '#5856D6' : '#FF9500'}
-              label="Theme"
-              value={getThemeModeLabel()}
-              onPress={cycleTheme}
-              themeColors={themeColors}
-              isLast={!biometricAvailable}
-            />
+            {/* Theme selector */}
+            <View className="flex-row items-center pl-3 min-h-[48px]">
+              <View
+                className="w-[30px] h-[30px] rounded-[7px] items-center justify-center"
+                style={{ backgroundColor: isDark ? '#5856D6' : '#FF9500' }}
+              >
+                <Ionicons name={isDark ? 'moon' : 'sunny'} size={18} color="#fff" />
+              </View>
+              <View
+                className="flex-1 flex-row items-center justify-between py-2 pr-3 ml-3"
+                style={biometricAvailable ? { borderBottomWidth: 0.5, borderBottomColor: themeColors.divider } : undefined}
+              >
+                <Text variant="body" color="textPrimary">
+                  Theme
+                </Text>
+                <SegmentedControl
+                  value={mode}
+                  onValueChange={(v) => setMode(v as 'light' | 'dark' | 'system')}
+                  className="rounded-lg p-0.5"
+                  style={{ backgroundColor: isDark ? themeColors.surface : themeColors.divider }}
+                >
+                  <SegmentedControl.Indicator className="rounded-md" style={{ backgroundColor: themeColors.surfaceElevated }} />
+                  <SegmentedControl.Item value="light" className="px-2.5 py-1 z-10">
+                    <Text variant="caption" style={{ color: mode === 'light' ? themeColors.textPrimary : themeColors.textMuted }}>
+                      Light
+                    </Text>
+                  </SegmentedControl.Item>
+                  <SegmentedControl.Item value="dark" className="px-2.5 py-1 z-10">
+                    <Text variant="caption" style={{ color: mode === 'dark' ? themeColors.textPrimary : themeColors.textMuted }}>
+                      Dark
+                    </Text>
+                  </SegmentedControl.Item>
+                  <SegmentedControl.Item value="system" className="px-2.5 py-1 z-10">
+                    <Text variant="caption" style={{ color: mode === 'system' ? themeColors.textPrimary : themeColors.textMuted }}>
+                      Auto
+                    </Text>
+                  </SegmentedControl.Item>
+                </SegmentedControl>
+              </View>
+            </View>
             {biometricAvailable && (
               <View className="flex-row items-center pl-3 min-h-[48px]">
                 <View
@@ -500,57 +465,26 @@ export default function ProfileScreen() {
               value={!isPremium ? 'Premium' : undefined}
               onPress={handleExport}
               themeColors={themeColors}
-            />
-            <SettingsRow
-              icon="trash-outline"
-              iconColor="#fff"
-              iconBg={themeColors.error}
-              label="Delete All Data"
-              onPress={handleDeleteData}
-              themeColors={themeColors}
               isLast
             />
           </Card>
-        </View>
-
-        {/* SECTION 6: Research & Disclaimer */}
-        <View className="mb-4">
-          <Text variant="h3" color="textPrimary" className="mb-3">
-            Research & Sources
-          </Text>
-          {/* Wellness Disclaimer - Required by Apple */}
-          <View
-            className="rounded-xl p-3 mb-3"
-            style={{ backgroundColor: `${themeColors.warning}15` }}
+          {/* Delete Data - separate card with warning styling */}
+          <Pressable
+            onPress={handleDeleteData}
+            className="mt-3 rounded-xl p-4 flex-row items-center justify-center"
+            style={{ backgroundColor: `${themeColors.error}10` }}
           >
-            <View className="flex-row items-center mb-1">
-              <Ionicons name="information-circle" size={16} color={themeColors.warning} />
-              <Text variant="caption" style={{ marginLeft: 6, color: themeColors.warning, fontWeight: '600' }}>
-                Wellness App Disclaimer
-              </Text>
-            </View>
-            <Text variant="caption" color="textSecondary" style={{ lineHeight: 18 }}>
-              Softmind is a wellness and self-care companion for personal reflection. It is NOT a medical device and does NOT provide medical advice, diagnosis, or treatment. Always consult a qualified healthcare provider for any health concerns.
+            <Ionicons name="trash-outline" size={18} color={themeColors.error} />
+            <Text variant="body" style={{ color: themeColors.error, marginLeft: 8 }}>
+              Delete All Data
             </Text>
-          </View>
-          <Card variant="flat" padding="none" className="overflow-hidden">
-            <SettingsRow
-              icon="book"
-              iconColor="#fff"
-              iconBg="#10B981"
-              label="View All Sources"
-              value="Research & Citations"
-              onPress={() => router.push('/(modals)/sources' as any)}
-              themeColors={themeColors}
-              isLast
-            />
-          </Card>
+          </Pressable>
         </View>
 
-        {/* SECTION 7: More */}
+        {/* SECTION 6: About */}
         <View className="mb-4">
           <Text variant="h3" color="textPrimary" className="mb-3">
-            More
+            About
           </Text>
           <Card variant="flat" padding="none" className="overflow-hidden">
             <SettingsRow
@@ -567,6 +501,22 @@ export default function ProfileScreen() {
               iconBg="#5856D6"
               label="Contact Support"
               onPress={() => Linking.openURL('mailto:support@getsoftmind.com')}
+              themeColors={themeColors}
+            />
+            <SettingsRow
+              icon="book"
+              iconColor="#fff"
+              iconBg="#10B981"
+              label="Research & Sources"
+              onPress={() => router.push('/(modals)/sources' as any)}
+              themeColors={themeColors}
+            />
+            <SettingsRow
+              icon="information-circle-outline"
+              iconColor="#fff"
+              iconBg={themeColors.warning}
+              label="Wellness Disclaimer"
+              onPress={() => router.push('/(modals)/sources' as any)}
               themeColors={themeColors}
             />
             <SettingsRow
@@ -596,8 +546,8 @@ export default function ProfileScreen() {
               isLast
             />
           </Card>
-          <Text variant="caption" color="textMuted" className="mt-3 mx-3 text-center leading-[18px]">
-            Your emotional wellness companion.{'\n'}All data is stored locally on your device.
+          <Text variant="caption" color="textMuted" className="mt-3 mx-3 text-center">
+            All data is stored locally on your device.
           </Text>
         </View>
 
