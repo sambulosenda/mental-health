@@ -10,8 +10,15 @@ import {
   X,
   ShieldCheck,
 } from "lucide-react-native";
-import React, { useRef, useState, useMemo } from "react";
-import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
+import React, { useRef, useState, useMemo, useEffect } from "react";
+import Animated, {
+  FadeIn,
+  FadeOut,
+  useSharedValue,
+  useAnimatedStyle,
+  withRepeat,
+  withTiming,
+} from "react-native-reanimated";
 import { LinearGradient } from "expo-linear-gradient";
 import { BlurView } from "expo-blur";
 import { useRouter } from "expo-router";
@@ -25,10 +32,39 @@ type Period = "weekly" | "monthly" | "yearly";
 const TERMS_URL = "https://getsoftmind.com/terms";
 const PRIVACY_URL = "https://getsoftmind.com/privacy";
 
+// Skeleton loader component
+function SkeletonPlanCard() {
+  const opacity = useSharedValue(0.3);
+
+  useEffect(() => {
+    opacity.value = withRepeat(
+      withTiming(0.7, { duration: 800 }),
+      -1,
+      true
+    );
+  }, [opacity]);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    opacity: opacity.value,
+  }));
+
+  return (
+    <Animated.View
+      style={[animatedStyle]}
+      className="flex-1 rounded-xl p-4 border border-neutral-700"
+    >
+      <View className="h-5 w-20 bg-neutral-700 rounded mb-2" />
+      <View className="h-7 w-16 bg-neutral-700 rounded mb-1" />
+      <View className="h-4 w-24 bg-neutral-700 rounded" />
+    </Animated.View>
+  );
+}
+
 export default function PaywallScreen() {
   const [period, setPeriod] = useState<Period>("yearly");
   const [selectedPackageId, setSelectedPackageId] = useState<string | null>(null);
   const [bottomContentHeight, setBottomContentHeight] = useState(0);
+  const [loadingTimeout, setLoadingTimeout] = useState(false);
 
   const insets = useSafeAreaInsets();
   const router = useRouter();
@@ -41,7 +77,27 @@ export default function PaywallScreen() {
     purchasePackage,
     restorePurchases,
     clearError,
+    loadOfferings,
   } = useSubscriptionStore();
+
+  // Timeout for loading - show retry after 5 seconds
+  useEffect(() => {
+    if (!isLoading) {
+      setLoadingTimeout(false);
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      setLoadingTimeout(true);
+    }, 5000);
+
+    return () => clearTimeout(timer);
+  }, [isLoading]);
+
+  const handleRetryLoad = () => {
+    setLoadingTimeout(false);
+    loadOfferings();
+  };
 
   const packages = useMemo(
     () => currentOffering?.availablePackages || [],
@@ -289,13 +345,29 @@ export default function PaywallScreen() {
             })}
           </View>
         ) : (
-          <View className="items-center py-4 mb-4">
-            {isLoading ? (
-              <ActivityIndicator size="small" color="#fff" />
+          <View className="mb-4">
+            {isLoading && !loadingTimeout ? (
+              <View className="flex-row gap-2">
+                <SkeletonPlanCard />
+                <SkeletonPlanCard />
+              </View>
+            ) : loadingTimeout ? (
+              <Pressable
+                onPress={handleRetryLoad}
+                className="items-center py-4"
+              >
+                <Text className="text-neutral-400 text-center mb-2">
+                  Taking longer than expected...
+                </Text>
+                <View className="flex-row items-center gap-2">
+                  <Text className="text-white font-medium">Tap to retry</Text>
+                </View>
+              </Pressable>
             ) : (
-              <Text className="text-neutral-400 text-center">
-                Loading subscription options...
-              </Text>
+              <View className="flex-row gap-2">
+                <SkeletonPlanCard />
+                <SkeletonPlanCard />
+              </View>
             )}
           </View>
         )}
