@@ -513,7 +513,41 @@ export default function ProfileScreen() {
           </Card>
         </View>
 
-        {/* SECTION 6: More */}
+        {/* SECTION 6: Research & Disclaimer */}
+        <View className="mb-4">
+          <Text variant="h3" color="textPrimary" className="mb-3">
+            Research & Sources
+          </Text>
+          {/* Wellness Disclaimer - Required by Apple */}
+          <View
+            className="rounded-xl p-3 mb-3"
+            style={{ backgroundColor: `${themeColors.warning}15` }}
+          >
+            <View className="flex-row items-center mb-1">
+              <Ionicons name="information-circle" size={16} color={themeColors.warning} />
+              <Text variant="caption" style={{ marginLeft: 6, color: themeColors.warning, fontWeight: '600' }}>
+                Wellness App Disclaimer
+              </Text>
+            </View>
+            <Text variant="caption" color="textSecondary" style={{ lineHeight: 18 }}>
+              Softmind is a wellness and self-care companion for personal reflection. It is NOT a medical device and does NOT provide medical advice, diagnosis, or treatment. Always consult a qualified healthcare provider for any health concerns.
+            </Text>
+          </View>
+          <Card variant="flat" padding="none" className="overflow-hidden">
+            <SettingsRow
+              icon="book"
+              iconColor="#fff"
+              iconBg="#10B981"
+              label="View All Sources"
+              value="Research & Citations"
+              onPress={() => router.push('/(modals)/sources' as any)}
+              themeColors={themeColors}
+              isLast
+            />
+          </Card>
+        </View>
+
+        {/* SECTION 7: More */}
         <View className="mb-4">
           <Text variant="h3" color="textPrimary" className="mb-3">
             More
@@ -533,14 +567,6 @@ export default function ProfileScreen() {
               iconBg="#5856D6"
               label="Contact Support"
               onPress={() => Linking.openURL('mailto:support@getsoftmind.com')}
-              themeColors={themeColors}
-            />
-            <SettingsRow
-              icon="book"
-              iconColor="#fff"
-              iconBg="#10B981"
-              label="Research & Sources"
-              onPress={() => router.push('/(modals)/sources' as any)}
               themeColors={themeColors}
             />
             <SettingsRow
