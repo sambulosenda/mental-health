@@ -1,6 +1,5 @@
 import { View, Pressable, Platform } from 'react-native';
 import { format, isToday, isYesterday } from 'date-fns';
-import { Ionicons } from '@expo/vector-icons';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -199,73 +198,14 @@ export function JournalCard({ entry, onPress, onEdit, onDelete, onShare }: Journ
           <Text
             variant="body"
             color="textSecondary"
-            numberOfLines={3}
+            numberOfLines={2}
             style={{
-              lineHeight: 24,
+              lineHeight: 22,
               letterSpacing: -0.1,
             }}
           >
             {preview}
           </Text>
-
-          {/* Tags with refined styling */}
-          {entry.tags.length > 0 && (
-            <View className="flex-row flex-wrap gap-1.5 mt-3">
-              {entry.tags.slice(0, 3).map((tag, index) => (
-                <View
-                  key={index}
-                  className="px-2.5 py-1 rounded-full"
-                  style={{
-                    backgroundColor: isDark
-                      ? themeColors.surfaceElevated
-                      : `${themeColors.primary}10`,
-                    borderWidth: 1,
-                    borderColor: isDark
-                      ? themeColors.border
-                      : `${themeColors.primary}20`,
-                  }}
-                >
-                  <Text
-                    variant="label"
-                    style={{
-                      color: themeColors.primary,
-                      fontSize: 11,
-                      letterSpacing: 0.2,
-                    }}
-                  >
-                    {tag}
-                  </Text>
-                </View>
-              ))}
-              {entry.tags.length > 3 && (
-                <View className="px-2 py-1">
-                  <Text variant="label" color="textMuted" style={{ fontSize: 11 }}>
-                    +{entry.tags.length - 3} more
-                  </Text>
-                </View>
-              )}
-            </View>
-          )}
-
-          {/* Footer with word count */}
-          <View className="flex-row items-center justify-between mt-4 pt-3 border-t"
-            style={{ borderTopColor: isDark ? themeColors.border : 'rgba(0,0,0,0.05)' }}
-          >
-            <View className="flex-row items-center gap-3">
-              <View className="flex-row items-center gap-1">
-                <Ionicons name="document-text-outline" size={14} color={themeColors.textMuted} />
-                <Text variant="caption" color="textMuted">
-                  {entry.content.split(/\s+/).length} words
-                </Text>
-              </View>
-            </View>
-            <View className="flex-row items-center gap-1">
-              <Text variant="caption" style={{ color: themeColors.primary }}>
-                Read more
-              </Text>
-              <Ionicons name="arrow-forward" size={14} color={themeColors.primary} />
-            </View>
-          </View>
         </View>
       </View>
     </AnimatedPressable>
