@@ -121,6 +121,22 @@ export async function initializeDatabase(): Promise<void> {
     ON journal_entries(created_at);
   `);
 
+  // Create favorites table
+  await expo.execAsync(`
+    CREATE TABLE IF NOT EXISTS favorites (
+      id TEXT PRIMARY KEY,
+      content_type TEXT NOT NULL,
+      content_id TEXT NOT NULL,
+      created_at INTEGER NOT NULL
+    );
+  `);
+
+  // Index for efficient favorites queries
+  await expo.execAsync(`
+    CREATE INDEX IF NOT EXISTS idx_favorites_content
+    ON favorites(content_type, content_id);
+  `);
+
   // Seed default prompts if empty
   const result = await expo.getFirstAsync<{ count: number }>('SELECT COUNT(*) as count FROM prompts');
   if (result?.count === 0) {
