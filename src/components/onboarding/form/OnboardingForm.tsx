@@ -213,10 +213,9 @@ export function OnboardingForm({ onComplete, onBack, title = 'Personalize' }: On
     setReminders((prev) => ({ ...prev, journalTime: formatTime(date) }));
   }, []);
 
-  const canComplete = goals.length > 0;
+  const hasGoals = goals.length > 0;
 
   const handleComplete = () => {
-    if (!canComplete) return;
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     onComplete({ name: name.trim(), goals, reminders });
   };
@@ -285,7 +284,7 @@ export function OnboardingForm({ onComplete, onBack, title = 'Personalize' }: On
             ))}
           </View>
           <Text style={[styles.sectionFooter, { color: themeColors.textMuted }]}>
-            Choose at least one goal to personalize your experience.
+            {hasGoals ? 'Great choices! You can change these later in Settings.' : 'Select goals to personalize your experience, or skip for now.'}
           </Text>
         </Animated.View>
 
@@ -335,23 +334,13 @@ export function OnboardingForm({ onComplete, onBack, title = 'Personalize' }: On
       >
         <Pressable
           onPress={handleComplete}
-          disabled={!canComplete}
           style={[
             styles.primaryButton,
-            {
-              backgroundColor: canComplete ? themeColors.primary : isDark ? '#2C2C2E' : '#E5E5EA',
-            },
+            { backgroundColor: themeColors.primary },
           ]}
         >
-          <Text
-            style={[
-              styles.primaryButtonText,
-              {
-                color: canComplete ? '#FFFFFF' : themeColors.textMuted,
-              },
-            ]}
-          >
-            Continue
+          <Text style={[styles.primaryButtonText, { color: '#FFFFFF' }]}>
+            {hasGoals ? 'Continue' : 'Skip for now'}
           </Text>
         </Pressable>
         <Pressable onPress={onBack} style={styles.secondaryButton}>
