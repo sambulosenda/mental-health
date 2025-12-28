@@ -8,9 +8,26 @@ import type { AppRoute } from '@/src/types/navigation';
 // Map reminder types to routes
 const REMINDER_ROUTES: Record<ReminderType, AppRoute> = {
   mood: ROUTES.TRACK,
-  exercise: ROUTES.TABS,
+  exercise: ROUTES.EXERCISE_SESSION,
   journal: ROUTES.JOURNAL,
 };
+
+// Extended notification actions beyond reminder types
+type NotificationAction = ReminderType | 'chat' | 'checkin' | 'achievements' | 'insights';
+
+const EXTENDED_ROUTES: Record<NotificationAction, string> = {
+  mood: ROUTES.TRACK,
+  exercise: ROUTES.EXERCISE_SESSION,
+  journal: ROUTES.JOURNAL,
+  chat: ROUTES.CHAT,
+  checkin: ROUTES.CHAT_CHECKIN,
+  achievements: ROUTES.ACHIEVEMENTS,
+  insights: ROUTES.INSIGHTS,
+};
+
+function isValidNotificationAction(value: unknown): value is NotificationAction {
+  return typeof value === 'string' && value in EXTENDED_ROUTES;
+}
 
 /**
  * Handle notification received while app is foregrounded.
@@ -36,6 +53,7 @@ export async function handleNotificationReceived(
 
 /**
  * Handle notification tap - navigate to appropriate screen.
+ * Supports extended actions beyond reminder types.
  */
 export function handleNotificationResponse(
   response: Notifications.NotificationResponse,
@@ -44,18 +62,24 @@ export function handleNotificationResponse(
   const data = response.notification.request.content.data;
   const action = data?.action;
 
-  if (action) {
-    if (!isValidReminderType(action)) {
-      if (__DEV__) console.warn(`Invalid reminder type in notification response: ${action}`);
-      return;
+  if (!action) return;
+
+  // Handle extended actions (chat, checkin, achievements, etc.)
+  if (isValidNotificationAction(action)) {
+    let route = EXTENDED_ROUTES[action];
+
+    // Handle exercise with optional templateId
+    if (action === 'exercise' && data?.templateId) {
+      route = `${route}?templateId=${data.templateId}`;
     }
 
-    const route = REMINDER_ROUTES[action];
-    if (route) {
-      // Type assertion needed for expo-router's strict route typing
-      router.push(route as '/(tabs)');
-    }
+    // Type assertion needed for expo-router's strict route typing
+    router.push(route as '/(tabs)');
+    return;
   }
+
+  // Fallback for unknown actions
+  if (__DEV__) console.warn(`Unknown notification action: ${action}`);
 }
 
 /**

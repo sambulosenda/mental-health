@@ -25,9 +25,12 @@ export const ROUTES = {
   INSIGHTS: '/(tabs)/insights',
   PROFILE: '/(tabs)/profile',
   CHAT: '/chat',
+  CHAT_CHECKIN: '/chat?type=checkin',
+  EXERCISE_SESSION: '/(modals)/exercise-session',
   PAYWALL: '/paywall',
   ONBOARDING: '/onboarding',
   CRISIS: '/crisis',
+  ACHIEVEMENTS: '/(modals)/achievements',
 } as const;
 
 // App info
