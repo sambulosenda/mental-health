@@ -5,12 +5,13 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
-import { Text, PremiumBadge } from '@/src/components/ui';
+import { Text, PremiumBadge, DurationFilter, filterByDuration, countByDuration } from '@/src/components/ui';
+import type { DurationFilterValue } from '@/src/components/ui';
 import { SLEEP_STORY_TEMPLATES } from '@/src/constants/sleepStories';
 import { getSleepStoryImageUrl } from '@/src/constants/cdnConfig';
 import { colors, darkColors, spacing } from '@/src/constants/theme';
 import { useTheme } from '@/src/contexts/ThemeContext';
-import { useSubscriptionStore } from '@/src/stores';
+import { useSubscriptionStore, useSettingsStore } from '@/src/stores';
 import type { ExerciseTemplate } from '@/src/types/exercise';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -105,12 +106,27 @@ export default function SleepStoriesScreen() {
   const { isDark } = useTheme();
   const themeColors = isDark ? darkColors : colors;
   const { isPremium, isInitialized } = useSubscriptionStore();
+  const { contentFilters, setSleepStoriesDurationFilter } = useSettingsStore();
 
-  const stories = useMemo(() => {
+  const allStories = useMemo(() => {
     const freeStories = SLEEP_STORY_TEMPLATES.filter((s) => !s.isPremium);
     const premiumStories = SLEEP_STORY_TEMPLATES.filter((s) => s.isPremium);
     return [...freeStories, ...premiumStories];
   }, []);
+
+  const durationCounts = useMemo(() => countByDuration(allStories), [allStories]);
+
+  const stories = useMemo(
+    () => filterByDuration(allStories, contentFilters.sleepStoriesDuration as DurationFilterValue),
+    [allStories, contentFilters.sleepStoriesDuration]
+  );
+
+  const handleFilterChange = useCallback(
+    (filter: DurationFilterValue) => {
+      setSleepStoriesDurationFilter(filter);
+    },
+    [setSleepStoriesDurationFilter]
+  );
 
   const handleSelectStory = useCallback(
     (templateId: string, templateIsPremium?: boolean) => {
@@ -162,6 +178,12 @@ export default function SleepStoriesScreen() {
         </Text>
         <View className="w-11" />
       </View>
+
+      <DurationFilter
+        value={contentFilters.sleepStoriesDuration as DurationFilterValue}
+        onChange={handleFilterChange}
+        counts={durationCounts}
+      />
 
       <FlatList
         data={stories}

@@ -50,6 +50,9 @@ export interface AppSettings {
   // Insights
   insightDepth: 'brief' | 'detailed';
   insightTone: 'empathetic' | 'professional';
+
+  // Content filters
+  contentFilters: ContentFilters;
 }
 
 export const defaultSmartReminders: SmartRemindersSettings = {
@@ -64,4 +67,12 @@ export interface ExportOptions {
   dateRange: 'all' | 'month' | 'week';
   includeJournal: boolean;
   includeMood: boolean;
+}
+
+// Content filtering
+export type DurationFilter = 'all' | '5' | '10' | '15+';
+
+export interface ContentFilters {
+  sleepStoriesDuration: DurationFilter;
+  meditationsDuration: DurationFilter;
 }

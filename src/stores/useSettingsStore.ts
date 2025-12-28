@@ -6,6 +6,8 @@ import type {
   SmartRemindersSettings,
   ReminderType,
   UserProfile,
+  DurationFilter,
+  ContentFilters,
 } from '@/src/types/settings';
 import { defaultSmartReminders } from '@/src/types/settings';
 import {
@@ -14,6 +16,11 @@ import {
   cancelReminder,
   cancelAllReminders,
 } from '@/src/lib/notifications';
+
+const defaultContentFilters: ContentFilters = {
+  sleepStoriesDuration: 'all',
+  meditationsDuration: 'all',
+};
 
 interface SettingsState extends AppSettings {
   // Smart reminder actions
@@ -34,6 +41,10 @@ interface SettingsState extends AppSettings {
   setInsightDepth: (depth: 'brief' | 'detailed') => void;
   setInsightTone: (tone: 'empathetic' | 'professional') => void;
   resetSettings: () => Promise<void>;
+
+  // Content filter actions
+  setSleepStoriesDurationFilter: (filter: DurationFilter) => void;
+  setMeditationsDurationFilter: (filter: DurationFilter) => void;
 }
 
 const defaultSettings: AppSettings = {
@@ -46,6 +57,7 @@ const defaultSettings: AppSettings = {
   hasAcceptedDisclaimer: false,
   insightDepth: 'brief',
   insightTone: 'empathetic',
+  contentFilters: defaultContentFilters,
 };
 
 export const useSettingsStore = create<SettingsState>()(
@@ -138,10 +150,20 @@ export const useSettingsStore = create<SettingsState>()(
         await cancelAllReminders();
         set(defaultSettings);
       },
+
+      // Content filter actions
+      setSleepStoriesDurationFilter: (filter) =>
+        set((state) => ({
+          contentFilters: { ...state.contentFilters, sleepStoriesDuration: filter },
+        })),
+      setMeditationsDurationFilter: (filter) =>
+        set((state) => ({
+          contentFilters: { ...state.contentFilters, meditationsDuration: filter },
+        })),
     }),
     {
       name: 'softmind-settings',
-      version: 5,
+      version: 6,
       storage: createJSONStorage(() => AsyncStorage),
       migrate: (persistedState: unknown, version: number) => {
 
@@ -180,6 +202,13 @@ export const useSettingsStore = create<SettingsState>()(
         if (version < 5) {
           // Reset disclaimer for testing
           state.hasAcceptedDisclaimer = false;
+        }
+
+        if (version < 6) {
+          // Add content filters
+          if (!state.contentFilters) {
+            state.contentFilters = defaultContentFilters;
+          }
         }
 
         return state;
