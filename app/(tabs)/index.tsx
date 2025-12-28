@@ -1,4 +1,4 @@
-import { useEffect, useCallback, useState } from 'react';
+import { useEffect, useCallback } from 'react';
 import { View, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -14,7 +14,6 @@ import { useMoodStore, useSubscriptionStore } from '@/src/stores';
 import { useGamificationStore } from '@/src/stores/useGamificationStore';
 import { usePremiumFeature } from '@/src/hooks/usePremiumFeature';
 import { colors, darkColors, spacing, moodLabels } from '@/src/constants/theme';
-import { getUniqueDaysTracked } from '@/src/lib/database';
 import { useTheme } from '@/src/contexts/ThemeContext';
 
 const HEADER_EXPANDED_HEIGHT = 110;
@@ -33,8 +32,6 @@ export default function HomeScreen() {
     dismissCelebration,
   } = useGamificationStore();
 
-  const [daysTracked, setDaysTracked] = useState(0);
-
   const handleChatPress = useCallback(
     (type: 'checkin' | 'chat') => {
       requirePremium(() => {
@@ -47,7 +44,6 @@ export default function HomeScreen() {
   useEffect(() => {
     loadTodayEntries();
     loadGamificationData();
-    getUniqueDaysTracked().then(setDaysTracked);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -123,21 +119,6 @@ export default function HomeScreen() {
               <Ionicons name="chevron-forward" size={24} color={themeColors.textMuted} />
             </View>
           </Card>
-        )}
-
-        {/* Days Tracked Progress */}
-        {daysTracked > 0 && (
-          <View className="flex-row items-center justify-center mb-4 -mt-2">
-            <View
-              className="flex-row items-center px-3 py-1.5 rounded-full"
-              style={{ backgroundColor: isDark ? `${themeColors.primary}15` : `${themeColors.primary}08` }}
-            >
-              <Ionicons name="calendar-outline" size={14} color={themeColors.primary} />
-              <Text variant="caption" style={{ color: themeColors.primary, marginLeft: 6 }}>
-                {daysTracked} {daysTracked === 1 ? 'day' : 'days'} tracked
-              </Text>
-            </View>
-          </View>
         )}
 
         {/* AI Chat Cards */}

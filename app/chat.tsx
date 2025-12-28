@@ -254,7 +254,7 @@ function ChatScreenContent() {
         style={{ backgroundColor: themeColors.background }}
       >
         <Text variant="body" color="textSecondary" center>
-          Loading...
+          Preparing your conversation...
         </Text>
       </SafeAreaView>
     );
@@ -290,7 +290,7 @@ function ChatScreenContent() {
           {messages.length === 0 && !isGenerating ? (
             <View className="items-center py-12">
               <Text variant="body" color="textMuted" center>
-                {isModelReady ? 'Starting...' : 'Loading...'}
+                {isModelReady ? 'Starting...' : 'Preparing...'}
               </Text>
             </View>
           ) : (

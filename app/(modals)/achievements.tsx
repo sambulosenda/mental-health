@@ -152,6 +152,19 @@ export default function AchievementsScreen() {
 
         {/* Badge Grid */}
         <View style={styles.badgeSection}>
+          {earnedBadges.length === 0 && !selectedCategory && (
+            <View style={[styles.emptyState, { backgroundColor: themeColors.surface }]}>
+              <View style={[styles.emptyIcon, { backgroundColor: `${themeColors.primary}15` }]}>
+                <Ionicons name="ribbon-outline" size={32} color={themeColors.primary} />
+              </View>
+              <Text variant="bodyMedium" color="textPrimary" style={{ marginTop: spacing.md, textAlign: 'center' }}>
+                Your first badge awaits!
+              </Text>
+              <Text variant="caption" color="textSecondary" style={{ marginTop: spacing.xs, textAlign: 'center' }}>
+                Track your mood daily to start earning badges and building your streak.
+              </Text>
+            </View>
+          )}
           <BadgeGrid
             category={selectedCategory ?? undefined}
             showLocked
@@ -312,6 +325,19 @@ const styles = StyleSheet.create({
   },
   badgeSection: {
     marginTop: spacing.lg,
+  },
+  emptyState: {
+    alignItems: 'center',
+    padding: spacing.xl,
+    borderRadius: borderRadius.lg,
+    marginBottom: spacing.lg,
+  },
+  emptyIcon: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   badgeOverlay: {
     position: 'absolute',

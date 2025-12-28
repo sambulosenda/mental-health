@@ -326,7 +326,9 @@ export default function PaywallScreen() {
             <Text className="text-black text-xl font-semibold">
               {selectedPackage?.identifier.toLowerCase().includes("lifetime")
                 ? "Get Lifetime Access"
-                : "Start Free Trial"}
+                : selectedPackage?.product.introPrice?.price === 0
+                  ? "Start Free Trial"
+                  : "Subscribe Now"}
             </Text>
           )}
         </Pressable>

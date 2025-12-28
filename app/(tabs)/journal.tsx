@@ -99,7 +99,7 @@ export default function JournalScreen() {
   };
 
   const displayedEntries = searchQuery ? searchResults : entries;
-  const showSearch = entries.length > 10 || searchQuery.length > 0;
+  const showSearch = entries.length >= 3 || searchQuery.length > 0;
 
   return (
     <SafeAreaView className={`flex-1 ${isDark ? 'bg-background-dark' : 'bg-background'}`} edges={['top']}>
