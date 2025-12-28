@@ -2,6 +2,7 @@ import { BiometricLock } from '@/src/components/BiometricLock';
 import { ErrorBoundary } from '@/src/components/ErrorBoundary';
 import { TransitionStack, CalmPresets, DimOverlay } from '@/src/components/navigation/TransitionStack';
 import { AnimatedSplash } from '@/src/components/splash/AnimatedSplash';
+import { OfflineBanner } from '@/src/components/ui';
 import { colors, darkColors } from '@/src/constants/theme';
 import { ThemeProvider, useTheme } from '@/src/contexts/ThemeContext';
 import { useRouteProtection } from '@/src/hooks/useRouteProtection';
@@ -61,6 +62,7 @@ function RootLayoutContent() {
           <BiometricLock>
             <StatusBar style={isDark ? 'light' : 'dark'} />
             <View style={{ flex: 1, backgroundColor: themeColors.background }}>
+              <OfflineBanner />
               <TransitionStack
                 screenOptions={{
                   overlay: DimOverlay,
