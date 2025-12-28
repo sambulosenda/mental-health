@@ -121,6 +121,38 @@ export async function initializeDatabase(): Promise<void> {
     ON journal_entries(created_at);
   `);
 
+  // Create user_streaks table
+  await expo.execAsync(`
+    CREATE TABLE IF NOT EXISTS user_streaks (
+      id TEXT PRIMARY KEY,
+      type TEXT NOT NULL,
+      current_streak INTEGER NOT NULL DEFAULT 0,
+      longest_streak INTEGER NOT NULL DEFAULT 0,
+      last_activity_date TEXT,
+      streak_start_date TEXT,
+      updated_at INTEGER NOT NULL
+    );
+  `);
+
+  // Create user_badges table
+  await expo.execAsync(`
+    CREATE TABLE IF NOT EXISTS user_badges (
+      id TEXT PRIMARY KEY,
+      badge_id TEXT NOT NULL,
+      earned_at INTEGER NOT NULL,
+      metadata TEXT
+    );
+  `);
+
+  // Create streak_protection table
+  await expo.execAsync(`
+    CREATE TABLE IF NOT EXISTS streak_protection (
+      id TEXT PRIMARY KEY,
+      used_at INTEGER NOT NULL,
+      reason TEXT
+    );
+  `);
+
   // Create favorites table
   await expo.execAsync(`
     CREATE TABLE IF NOT EXISTS favorites (
