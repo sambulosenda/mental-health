@@ -5,7 +5,7 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import Animated, { useSharedValue, useAnimatedScrollHandler } from 'react-native-reanimated';
 import { formatDistanceToNow } from 'date-fns';
-import { Text, Card, AnimatedHeader, NativeGauge } from '@/src/components/ui';
+import { Text, Card, AnimatedHeader } from '@/src/components/ui';
 import { MoodAnimation } from '@/src/components/mood';
 import { InterventionPicker } from '@/src/components/interventions/InterventionPicker';
 import { SleepStoriesSection } from '@/src/components/sleep';
@@ -22,7 +22,7 @@ export default function HomeScreen() {
   const router = useRouter();
   const { isDark } = useTheme();
   const themeColors = isDark ? darkColors : colors;
-  const { todayEntries, entries, loadTodayEntries, loadEntries } = useMoodStore();
+  const { todayEntries, loadTodayEntries } = useMoodStore();
   const { isPremium } = useSubscriptionStore();
   const { requirePremium } = usePremiumFeature();
   const {
@@ -42,7 +42,6 @@ export default function HomeScreen() {
 
   useEffect(() => {
     loadTodayEntries();
-    loadEntries();
     loadGamificationData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -56,19 +55,6 @@ export default function HomeScreen() {
       scrollY.value = event.contentOffset.y;
     },
   });
-
-  const weekAgo = new Date();
-  weekAgo.setDate(weekAgo.getDate() - 7);
-
-  const weekEntries = entries.filter((e) => e.timestamp >= weekAgo);
-  const weeklyAverage =
-    weekEntries.length > 0
-      ? weekEntries.reduce((sum, e) => sum + e.mood, 0) / weekEntries.length
-      : null;
-
-  const uniqueDaysTracked = new Set(
-    weekEntries.map((e) => new Date(e.timestamp).toDateString())
-  ).size;
 
   return (
     <SafeAreaView className={`flex-1 ${isDark ? 'bg-background-dark' : 'bg-background'}`} edges={['top']}>
@@ -237,44 +223,6 @@ export default function HomeScreen() {
             title="Suggested for You"
           />
         </View>
-
-        {(weeklyAverage !== null || uniqueDaysTracked > 0) && (
-          <View className="mb-6">
-            <Text variant="h3" color="textPrimary" className="mb-4">
-              This Week
-            </Text>
-            <Card variant="flat">
-              <View className="flex-row items-center py-2 gap-6">
-                <NativeGauge
-                  value={uniqueDaysTracked}
-                  maxValue={7}
-                  label="Days Tracked"
-                  size={90}
-                />
-                <View className="flex-1 gap-2">
-                  <View className="flex-row justify-between items-center">
-                    <Text variant="caption" color="textSecondary">Avg. Mood</Text>
-                    <Text variant="bodyMedium" color="textPrimary">
-                      {weeklyAverage?.toFixed(1) ?? '-'}
-                    </Text>
-                  </View>
-                  <View className="flex-row justify-between items-center">
-                    <Text variant="caption" color="textSecondary">Check-ins</Text>
-                    <Text variant="bodyMedium" color="textPrimary">
-                      {weekEntries.length}
-                    </Text>
-                  </View>
-                  <View className="flex-row justify-between items-center">
-                    <Text variant="caption" color="textSecondary">Today</Text>
-                    <Text variant="bodyMedium" color="textPrimary">
-                      {todayEntries.length}
-                    </Text>
-                  </View>
-                </View>
-              </View>
-            </Card>
-          </View>
-        )}
 
         {/* Streak Card */}
         <View className="mb-6">
