@@ -9,7 +9,7 @@ import { Text, Card, AnimatedHeader } from '@/src/components/ui';
 import { MoodAnimation } from '@/src/components/mood';
 import { InterventionPicker } from '@/src/components/interventions/InterventionPicker';
 import { SleepStoriesSection } from '@/src/components/sleep';
-import { StreakCard, BadgeCelebration } from '@/src/components/gamification';
+import { StreakCard, BadgeCelebration, BadgeProgressCard } from '@/src/components/gamification';
 import { useMoodStore, useSubscriptionStore } from '@/src/stores';
 import { useGamificationStore } from '@/src/stores/useGamificationStore';
 import { usePremiumFeature } from '@/src/hooks/usePremiumFeature';
@@ -224,6 +224,11 @@ export default function HomeScreen() {
             Your Streak
           </Text>
           <StreakCard onPress={() => router.push('/achievements')} />
+        </View>
+
+        {/* Badge Progress */}
+        <View className="mb-6">
+          <BadgeProgressCard onPress={() => router.push('/achievements')} />
         </View>
 
       </Animated.ScrollView>
