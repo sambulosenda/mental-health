@@ -1,14 +1,5 @@
 import { Audio } from 'expo-av';
-import { getMeditationAudioUrl } from '@/src/constants/cdnConfig';
-
-// Meditation IDs that have pre-recorded audio
-const MEDITATIONS_WITH_AUDIO = [
-  'breath-awareness-5min',
-  'body-scan-10min',
-  'sleep-relaxation',
-  'calming-anxiety',
-  'grounding-meditation',
-];
+import { getMeditationAudioUrl, MEDITATIONS_WITH_AUDIO } from '@/src/constants/cdnConfig';
 
 let currentSound: Audio.Sound | null = null;
 let isPlaying = false;
@@ -17,7 +8,7 @@ let isPlaying = false;
  * Check if a meditation has pre-recorded audio available
  */
 export function hasMeditationAudio(meditationId: string): boolean {
-  return MEDITATIONS_WITH_AUDIO.includes(meditationId);
+  return (MEDITATIONS_WITH_AUDIO as readonly string[]).includes(meditationId);
 }
 
 /**

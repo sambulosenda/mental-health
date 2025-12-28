@@ -29,6 +29,15 @@ export const IMAGE_PATHS = {
   sleepStories: `${CDN_BASE_URL}/sleep-stories/thumbnails`,
 } as const;
 
+// Meditation IDs that have pre-recorded audio available on CDN
+export const MEDITATIONS_WITH_AUDIO = [
+  'breath-awareness-5min',
+  'body-scan-10min',
+  'sleep-relaxation',
+  'calming-anxiety',
+  'grounding-meditation',
+] as const;
+
 /**
  * Get the full audio URL for a sleep story
  */
@@ -46,7 +55,7 @@ export function getBreathingCueAudioUrl(cueId: string): string {
 
 /**
  * Get the full audio URL for a meditation
- * Meditation IDs: breath-awareness-5min, body-scan-10min, sleep-relaxation, calming-anxiety, grounding-meditation
+ * @see MEDITATIONS_WITH_AUDIO for available meditation IDs
  */
 export function getMeditationAudioUrl(meditationId: string): string {
   return `${AUDIO_PATHS.meditations}/${meditationId}.mp3`;
