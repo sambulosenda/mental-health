@@ -270,7 +270,7 @@ function ExerciseSessionContent() {
             step={currentExerciseStep}
             value={responses[currentExerciseStep.id] || (currentExerciseStep.type === 'multi_input' ? [] : '')}
             onChange={handleStepResponse}
-            onBreathingComplete={advanceStep}
+            onStepComplete={advanceStep}
             accentColor={accentColor}
             templateId={template.id}
           />

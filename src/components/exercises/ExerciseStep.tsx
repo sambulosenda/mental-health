@@ -14,7 +14,7 @@ interface ExerciseStepProps {
   step: ExerciseStepType;
   value: string | string[];
   onChange: (value: string | string[]) => void;
-  onBreathingComplete?: () => void;
+  onStepComplete?: () => void;
   accentColor?: string;
   templateId?: string;
 }
@@ -30,7 +30,7 @@ export function ExerciseStepRenderer({
   step,
   value,
   onChange,
-  onBreathingComplete,
+  onStepComplete,
   accentColor,
   templateId,
 }: ExerciseStepProps) {
@@ -63,7 +63,7 @@ export function ExerciseStepRenderer({
       return (
         <BreathingStep
           step={step}
-          onComplete={onBreathingComplete || (() => {})}
+          onComplete={onStepComplete || (() => {})}
           accentColor={accentColor}
         />
       );
@@ -75,7 +75,7 @@ export function ExerciseStepRenderer({
           <AudioMeditationStep
             step={step}
             meditationId={templateId}
-            onComplete={onBreathingComplete || (() => {})}
+            onComplete={onStepComplete || (() => {})}
             accentColor={accentColor}
           />
         );
@@ -83,7 +83,7 @@ export function ExerciseStepRenderer({
       return (
         <TimedSpeechStep
           step={step}
-          onComplete={onBreathingComplete || (() => {})}
+          onComplete={onStepComplete || (() => {})}
           accentColor={accentColor}
         />
       );
@@ -92,7 +92,7 @@ export function ExerciseStepRenderer({
       return (
         <MeditationTimerStep
           step={step}
-          onComplete={onBreathingComplete || (() => {})}
+          onComplete={onStepComplete || (() => {})}
           accentColor={accentColor}
         />
       );
@@ -102,7 +102,7 @@ export function ExerciseStepRenderer({
       return (
         <TimedSpeechStep
           step={step}
-          onComplete={onBreathingComplete || (() => {})}
+          onComplete={onStepComplete || (() => {})}
           accentColor={accentColor}
         />
       );
@@ -111,7 +111,7 @@ export function ExerciseStepRenderer({
       return (
         <AudioSleepStep
           step={step}
-          onComplete={onBreathingComplete || (() => {})}
+          onComplete={onStepComplete || (() => {})}
           accentColor={accentColor}
         />
       );
