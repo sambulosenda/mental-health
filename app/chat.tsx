@@ -1,5 +1,6 @@
-import { useEffect, useCallback, useState } from 'react';
-import { View, ScrollView } from 'react-native';
+import { useEffect, useCallback, useState, useRef } from 'react';
+import { View, ScrollView, Pressable } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { KeyboardStickyView, useKeyboardHandler } from 'react-native-keyboard-controller';
 import Animated, {
   useSharedValue,
@@ -40,6 +41,8 @@ function ChatScreenContent() {
   const themeColors = isDark ? darkColors : colors;
   const scrollViewRef = useAnimatedRef<Animated.ScrollView>();
   const [composerHeight, setComposerHeight] = useState(80);
+  const [error, setError] = useState<string | null>(null);
+  const lastFailedMessage = useRef<string | null>(null);
   const { setNewChatAnimating } = useChatAnimation();
 
   // v0-style: Track keyboard height for contentInset
@@ -137,6 +140,7 @@ function ChatScreenContent() {
 
     const generateGreeting = async () => {
       setGenerating(true);
+      setError(null);
       try {
         const greetingPrompt = isCheckin
           ? getCheckinPrompt('greeting')
@@ -157,8 +161,10 @@ function ChatScreenContent() {
           await addAssistantMessage(response);
           scrollToBottom();
         }
-      } catch (error) {
-        console.error('Failed to generate greeting:', error);
+      } catch (err) {
+        console.error('Failed to generate greeting:', err);
+        setError('Failed to start conversation. Tap to retry.');
+        lastFailedMessage.current = null; // No user message to retry
       } finally {
         setGenerating(false);
       }
@@ -172,6 +178,8 @@ function ChatScreenContent() {
   const handleSend = useCallback(
     async (content: string) => {
       if (!activeConversation || isGenerating) return;
+
+      setError(null);
 
       // Trigger new chat animation for first user message
       const isFirstUserMessage = messages.length === 0 ||
@@ -199,14 +207,17 @@ function ChatScreenContent() {
 
         if (response) {
           await addAssistantMessage(response);
+          lastFailedMessage.current = null;
 
           if (isCheckin && checkinFlow) {
             advanceCheckinStep();
           }
           scrollToBottom();
         }
-      } catch (error) {
-        console.error('Failed to generate response:', error);
+      } catch (err) {
+        console.error('Failed to generate response:', err);
+        setError('Failed to get response. Tap to retry.');
+        lastFailedMessage.current = content;
       } finally {
         setGenerating(false);
       }
@@ -240,6 +251,24 @@ function ChatScreenContent() {
     router.back();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const handleRetry = useCallback(() => {
+    if (lastFailedMessage.current) {
+      // Retry the last failed user message
+      handleSend(lastFailedMessage.current);
+    } else {
+      // Retry greeting generation
+      setError(null);
+      // Force re-run of greeting effect by resetting state
+      reset();
+      if (isCheckin) {
+        startCheckin();
+      } else {
+        startConversation(type);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [handleSend, isCheckin, type]);
 
   const showCheckinSummary =
     isCheckin && checkinFlow?.step === 'summary' && messages.length >= 6;
@@ -311,6 +340,19 @@ function ChatScreenContent() {
             })
           )}
           {isGenerating && <TypingIndicator />}
+          {error && !isGenerating && (
+            <Pressable
+              onPress={handleRetry}
+              className="flex-row items-center justify-center py-3 px-4 mx-4 mb-2 rounded-xl"
+              style={{ backgroundColor: `${themeColors.error}15` }}
+            >
+              <Ionicons name="alert-circle" size={18} color={themeColors.error} />
+              <Text variant="caption" style={{ color: themeColors.error, marginLeft: 8, flex: 1 }}>
+                {error}
+              </Text>
+              <Ionicons name="refresh" size={18} color={themeColors.error} />
+            </Pressable>
+          )}
         </AnimatedScrollView>
 
         {/* Floating composer - sticks above keyboard */}
