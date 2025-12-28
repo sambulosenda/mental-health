@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 import { View, LayoutChangeEvent } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
@@ -10,6 +10,7 @@ import Animated, {
   withTiming,
   withRepeat,
   withSequence,
+  cancelAnimation,
   runOnJS,
   Easing,
   FadeIn,
@@ -72,6 +73,31 @@ export function MoodGradientSlider({ selectedMood, onSelectMood }: MoodGradientS
   const position = useSharedValue(selectedMood ? MOOD_POSITIONS[selectedMood - 1] : 0.5);
   const isDragging = useSharedValue(false);
   const hasSelected = useSharedValue(selectedMood !== null);
+  const idlePulseScale = useSharedValue(1);
+
+  // Idle pulse animation - starts after 2s if no mood selected
+  useEffect(() => {
+    if (!selectedMood) {
+      const timeout = setTimeout(() => {
+        idlePulseScale.value = withRepeat(
+          withSequence(
+            withTiming(1.06, { duration: 800, easing: Easing.inOut(Easing.ease) }),
+            withTiming(1, { duration: 800, easing: Easing.inOut(Easing.ease) })
+          ),
+          -1,
+          true
+        );
+      }, 2000);
+      return () => {
+        clearTimeout(timeout);
+        cancelAnimation(idlePulseScale);
+        idlePulseScale.value = 1;
+      };
+    } else {
+      cancelAnimation(idlePulseScale);
+      idlePulseScale.value = 1;
+    }
+  }, [selectedMood, idlePulseScale]);
 
   const handleMoodSelect = useCallback((mood: 1 | 2 | 3 | 4 | 5) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -137,12 +163,13 @@ export function MoodGradientSlider({ selectedMood, onSelectMood }: MoodGradientS
     'worklet';
     const usableWidth = Math.max(0, trackWidthValue.value - THUMB_SIZE - TRACK_PADDING * 2);
     const translateX = TRACK_PADDING + position.value * usableWidth;
-    const scale = isDragging.value ? 1.1 : 1;
+    const baseScale = isDragging.value ? 1.1 : 1;
+    const pulseScale = hasSelected.value ? 1 : idlePulseScale.value;
 
     return {
       transform: [
         { translateX },
-        { scale: withSpring(scale, { damping: 15 }) },
+        { scale: withSpring(baseScale * pulseScale, { damping: 15 }) },
       ],
     };
   });
@@ -178,23 +205,20 @@ export function MoodGradientSlider({ selectedMood, onSelectMood }: MoodGradientS
   return (
     <View className="w-full">
       {/* Mood label display */}
-      <View className="items-center mb-8 min-h-[80px] justify-center">
+      <View className="items-center mb-6 min-h-[60px] justify-center">
         {selectedMood ? (
-          <Animated.View entering={FadeIn.duration(300)} className="items-center">
-            <Text variant="h2" color="textPrimary" center>
+          <Animated.View entering={FadeIn.duration(200)} className="items-center">
+            <Text variant="h3" color="textPrimary" center>
               {moodLabels[selectedMood].label}
             </Text>
-            <Text variant="body" color="textMuted" center className="mt-2 px-4">
+            <Text variant="caption" color="textMuted" center className="mt-1 px-4">
               {moodLabels[selectedMood].description}
             </Text>
           </Animated.View>
         ) : (
           <View className="items-center">
-            <Text variant="h3" color="textPrimary" center>
-              Slide to reflect
-            </Text>
-            <Text variant="body" color="textMuted" center className="mt-2">
-              How are you feeling right now?
+            <Text variant="bodyMedium" color="textMuted" center>
+              How are you feeling?
             </Text>
           </View>
         )}
