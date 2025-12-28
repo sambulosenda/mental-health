@@ -44,7 +44,7 @@ function parsePlaybackStatus(status: AVPlaybackStatus): AudioState {
   return {
     isLoaded: true,
     isPlaying: status.isPlaying,
-    isPaused: !status.isPlaying && status.positionMillis > 0,
+    isPaused: !status.isPlaying && status.positionMillis > 0 && !status.didJustFinish,
     positionMs: status.positionMillis,
     durationMs: status.durationMillis || 0,
     isBuffering: status.isBuffering,
