@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import Animated, { useSharedValue, useAnimatedScrollHandler } from 'react-native-reanimated';
 import { Text, Card, Button, NativePicker, AnimatedHeader } from '@/src/components/ui';
-import { MoodTrendChart, MoodCalendar, InsightList, InsightSources } from '@/src/components/insights';
+import { MoodTrendChart, MoodCalendar, InsightList, InsightSources, ExerciseHistoryList } from '@/src/components/insights';
 import type { Insight } from '@/src/components/insights';
 import { useMoodStore, useJournalStore, useExerciseStore } from '@/src/stores';
 import { detectPatterns } from '@/src/lib/insights';
@@ -227,14 +227,7 @@ export default function InsightsScreen() {
           {(() => {
             const completed = recentSessions.filter(s => s.status === 'completed');
             if (completed.length === 0) {
-              return (
-                <Card variant="flat" className="p-4 items-center">
-                  <Ionicons name="fitness-outline" size={32} color={themeColors.textMuted} />
-                  <Text variant="body" color="textMuted" center className="mt-2">
-                    Complete exercises to see your stats here
-                  </Text>
-                </Card>
-              );
+              return null; // ExerciseHistoryList handles empty state
             }
 
             // Calculate stats
@@ -253,7 +246,7 @@ export default function InsightsScreen() {
             const topExercise = EXERCISE_TEMPLATES.find(t => t.id === topExerciseId);
 
             return (
-              <Card variant="flat">
+              <Card variant="flat" className="mb-4">
                 <View className="flex-row justify-between">
                   <View className="items-center flex-1">
                     <Text variant="h2" color="textPrimary">{completed.length}</Text>
@@ -284,6 +277,10 @@ export default function InsightsScreen() {
               </Card>
             );
           })()}
+          <Text variant="bodyMedium" color="textSecondary" className="mb-3">
+            Recent Sessions
+          </Text>
+          <ExerciseHistoryList sessions={recentSessions} maxItems={5} />
         </View>
 
         <View className="mb-6">
